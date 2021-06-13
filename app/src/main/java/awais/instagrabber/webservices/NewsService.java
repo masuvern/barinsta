@@ -23,7 +23,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class NewsService extends BaseService {
+public class NewsService {
     private static final String TAG = "NewsService";
 
     private final NewsRepository repository;
@@ -31,7 +31,7 @@ public class NewsService extends BaseService {
     private static NewsService instance;
 
     private NewsService() {
-        repository = RetrofitFactory.getInstance()
+        repository = RetrofitFactory.INSTANCE
                                     .getRetrofit()
                                     .create(NewsRepository.class);
     }

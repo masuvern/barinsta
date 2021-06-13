@@ -1,13 +1,15 @@
 package awais.instagrabber.webservices.interceptors;
 
+import android.text.Html;
+import android.text.Spanned;
 import android.util.Log;
-import android.view.View;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.StringRes;
+import androidx.fragment.app.FragmentManager;
 
-import com.google.android.material.snackbar.Snackbar;
-
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
@@ -15,6 +17,7 @@ import java.io.IOException;
 import awais.instagrabber.R;
 import awais.instagrabber.activities.MainActivity;
 import awais.instagrabber.dialogs.ConfirmDialogFragment;
+import awais.instagrabber.utils.AppExecutors;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.TextUtils;
 import okhttp3.Interceptor;
@@ -25,11 +28,7 @@ import okhttp3.ResponseBody;
 public class IgErrorsInterceptor implements Interceptor {
     private static final String TAG = IgErrorsInterceptor.class.getSimpleName();
 
-    private MainActivity mainActivity;
-
-    public IgErrorsInterceptor(@NonNull final MainActivity mainActivity) {
-        this.mainActivity = mainActivity;
-    }
+    public IgErrorsInterceptor() { }
 
     @NonNull
     @Override
@@ -59,9 +58,11 @@ public class IgErrorsInterceptor implements Interceptor {
                 return;
             case 302: // redirect
                 final String location = response.header("location");
-                if (location.equals("https://www.instagram.com/accounts/login/")) {
+                if (location != null && location.equals("https://www.instagram.com/accounts/login/")) {
                     // rate limited
-                    showErrorDialog(R.string.rate_limit);
+                    final String message = MainActivity.getInstance().getString(R.string.rate_limit);
+                    final Spanned spanned = Html.fromHtml(message);
+                    showErrorDialog(spanned);
                 }
                 return;
         }
@@ -69,8 +70,19 @@ public class IgErrorsInterceptor implements Interceptor {
         if (body == null) return;
         try {
             final String bodyString = body.string();
-            final JSONObject jsonObject = new JSONObject(bodyString);
-            String message = jsonObject.optString("message", null);
+            Log.d(TAG, "checkError: " + bodyString);
+            JSONObject jsonObject = null;
+            try {
+                jsonObject = new JSONObject(bodyString);
+            } catch (JSONException e) {
+                Log.e(TAG, "checkError: ", e);
+            }
+            String message;
+            if (jsonObject != null) {
+                message = jsonObject.optString("message");
+            } else {
+                message = bodyString;
+            }
             if (!TextUtils.isEmpty(message)) {
                 message = message.toLowerCase();
                 switch (message) {
@@ -91,7 +103,7 @@ public class IgErrorsInterceptor implements Interceptor {
                         return;
                 }
             }
-            final String errorType = jsonObject.optString("error_type", null);
+            final String errorType = jsonObject.optString("error_type");
             if (TextUtils.isEmpty(errorType)) return;
             if (errorType.equals("sentry_block")) {
                 showErrorDialog(R.string.sentry_block);
@@ -106,9 +118,17 @@ public class IgErrorsInterceptor implements Interceptor {
     }
 
     private void showSnackbar(final String message) {
-        final View view = mainActivity.getRootView();
-        if (view == null) return;
-        Snackbar.make(view, message, Snackbar.LENGTH_LONG).show();
+        final MainActivity mainActivity = MainActivity.getInstance();
+        if (mainActivity == null) return;
+        // final View view = mainActivity.getRootView();
+        // if (view == null) return;
+        try {
+            AppExecutors.INSTANCE
+                    .getMainThread()
+                    .execute(() -> Toast.makeText(mainActivity.getApplicationContext(), message, Toast.LENGTH_LONG).show());
+        } catch (Exception e) {
+            Log.e(TAG, "showSnackbar: ", e);
+        }
     }
 
     @NonNull
@@ -116,21 +136,27 @@ public class IgErrorsInterceptor implements Interceptor {
         return String.format("code: %s, internalMessage: %s", errorCode, message);
     }
 
-    private void showErrorDialog(@StringRes final int messageResId) {
+    private void showErrorDialog(@NonNull final CharSequence message) {
+        final MainActivity mainActivity = MainActivity.getInstance();
         if (mainActivity == null) return;
-        if (messageResId == 0) return;
+        final FragmentManager fragmentManager = mainActivity.getSupportFragmentManager();
+        if (fragmentManager.isStateSaved()) return;
         final ConfirmDialogFragment dialogFragment = ConfirmDialogFragment.newInstance(
                 Constants.GLOBAL_NETWORK_ERROR_DIALOG_REQUEST_CODE,
                 R.string.error,
-                messageResId,
+                message,
                 R.string.ok,
                 0,
                 0
         );
-        dialogFragment.show(mainActivity.getSupportFragmentManager(), "network_error_dialog");
+        dialogFragment.show(fragmentManager, "network_error_dialog");
+    }
+
+    private void showErrorDialog(@StringRes final int messageResId) {
+        showErrorDialog(MainActivity.getInstance().getString(messageResId));
     }
 
     public void destroy() {
-        mainActivity = null;
+        // mainActivity = null;
     }
 }

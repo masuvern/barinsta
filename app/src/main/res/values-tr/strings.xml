@@ -56,6 +56,8 @@
     </plurals>
     <string name="main_posts_following">%s\nTakip</string>
     <string name="post_viewer_autoplay_video">Videoları otomatik oynat</string>
+    <string name="post_viewer_background_play">Continue videos in background</string>
+    <string name="post_viewer_background_play_summary">Do not pause videos when the app is out of focus</string>
     <string name="post_viewer_muted_autoplay">Videoları her zaman sustur</string>
     <string name="post_viewer_show_captions">Gönderi başlıklarını her zaman göster</string>
     <string name="post_viewer_download_dialog_title">İndirmek için seçin</string>
@@ -121,6 +123,7 @@
     <string name="mute_posts">Gönderileri sustur</string>
     <string name="unmute_stories">Hikayelerin sesini aç</string>
     <string name="unmute_posts">Gönderilerin sesini aç</string>
+    <string name="remove_follower">Remove follower</string>
     <string name="bio_copy">Biyoyu kopyala</string>
     <string name="bio_translate">Biyoyu çevir</string>
     <string name="status_mutual">Karşılıklı</string>
@@ -209,7 +212,7 @@
     <string name="comment_viewer_like_comment">Yorumu beğen</string>
     <string name="comment_viewer_unlike_comment">Yorum beğenisini geri al</string>
     <string name="comment_viewer_translate_comment">Yorumu çevir</string>
-    <string name="comment_viewer_delete_comment">Yorumu sil</string>
+    <string name="comment_viewer_delete_comment">Delete comment</string>
     <string name="comment_send_empty_comment">Boş yorum yapılamaz!</string>
     <string name="comment_view_mention_user_search">Kullanıcı adını aratmak istiyor musun?</string>
     <string name="comment_view_mention_hash_search">Etiketi aratmak istiyor musun?</string>
@@ -230,7 +233,7 @@
     <string name="request_approve">İsteği onayla</string>
     <string name="request_reject">İsteği reddet</string>
     <string name="share_public_post">Bu genel gönderiyi paylaş…</string>
-    <string name="share_private_post">Bu gizli bir gönderi! Onu görebilen kişilerle paylaş!</string>
+    <string name="share_private_post">This is a private post! Share to those who can view it.</string>
     <string name="discover_empty">Bu kategori nasıl oluyorsa boş…</string>
     <string name="update_available">Yeni bir güncelleme mevcut! (%s)</string>
     <string name="update_notice">Hatırlatıcı: Eğer F-Droid kullanarak kurduysanız güncellemeyi oradan yapmalısınız. Aynısı GitHub için de geçerli.</string>
@@ -262,6 +265,7 @@
     <string name="skip_update_checkbox">Sonraki güncellemeye kadar gösterme</string>
     <string name="version">Sürüm</string>
     <string name="pref_start_screen">Başlangıç ekranı</string>
+    <string name="pref_search_focus_keyboard" comment="basically bring up the keyboard immediately when someone does search">Show keyboard on search</string>
     <string name="pref_category_general">Genel</string>
     <string name="pref_category_theme">Tema</string>
     <string name="pref_category_downloads">İndirmeler</string>
@@ -364,6 +368,10 @@
     <plurals name="likes_count">
         <item quantity="one">%d beğeni</item>
         <item quantity="other">%d beğeni</item>
+    </plurals>
+    <plurals name="replies_count">
+        <item quantity="one">%d reply</item>
+        <item quantity="other">%d replies</item>
     </plurals>
     <plurals name="comments_count">
         <item quantity="one">%d yorum</item>
@@ -479,4 +487,11 @@
     <string name="dm_remove_warning">If saved, all DM related features will be disabled on next launch</string>
     <string name="copy_caption">Copy caption</string>
     <string name="copy_reply">Copy reply</string>
+    <string name="top">Top</string>
+    <string name="recent">Recent</string>
+    <string name="clear">Clear</string>
+    <string name="no_external_map_app">No Map app found!</string>
+    <string name="click_to_show_full">Click to show full like count</string>
+    <string name="no_profile_pic_found">No profile pic found!</string>
+    <string name="swipe_up_confirmation">Are you sure you want to open this link?</string>
 </resources>

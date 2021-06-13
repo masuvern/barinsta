@@ -23,23 +23,29 @@ public final class FeedStoriesListAdapter extends ListAdapter<FeedStoryModel, St
     private List<FeedStoryModel> list;
 
     private final Filter filter = new Filter() {
-        @Nullable
+        @NonNull
         @Override
         protected FilterResults performFiltering(final CharSequence filter) {
-            final boolean isFilterEmpty = TextUtils.isEmpty(filter);
-            final String query = isFilterEmpty ? null : filter.toString().toLowerCase();
-
-            for (FeedStoryModel item : list) {
-                if (isFilterEmpty) item.setShown(true);
-                else item.setShown(item.getProfileModel().getUsername().toLowerCase().contains(query));
+            final String query = TextUtils.isEmpty(filter) ? null : filter.toString().toLowerCase();
+            List<FeedStoryModel> filteredList = list;
+            if (list != null && query != null) {
+                filteredList = list.stream()
+                                   .filter(feedStoryModel -> feedStoryModel.getProfileModel()
+                                                                           .getUsername()
+                                                                           .toLowerCase()
+                                                                           .contains(query))
+                                   .collect(Collectors.toList());
             }
-            return null;
+            final FilterResults filterResults = new FilterResults();
+            filterResults.count = filteredList != null ? filteredList.size() : 0;
+            filterResults.values = filteredList;
+            return filterResults;
         }
 
         @Override
         protected void publishResults(final CharSequence constraint, final FilterResults results) {
-            submitList(list);
-            notifyDataSetChanged();
+            //noinspection unchecked
+            submitList((List<FeedStoryModel>) results.values, true);
         }
     };
 
@@ -51,7 +57,7 @@ public final class FeedStoriesListAdapter extends ListAdapter<FeedStoryModel, St
 
         @Override
         public boolean areContentsTheSame(@NonNull final FeedStoryModel oldItem, @NonNull final FeedStoryModel newItem) {
-            return oldItem.getStoryMediaId().equals(newItem.getStoryMediaId()) && oldItem.isFullyRead().equals(newItem.isFullyRead());
+            return oldItem.getStoryMediaId().equals(newItem.getStoryMediaId()) && oldItem.isFullyRead() == newItem.isFullyRead();
         }
     };
 
@@ -65,10 +71,16 @@ public final class FeedStoriesListAdapter extends ListAdapter<FeedStoryModel, St
         return filter;
     }
 
+    private void submitList(@Nullable final List<FeedStoryModel> list, final boolean isFiltered) {
+        if (!isFiltered) {
+            this.list = list;
+        }
+        super.submitList(list);
+    }
+
     @Override
     public void submitList(final List<FeedStoryModel> list) {
-        super.submitList(list.stream().filter(i -> i.isShown()).collect(Collectors.toList()));
-        this.list = list;
+        submitList(list, false);
     }
 
     @NonNull
@@ -82,11 +94,11 @@ public final class FeedStoriesListAdapter extends ListAdapter<FeedStoryModel, St
     @Override
     public void onBindViewHolder(@NonNull final StoryListViewHolder holder, final int position) {
         final FeedStoryModel model = getItem(position);
-        holder.bind(model, position, listener);
+        holder.bind(model, listener);
     }
 
     public interface OnFeedStoryClickListener {
-        void onFeedStoryClick(final FeedStoryModel model, final int position);
+        void onFeedStoryClick(final FeedStoryModel model);
 
         void onProfileClick(final String username);
     }

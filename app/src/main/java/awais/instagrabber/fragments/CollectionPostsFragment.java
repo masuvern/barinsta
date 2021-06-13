@@ -80,6 +80,7 @@ public class CollectionPostsFragment extends Fragment implements SwipeRefreshLay
     private int downloadChildPosition = -1;
     private CollectionService collectionService;
     private PostsLayoutPreferences layoutPreferences = Utils.getPostsLayoutPreferences(Constants.PREF_SAVED_POSTS_LAYOUT);
+    private MenuItem deleteMenu, editMenu;
 
     private final OnBackPressedCallback onBackPressedCallback = new OnBackPressedCallback(false) {
         @Override
@@ -186,16 +187,15 @@ public class CollectionPostsFragment extends Fragment implements SwipeRefreshLay
                                     final View profilePicView,
                                     final View mainPostImage,
                                     final int position) {
-            final PostViewV2Fragment.Builder builder = PostViewV2Fragment
-                    .builder(feedModel);
-            if (position >= 0) {
-                builder.setPosition(position);
+            final NavController navController = NavHostFragment.findNavController(CollectionPostsFragment.this);
+            final Bundle bundle = new Bundle();
+            bundle.putSerializable(PostViewV2Fragment.ARG_MEDIA, feedModel);
+            bundle.putInt(PostViewV2Fragment.ARG_SLIDER_POSITION, position);
+            try {
+                navController.navigate(R.id.action_global_post_view, bundle);
+            } catch (Exception e) {
+                Log.e(TAG, "openPostDialog: ", e);
             }
-            if (!layoutPreferences.isAnimationDisabled()) {
-                builder.setSharedProfilePicElement(profilePicView)
-                       .setSharedMainPostElement(mainPostImage);
-            }
-            builder.build().show(getChildFragmentManager(), "post_view");
         }
     };
     private final FeedAdapterV2.SelectionModeCallback selectionModeCallback = new FeedAdapterV2.SelectionModeCallback() {
@@ -239,8 +239,10 @@ public class CollectionPostsFragment extends Fragment implements SwipeRefreshLay
         super.onCreate(savedInstanceState);
         fragmentActivity = (MainActivity) requireActivity();
         final TransitionSet transitionSet = new TransitionSet();
+        final Context context = getContext();
+        if (context == null) return;
         transitionSet.addTransition(new ChangeBounds())
-                     .addTransition(TransitionInflater.from(getContext()).inflateTransition(android.R.transition.move))
+                     .addTransition(TransitionInflater.from(context).inflateTransition(android.R.transition.move))
                      .setDuration(200);
         setSharedElementEnterTransition(transitionSet);
         postponeEnterTransition();
@@ -277,6 +279,12 @@ public class CollectionPostsFragment extends Fragment implements SwipeRefreshLay
     @Override
     public void onCreateOptionsMenu(@NonNull final Menu menu, @NonNull final MenuInflater inflater) {
         inflater.inflate(R.menu.collection_posts_menu, menu);
+        deleteMenu = menu.findItem(R.id.delete);
+        if (deleteMenu != null)
+            deleteMenu.setVisible(savedCollection.getCollectionType().equals("MEDIA"));
+        editMenu = menu.findItem(R.id.edit);
+        if (editMenu != null)
+            editMenu.setVisible(savedCollection.getCollectionType().equals("MEDIA"));
     }
 
     @Override
@@ -286,56 +294,58 @@ public class CollectionPostsFragment extends Fragment implements SwipeRefreshLay
             return true;
         } else if (item.getItemId() == R.id.delete) {
             final Context context = getContext();
+            if (context == null) return false;
             new AlertDialog.Builder(context)
                     .setTitle(R.string.delete_collection)
                     .setMessage(R.string.delete_collection_note)
-                    .setPositiveButton(R.string.confirm, (d, w) -> {
-                        collectionService.deleteCollection(
-                                savedCollection.getId(),
-                                new ServiceCallback<String>() {
-                                    @Override
-                                    public void onSuccess(final String result) {
-                                        SavedCollectionsFragment.pleaseRefresh = true;
-                                        NavHostFragment.findNavController(CollectionPostsFragment.this).navigateUp();
-                                    }
+                    .setPositiveButton(R.string.confirm, (d, w) -> collectionService.deleteCollection(
+                            savedCollection.getCollectionId(),
+                            new ServiceCallback<String>() {
+                                @Override
+                                public void onSuccess(final String result) {
+                                    SavedCollectionsFragment.pleaseRefresh = true;
+                                    NavHostFragment.findNavController(CollectionPostsFragment.this).navigateUp();
+                                }
 
-                                    @Override
-                                    public void onFailure(final Throwable t) {
-                                        Log.e(TAG, "Error deleting collection", t);
-                                        try {
-                                            Toast.makeText(context, t.getMessage(), Toast.LENGTH_SHORT).show();
-                                        } catch (final Throwable e) {}
-                                    }
-                                });
-                    })
+                                @Override
+                                public void onFailure(final Throwable t) {
+                                    Log.e(TAG, "Error deleting collection", t);
+                                    try {
+                                        final Context context = getContext();
+                                        if (context == null) return;
+                                        Toast.makeText(context, t.getMessage(), Toast.LENGTH_SHORT).show();
+                                    } catch (final Throwable ignored) {}
+                                }
+                            }))
                     .setNegativeButton(R.string.cancel, null)
                     .show();
         } else if (item.getItemId() == R.id.edit) {
             final Context context = getContext();
+            if (context == null) return false;
             final EditText input = new EditText(context);
             new AlertDialog.Builder(context)
                     .setTitle(R.string.edit_collection)
                     .setView(input)
-                    .setPositiveButton(R.string.confirm, (d, w) -> {
-                        collectionService.editCollectionName(
-                                savedCollection.getId(),
-                                input.getText().toString(),
-                                new ServiceCallback<String>() {
-                                    @Override
-                                    public void onSuccess(final String result) {
-                                        binding.collapsingToolbarLayout.setTitle(input.getText().toString());
-                                        SavedCollectionsFragment.pleaseRefresh = true;
-                                    }
+                    .setPositiveButton(R.string.confirm, (d, w) -> collectionService.editCollectionName(
+                            savedCollection.getCollectionId(),
+                            input.getText().toString(),
+                            new ServiceCallback<String>() {
+                                @Override
+                                public void onSuccess(final String result) {
+                                    binding.collapsingToolbarLayout.setTitle(input.getText().toString());
+                                    SavedCollectionsFragment.pleaseRefresh = true;
+                                }
 
-                                    @Override
-                                    public void onFailure(final Throwable t) {
-                                        Log.e(TAG, "Error editing collection", t);
-                                        try {
-                                            Toast.makeText(context, t.getMessage(), Toast.LENGTH_SHORT).show();
-                                        } catch (final Throwable e) {}
-                                    }
-                                });
-                    })
+                                @Override
+                                public void onFailure(final Throwable t) {
+                                    Log.e(TAG, "Error editing collection", t);
+                                    try {
+                                        final Context context = getContext();
+                                        if (context == null) return;
+                                        Toast.makeText(context, t.getMessage(), Toast.LENGTH_SHORT).show();
+                                    } catch (final Throwable ignored) {}
+                                }
+                            }))
                     .setNegativeButton(R.string.cancel, null)
                     .show();
         }
@@ -400,9 +410,9 @@ public class CollectionPostsFragment extends Fragment implements SwipeRefreshLay
         if (savedCollection == null) {
             return;
         }
-        binding.cover.setTransitionName("collection-" + savedCollection.getId());
+        binding.cover.setTransitionName("collection-" + savedCollection.getCollectionId());
         fragmentActivity.setToolbar(binding.toolbar);
-        binding.collapsingToolbarLayout.setTitle(savedCollection.getTitle());
+        binding.collapsingToolbarLayout.setTitle(savedCollection.getCollectionName());
         final int collapsedTitleTextColor = ColorUtils.setAlphaComponent(titleColor, 0xFF);
         final int expandedTitleTextColor = ColorUtils.setAlphaComponent(titleColor, 0x99);
         binding.collapsingToolbarLayout.setExpandedTitleColor(expandedTitleTextColor);
@@ -434,9 +444,9 @@ public class CollectionPostsFragment extends Fragment implements SwipeRefreshLay
     }
 
     private void setupCover() {
-        final String coverUrl = ResponseBodyUtils.getImageUrl(savedCollection.getCoverMedias() == null
+        final String coverUrl = ResponseBodyUtils.getImageUrl(savedCollection.getCoverMediaList() == null
                                                               ? savedCollection.getCoverMedia()
-                                                              : savedCollection.getCoverMedias().get(0));
+                                                              : savedCollection.getCoverMediaList().get(0));
         final DraweeController controller = Fresco
                 .newDraweeControllerBuilder()
                 .setOldController(binding.cover.getController())
@@ -463,7 +473,7 @@ public class CollectionPostsFragment extends Fragment implements SwipeRefreshLay
     private void setupPosts() {
         binding.posts.setViewModelStoreOwner(this)
                      .setLifeCycleOwner(this)
-                     .setPostFetchService(new SavedPostFetchService(0, PostItemType.COLLECTION, true, savedCollection.getId()))
+                     .setPostFetchService(new SavedPostFetchService(0, PostItemType.COLLECTION, true, savedCollection.getCollectionId()))
                      .setLayoutPreferences(layoutPreferences)
                      .addFetchStatusChangeListener(fetching -> updateSwipeRefreshState())
                      .setFeedItemCallback(feedItemCallback)
@@ -485,7 +495,7 @@ public class CollectionPostsFragment extends Fragment implements SwipeRefreshLay
 
     private void showPostsLayoutPreferences() {
         final PostsLayoutPreferencesDialogFragment fragment = new PostsLayoutPreferencesDialogFragment(
-                Constants.PREF_TOPIC_POSTS_LAYOUT,
+                Constants.PREF_SAVED_POSTS_LAYOUT,
                 preferences -> {
                     layoutPreferences = preferences;
                     new Handler().postDelayed(() -> binding.posts.setLayoutPreferences(preferences), 200);

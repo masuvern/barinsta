@@ -1,6 +1,9 @@
 package awais.instagrabber.customviews.emoji;
 
+import android.content.Context;
 import android.util.Log;
+
+import androidx.annotation.NonNull;
 
 import com.google.common.collect.ImmutableList;
 
@@ -11,7 +14,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import awais.instagrabber.utils.AppExecutors;
 import awais.instagrabber.utils.TextUtils;
 import awais.instagrabber.utils.Utils;
 import awais.instagrabber.utils.emoji.EmojiParser;
@@ -22,29 +24,29 @@ public class ReactionsManager {
     private static final String TAG = ReactionsManager.class.getSimpleName();
     private static final Object LOCK = new Object();
 
-    private final AppExecutors appExecutors = AppExecutors.getInstance();
+    // private final AppExecutors appExecutors = AppExecutors.INSTANCE;
     private final List<Emoji> reactions = new ArrayList<>();
 
     private static ReactionsManager instance;
 
-    public static ReactionsManager getInstance() {
+    public static ReactionsManager getInstance(@NonNull final Context context) {
         if (instance == null) {
             synchronized (LOCK) {
                 if (instance == null) {
-                    instance = new ReactionsManager();
+                    instance = new ReactionsManager(context);
                 }
             }
         }
         return instance;
     }
 
-    private ReactionsManager() {
+    private ReactionsManager(@NonNull final Context context) {
+        final EmojiParser emojiParser = EmojiParser.Companion.getInstance(context);
         String reactionsJson = Utils.settingsHelper.getString(PREF_REACTIONS);
         if (TextUtils.isEmpty(reactionsJson)) {
             final ImmutableList<String> list = ImmutableList.of("❤️", "\uD83D\uDE02", "\uD83D\uDE2E", "\uD83D\uDE22", "\uD83D\uDE21", "\uD83D\uDC4D");
             reactionsJson = new JSONArray(list).toString();
         }
-        final EmojiParser emojiParser = EmojiParser.getInstance();
         final Map<String, Emoji> allEmojis = emojiParser.getAllEmojis();
         try {
             final JSONArray reactionsJsonArray = new JSONArray(reactionsJson);

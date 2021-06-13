@@ -11,20 +11,19 @@ import androidx.recyclerview.widget.ListAdapter;
 import awais.instagrabber.adapters.viewholder.TopicClusterViewHolder;
 import awais.instagrabber.databinding.ItemDiscoverTopicBinding;
 import awais.instagrabber.repositories.responses.saved.SavedCollection;
-import awais.instagrabber.utils.ResponseBodyUtils;
 
 public class SavedCollectionsAdapter extends ListAdapter<SavedCollection, TopicClusterViewHolder> {
     private static final DiffUtil.ItemCallback<SavedCollection> DIFF_CALLBACK = new DiffUtil.ItemCallback<SavedCollection>() {
         @Override
         public boolean areItemsTheSame(@NonNull final SavedCollection oldItem, @NonNull final SavedCollection newItem) {
-            return oldItem.getId().equals(newItem.getId());
+            return oldItem.getCollectionId().equals(newItem.getCollectionId());
         }
 
         @Override
         public boolean areContentsTheSame(@NonNull final SavedCollection oldItem, @NonNull final SavedCollection newItem) {
-            if (oldItem.getCoverMedias() != null && newItem.getCoverMedias() != null
-                && oldItem.getCoverMedias().size() == newItem.getCoverMedias().size()) {
-                return oldItem.getCoverMedias().get(0).getId().equals(newItem.getCoverMedias().get(0).getId());
+            if (oldItem.getCoverMediaList() != null && newItem.getCoverMediaList() != null
+                && oldItem.getCoverMediaList().size() == newItem.getCoverMediaList().size()) {
+                return oldItem.getCoverMediaList().get(0).getId().equals(newItem.getCoverMediaList().get(0).getId());
             }
             else if (oldItem.getCoverMedia() != null && newItem.getCoverMedia() != null) {
                 return oldItem.getCoverMedia().getId().equals(newItem.getCoverMedia().getId());

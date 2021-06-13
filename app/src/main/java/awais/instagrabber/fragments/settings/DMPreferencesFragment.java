@@ -20,7 +20,6 @@ import awais.instagrabber.customviews.helpers.TextWatcherAdapter;
 import awais.instagrabber.databinding.PrefAutoRefreshDmFreqBinding;
 import awais.instagrabber.services.DMSyncAlarmReceiver;
 import awais.instagrabber.services.DMSyncService;
-import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.Debouncer;
 import awais.instagrabber.utils.TextUtils;
 
@@ -43,7 +42,7 @@ public class DMPreferencesFragment extends BasePreferencesFragment {
     private Preference getMarkDMSeenPreference(@NonNull final Context context) {
         return PreferenceHelper.getSwitchPreference(
                 context,
-                Constants.DM_MARK_AS_SEEN,
+                PreferenceKeys.DM_MARK_AS_SEEN,
                 R.string.dm_mark_as_seen_setting,
                 R.string.dm_mark_as_seen_setting_summary,
                 false,

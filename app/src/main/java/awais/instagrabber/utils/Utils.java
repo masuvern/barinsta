@@ -10,12 +10,12 @@ import android.content.Intent;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Color;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
-import android.os.Handler;
 import android.os.storage.StorageManager;
 import android.provider.Browser;
 import android.provider.DocumentsContract;
@@ -23,6 +23,7 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.Pair;
 import android.util.TypedValue;
+import android.view.Display;
 import android.view.Gravity;
 import android.view.View;
 import android.view.Window;
@@ -38,6 +39,8 @@ import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.documentfile.provider.DocumentFile;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MediatorLiveData;
 import androidx.vectordrawable.graphics.drawable.AnimatedVectorDrawableCompat;
 
 import com.google.android.exoplayer2.database.ExoDatabaseProvider;
@@ -52,7 +55,6 @@ import java.io.File;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -79,11 +81,9 @@ public final class Utils {
     public static final MimeTypeMap mimeTypeMap = MimeTypeMap.getSingleton();
     public static final DisplayMetrics displayMetrics = Resources.getSystem().getDisplayMetrics();
     public static ClipboardManager clipboardManager;
-    public static SimpleDateFormat datetimeParser;
     public static SimpleCache simpleCache;
     private static int statusBarHeight;
     private static int actionBarHeight;
-    public static Handler applicationHandler;
     public static String cacheDir;
     public static String tabOrderString;
     private static int defaultStatusBarColor;
@@ -94,13 +94,17 @@ public final class Utils {
     }
 
     public static void copyText(@NonNull final Context context, final CharSequence string) {
-        if (clipboardManager == null)
+        if (clipboardManager == null) {
             clipboardManager = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
-
+        }
         int toastMessage = R.string.clipboard_error;
         if (clipboardManager != null) {
-            clipboardManager.setPrimaryClip(ClipData.newPlainText(context.getString(R.string.app_name), string));
-            toastMessage = R.string.clipboard_copied;
+            try {
+                clipboardManager.setPrimaryClip(ClipData.newPlainText(context.getString(R.string.app_name), string));
+                toastMessage = R.string.clipboard_copied;
+            } catch (Exception e) {
+                Log.e(TAG, "copyText: ", e);
+            }
         }
         Toast.makeText(context, toastMessage, Toast.LENGTH_SHORT).show();
     }
@@ -231,7 +235,7 @@ public final class Utils {
         final Toast toast = Toast.makeText(context, text, Toast.LENGTH_SHORT);
         toast.setGravity(Gravity.TOP | Gravity.START,
                          view.getLeft(),
-                         view.getTop() - view.getHeight() - 4);
+                         view.getTop());
         toast.show();
     }
 
@@ -288,6 +292,18 @@ public final class Utils {
         TypedValue outValue = new TypedValue();
         context.getTheme().resolveAttribute(colorAttr, outValue, true);
         return outValue.data;
+    }
+
+    public static int getAttrValue(@NonNull final Context context, final int attr) {
+        final TypedValue outValue = new TypedValue();
+        context.getTheme().resolveAttribute(attr, outValue, true);
+        return outValue.data;
+    }
+
+    public static int getAttrResId(@NonNull final Context context, final int attr) {
+        final TypedValue outValue = new TypedValue();
+        context.getTheme().resolveAttribute(attr, outValue, true);
+        return outValue.resourceId;
     }
 
     public static void transparentStatusBar(final Activity activity,
@@ -348,6 +364,18 @@ public final class Utils {
     //             callback
     //     );
     // }
+
+    public static void showKeyboard(@NonNull final View view) {
+        final Context context = view.getContext();
+        if (context == null) return;
+        final InputMethodManager imm = (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
+        if (imm == null) return;
+        view.requestFocus();
+        final boolean shown = imm.showSoftInput(view, InputMethodManager.SHOW_IMPLICIT);
+        if (!shown) {
+            Log.e(TAG, "showKeyboard: System did not display the keyboard");
+        }
+    }
 
     public static void hideKeyboard(final View view) {
         if (view == null) return;
@@ -567,5 +595,77 @@ public final class Utils {
         settingsHelper.putString(PREF_BARINSTA_DIR_URI, dirUri.toString());
         // re-init DownloadUtils
         DownloadUtils.init(context);
+    }
+
+    @NonNull
+    public static Point getNavigationBarSize(@NonNull Context context) {
+        Point appUsableSize = getAppUsableScreenSize(context);
+        Point realScreenSize = getRealScreenSize(context);
+
+        // navigation bar on the right
+        if (appUsableSize.x < realScreenSize.x) {
+            return new Point(realScreenSize.x - appUsableSize.x, appUsableSize.y);
+        }
+
+        // navigation bar at the bottom
+        if (appUsableSize.y < realScreenSize.y) {
+            return new Point(appUsableSize.x, realScreenSize.y - appUsableSize.y);
+        }
+
+        // navigation bar is not present
+        return new Point();
+    }
+
+    @NonNull
+    public static Point getAppUsableScreenSize(@NonNull Context context) {
+        WindowManager windowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
+        Display display = windowManager.getDefaultDisplay();
+        Point size = new Point();
+        display.getSize(size);
+        return size;
+    }
+
+    @NonNull
+    public static Point getRealScreenSize(@NonNull Context context) {
+        WindowManager windowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
+        Display display = windowManager.getDefaultDisplay();
+        Point size = new Point();
+        display.getRealSize(size);
+        return size;
+    }
+
+    public static <F, S> LiveData<Pair<F, S>> zipLiveData(@NonNull final LiveData<F> firstLiveData,
+                                                          @NonNull final LiveData<S> secondLiveData) {
+        final ZippedLiveData<F, S> zippedLiveData = new ZippedLiveData<>();
+        zippedLiveData.addFirstSource(firstLiveData);
+        zippedLiveData.addSecondSource(secondLiveData);
+        return zippedLiveData;
+    }
+
+    public static class ZippedLiveData<F, S> extends MediatorLiveData<Pair<F, S>> {
+        private F lastF;
+        private S lastS;
+
+        private void update() {
+            F localLastF = lastF;
+            S localLastS = lastS;
+            if (localLastF != null && localLastS != null) {
+                setValue(new Pair<>(localLastF, localLastS));
+            }
+        }
+
+        public void addFirstSource(@NonNull final LiveData<F> firstLiveData) {
+            addSource(firstLiveData, f -> {
+                lastF = f;
+                update();
+            });
+        }
+
+        public void addSecondSource(@NonNull final LiveData<S> secondLiveData) {
+            addSource(secondLiveData, s -> {
+                lastS = s;
+                update();
+            });
+        }
     }
 }

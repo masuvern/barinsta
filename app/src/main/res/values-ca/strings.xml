@@ -56,6 +56,8 @@
     </plurals>
     <string name="main_posts_following">%s\n Seguint</string>
     <string name="post_viewer_autoplay_video">Reproduir vídeos automàticament</string>
+    <string name="post_viewer_background_play">Continue videos in background</string>
+    <string name="post_viewer_background_play_summary">Do not pause videos when the app is out of focus</string>
     <string name="post_viewer_muted_autoplay">Silenciar sempre els vídeos</string>
     <string name="post_viewer_show_captions">Mostrar sempre els subtítols</string>
     <string name="post_viewer_download_dialog_title">Seleccionar el que s\'ha de descarregar</string>
@@ -121,6 +123,7 @@
     <string name="mute_posts">Silenciar publicacions</string>
     <string name="unmute_stories">No silenciar les històries</string>
     <string name="unmute_posts">No silenciar les publicacions</string>
+    <string name="remove_follower">Remove follower</string>
     <string name="bio_copy">Copiar bio</string>
     <string name="bio_translate">Traduir bio</string>
     <string name="status_mutual">Mutu</string>
@@ -209,7 +212,7 @@
     <string name="comment_viewer_like_comment">Donar \"m\'agrada\" al comentari</string>
     <string name="comment_viewer_unlike_comment">Treure \"m\'agrada\" al comentari</string>
     <string name="comment_viewer_translate_comment">Traduir comentari</string>
-    <string name="comment_viewer_delete_comment">Esborrar comentari</string>
+    <string name="comment_viewer_delete_comment">Delete comment</string>
     <string name="comment_send_empty_comment">No als comentaris buits!</string>
     <string name="comment_view_mention_user_search">Vols cercar el nom d\'usuari?</string>
     <string name="comment_view_mention_hash_search">Vols cercar l\'etiqueta?</string>
@@ -230,7 +233,7 @@
     <string name="request_approve">Aprovar la sol·licitud</string>
     <string name="request_reject">Rebutjar la sol·licitud</string>
     <string name="share_public_post">Comparteix aquesta publicació pública a…</string>
-    <string name="share_private_post">Aquesta és una publicació privada! Comparteix-la amb aquells que la puguin veure!</string>
+    <string name="share_private_post">This is a private post! Share to those who can view it.</string>
     <string name="discover_empty">Aquesta categoria està buida d\'alguna manera…</string>
     <string name="update_available">Hi ha disponible una actualització! (%s)</string>
     <string name="update_notice">Recordatori: Si has baixat l\'app des de F-Droid, l\'has d\'actualitzar des d\'allà! El mateix s\'aplica a GitHub.</string>
@@ -262,6 +265,7 @@
     <string name="skip_update_checkbox">No ho tornis a mostrar fins a la propera actualització</string>
     <string name="version">Versió</string>
     <string name="pref_start_screen">Pantalla d\'inici</string>
+    <string name="pref_search_focus_keyboard" comment="basically bring up the keyboard immediately when someone does search">Show keyboard on search</string>
     <string name="pref_category_general">General</string>
     <string name="pref_category_theme">Tema</string>
     <string name="pref_category_downloads">Descàrregues</string>
@@ -364,6 +368,10 @@
     <plurals name="likes_count">
         <item quantity="one">%d m\'agrada</item>
         <item quantity="other">%d m\'agrades</item>
+    </plurals>
+    <plurals name="replies_count">
+        <item quantity="one">%d reply</item>
+        <item quantity="other">%d replies</item>
     </plurals>
     <plurals name="comments_count">
         <item quantity="one">%d comentari</item>
@@ -479,4 +487,11 @@
     <string name="dm_remove_warning">If saved, all DM related features will be disabled on next launch</string>
     <string name="copy_caption">Copy caption</string>
     <string name="copy_reply">Copy reply</string>
+    <string name="top">Top</string>
+    <string name="recent">Recent</string>
+    <string name="clear">Clear</string>
+    <string name="no_external_map_app">No Map app found!</string>
+    <string name="click_to_show_full">Click to show full like count</string>
+    <string name="no_profile_pic_found">No profile pic found!</string>
+    <string name="swipe_up_confirmation">Are you sure you want to open this link?</string>
 </resources>

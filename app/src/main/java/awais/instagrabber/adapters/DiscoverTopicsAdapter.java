@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.ListAdapter;
 import awais.instagrabber.adapters.viewholder.TopicClusterViewHolder;
 import awais.instagrabber.databinding.ItemDiscoverTopicBinding;
 import awais.instagrabber.repositories.responses.discover.TopicCluster;
+import awais.instagrabber.repositories.responses.Media;
 import awais.instagrabber.utils.ResponseBodyUtils;
 
 public class DiscoverTopicsAdapter extends ListAdapter<TopicCluster, TopicClusterViewHolder> {
@@ -50,6 +51,8 @@ public class DiscoverTopicsAdapter extends ListAdapter<TopicCluster, TopicCluste
     }
 
     public interface OnTopicClickListener {
-        void onTopicClick(TopicCluster topicCluster, View root, View cover, View title, int titleColor, int backgroundColor);
+        void onTopicClick(TopicCluster topicCluster, View cover, int titleColor, int backgroundColor);
+
+        void onTopicLongClick(Media coverMedia);
     }
 }

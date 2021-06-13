@@ -62,6 +62,8 @@
     </plurals>
     <string name="main_posts_following">%s\nSleduje</string>
     <string name="post_viewer_autoplay_video">Automaticky prehrávať videá</string>
+    <string name="post_viewer_background_play">Continue videos in background</string>
+    <string name="post_viewer_background_play_summary">Do not pause videos when the app is out of focus</string>
     <string name="post_viewer_muted_autoplay">Vždy stíšiť videá</string>
     <string name="post_viewer_show_captions">Vždy zobraziť popis príspevku</string>
     <string name="post_viewer_download_dialog_title">Vybrať čo stiahnuť</string>
@@ -129,6 +131,7 @@
     <string name="mute_posts">Mute posts</string>
     <string name="unmute_stories">Unmute stories</string>
     <string name="unmute_posts">Unmute posts</string>
+    <string name="remove_follower">Remove follower</string>
     <string name="bio_copy">Skopírovať bio</string>
     <string name="bio_translate">Preložiť bio</string>
     <string name="status_mutual">Spoločné</string>
@@ -217,7 +220,7 @@
     <string name="comment_viewer_like_comment">Páči sa mi</string>
     <string name="comment_viewer_unlike_comment">Nepáči sa mi</string>
     <string name="comment_viewer_translate_comment">Preložiť komentár</string>
-    <string name="comment_viewer_delete_comment">Odstrániť komentár</string>
+    <string name="comment_viewer_delete_comment">Delete comment</string>
     <string name="comment_send_empty_comment">Komentár je prázdny!</string>
     <string name="comment_view_mention_user_search">Chcete vyhľadať používeteľské meno?</string>
     <string name="comment_view_mention_hash_search">Chcete vyhľadať hashtag?</string>
@@ -238,7 +241,7 @@
     <string name="request_approve">Schváliť žiadosť</string>
     <string name="request_reject">Odmietnuť žiadosť</string>
     <string name="share_public_post">Zdieľať tento príspevok…</string>
-    <string name="share_private_post">Toto je súkromný príspevok! Zdieľaj iba tým ktorý ho môžu vidieť!</string>
+    <string name="share_private_post">This is a private post! Share to those who can view it.</string>
     <string name="discover_empty">Táto kategória je nejaká prázdna…</string>
     <string name="update_available">Aktualizácia je pripravená! (%s)</string>
     <string name="update_notice">Upomienka: Ak si sťahoval/a z F-Droid, musíš aktualizovať z nej! To platí aj pre GitHub.</string>
@@ -270,6 +273,7 @@
     <string name="skip_update_checkbox">Neukazovať do ďalšej aktualizácie</string>
     <string name="version">Verzia</string>
     <string name="pref_start_screen">Úvodná obrazovka</string>
+    <string name="pref_search_focus_keyboard" comment="basically bring up the keyboard immediately when someone does search">Show keyboard on search</string>
     <string name="pref_category_general">Všeobecné</string>
     <string name="pref_category_theme">Téma</string>
     <string name="pref_category_downloads">Stiahnuté</string>
@@ -374,6 +378,12 @@
         <item quantity="few">%d sa páči</item>
         <item quantity="many">%d sa páči</item>
         <item quantity="other">%d sa páči</item>
+    </plurals>
+    <plurals name="replies_count">
+        <item quantity="one">%d reply</item>
+        <item quantity="few">%d replies</item>
+        <item quantity="many">%d replies</item>
+        <item quantity="other">%d replies</item>
     </plurals>
     <plurals name="comments_count">
         <item quantity="one">%d komentár</item>
@@ -495,4 +505,11 @@
     <string name="dm_remove_warning">If saved, all DM related features will be disabled on next launch</string>
     <string name="copy_caption">Copy caption</string>
     <string name="copy_reply">Copy reply</string>
+    <string name="top">Top</string>
+    <string name="recent">Recent</string>
+    <string name="clear">Clear</string>
+    <string name="no_external_map_app">No Map app found!</string>
+    <string name="click_to_show_full">Click to show full like count</string>
+    <string name="no_profile_pic_found">No profile pic found!</string>
+    <string name="swipe_up_confirmation">Are you sure you want to open this link?</string>
 </resources>

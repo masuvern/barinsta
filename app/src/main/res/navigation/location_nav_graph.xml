@@ -66,6 +66,28 @@
             app:nullable="false" />
     </action>
 
+    <action
+        android:id="@+id/action_global_search"
+        app:destination="@id/searchFragment" />
+
+    <action
+        android:id="@+id/action_global_post_view"
+        app:destination="@id/postViewFragment">
+        <argument
+            android:name="media"
+            app:argType="awais.instagrabber.repositories.responses.Media"
+            app:nullable="false" />
+        <argument
+            android:name="position"
+            app:argType="integer" />
+    </action>
+
+    <include app:graph="@navigation/user_search_nav_graph" />
+
+    <action
+        android:id="@+id/action_global_user_search"
+        app:destination="@id/user_search_nav_graph" />
+
     <fragment
         android:id="@+id/locationFragment"
         android:name="awais.instagrabber.fragments.LocationFragment"
@@ -94,4 +116,14 @@
             android:name="options"
             app:argType="awais.instagrabber.repositories.requests.StoryViewerOptions" />
     </fragment>
+    <fragment
+        android:id="@+id/searchFragment"
+        android:name="awais.instagrabber.fragments.search.SearchFragment"
+        android:label="@string/search"
+        tools:layout="@layout/fragment_search" />
+    <fragment
+        android:id="@+id/postViewFragment"
+        android:name="awais.instagrabber.fragments.PostViewV2Fragment"
+        android:label="@string/post"
+        tools:layout="@layout/dialog_post_view" />
 </navigation>

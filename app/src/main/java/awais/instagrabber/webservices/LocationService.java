@@ -14,7 +14,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class LocationService extends BaseService {
+public class LocationService {
     private static final String TAG = "LocationService";
 
     private final LocationRepository repository;
@@ -22,7 +22,7 @@ public class LocationService extends BaseService {
     private static LocationService instance;
 
     private LocationService() {
-        repository = RetrofitFactory.getInstance()
+        repository = RetrofitFactory.INSTANCE
                                     .getRetrofit()
                                     .create(LocationRepository.class);
     }

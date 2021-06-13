@@ -7,6 +7,8 @@ import android.graphics.drawable.Animatable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.GestureDetector;
 import android.view.Gravity;
@@ -29,10 +31,13 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.core.view.GestureDetectorCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.NavController;
 import androidx.navigation.NavDirections;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -55,11 +60,9 @@ import com.google.android.exoplayer2.source.dash.DashMediaSource;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -67,10 +70,10 @@ import java.util.regex.Pattern;
 import awais.instagrabber.BuildConfig;
 import awais.instagrabber.R;
 import awais.instagrabber.adapters.StoriesAdapter;
-import awais.instagrabber.asyncs.CreateThreadAction;
 import awais.instagrabber.customviews.helpers.SwipeGestureListener;
 import awais.instagrabber.databinding.FragmentStoryViewerBinding;
 import awais.instagrabber.fragments.main.ProfileFragmentDirections;
+import awais.instagrabber.fragments.settings.PreferenceKeys;
 import awais.instagrabber.interfaces.SwipeEvent;
 import awais.instagrabber.models.FeedStoryModel;
 import awais.instagrabber.models.HighlightModel;
@@ -83,12 +86,11 @@ import awais.instagrabber.models.stickers.SliderModel;
 import awais.instagrabber.models.stickers.SwipeUpModel;
 import awais.instagrabber.repositories.requests.StoryViewerOptions;
 import awais.instagrabber.repositories.requests.StoryViewerOptions.Type;
-import awais.instagrabber.repositories.requests.directmessages.BroadcastOptions;
-import awais.instagrabber.repositories.responses.Media;
-import awais.instagrabber.repositories.responses.StoryStickerResponse;
-import awais.instagrabber.repositories.responses.directmessages.DirectThreadBroadcastResponse;
+import awais.instagrabber.repositories.requests.directmessages.ThreadIdOrUserIds;
+import awais.instagrabber.utils.AppExecutors;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.CookieUtils;
+import awais.instagrabber.utils.CoroutineUtilsKt;
 import awais.instagrabber.utils.DownloadUtils;
 import awais.instagrabber.utils.TextUtils;
 import awais.instagrabber.utils.Utils;
@@ -97,33 +99,31 @@ import awais.instagrabber.viewmodels.FeedStoriesViewModel;
 import awais.instagrabber.viewmodels.HighlightsViewModel;
 import awais.instagrabber.viewmodels.StoriesViewModel;
 import awais.instagrabber.webservices.DirectMessagesService;
-import awais.instagrabber.webservices.MediaService;
+import awais.instagrabber.webservices.MediaRepository;
 import awais.instagrabber.webservices.ServiceCallback;
-import awais.instagrabber.webservices.StoriesService;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
+import awais.instagrabber.webservices.StoriesRepository;
+import kotlinx.coroutines.Dispatchers;
 
 import static awais.instagrabber.customviews.helpers.SwipeGestureListener.SWIPE_THRESHOLD;
 import static awais.instagrabber.customviews.helpers.SwipeGestureListener.SWIPE_VELOCITY_THRESHOLD;
-import static awais.instagrabber.utils.Constants.MARK_AS_SEEN;
+import static awais.instagrabber.fragments.settings.PreferenceKeys.MARK_AS_SEEN;
 import static awais.instagrabber.utils.Utils.settingsHelper;
-
-//import awaisomereport.LogCollector;
-//import static awais.instagrabber.utils.Utils.logCollector;
 
 public class StoryViewerFragment extends Fragment {
     private static final String TAG = "StoryViewerFragment";
+
+    private final String cookie = settingsHelper.getString(Constants.COOKIE);
 
     private AppCompatActivity fragmentActivity;
     private View root;
     private FragmentStoryViewerBinding binding;
     private String currentStoryUsername;
+    private String highlightTitle;
     private StoriesAdapter storiesAdapter;
     private SwipeEvent swipeEvent;
     private GestureDetectorCompat gestureDetector;
-    private StoriesService storiesService;
-    private MediaService mediaService;
+    private StoriesRepository storiesRepository;
+    private MediaRepository mediaRepository;
     private StoryModel currentStory;
     private int slidePos;
     private int lastSlidePos;
@@ -149,21 +149,22 @@ public class StoryViewerFragment extends Fragment {
     // private boolean isArchive;
     // private boolean isNotification;
     private DirectMessagesService directMessagesService;
-
-    private final String cookie = settingsHelper.getString(Constants.COOKIE);
     private StoryViewerOptions options;
+    private String csrfToken;
+    private String deviceId;
+    private long userId;
 
     @Override
     public void onCreate(@Nullable final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        final String csrfToken = CookieUtils.getCsrfTokenFromCookie(cookie);
+        csrfToken = CookieUtils.getCsrfTokenFromCookie(cookie);
         if (csrfToken == null) return;
-        final long userIdFromCookie = CookieUtils.getUserIdFromCookie(cookie);
-        final String deviceId = settingsHelper.getString(Constants.DEVICE_UUID);
+        userId = CookieUtils.getUserIdFromCookie(cookie);
+        deviceId = settingsHelper.getString(Constants.DEVICE_UUID);
         fragmentActivity = (AppCompatActivity) requireActivity();
-        storiesService = StoriesService.getInstance(csrfToken, userIdFromCookie, deviceId);
-        mediaService = MediaService.getInstance(null, null, 0);
-        directMessagesService = DirectMessagesService.getInstance(csrfToken, userIdFromCookie, deviceId);
+        storiesRepository = StoriesRepository.Companion.getInstance();
+        mediaRepository = MediaRepository.Companion.getInstance();
+        directMessagesService = DirectMessagesService.INSTANCE;
         setHasOptionsMenu(true);
     }
 
@@ -208,54 +209,67 @@ public class StoryViewerFragment extends Fragment {
         if (context == null) return false;
         int itemId = item.getItemId();
         if (itemId == R.id.action_download) {
-            // if (ContextCompat.checkSelfPermission(context, DownloadUtils.PERMS[0]) == PackageManager.PERMISSION_GRANTED)
-            downloadStory();
-            // else
-            //     ActivityCompat.requestPermissions(requireActivity(), DownloadUtils.PERMS, 8020);
+            if (ContextCompat.checkSelfPermission(context, DownloadUtils.PERMS[0]) == PackageManager.PERMISSION_GRANTED)
+                downloadStory();
+            else
+                ActivityCompat.requestPermissions(requireActivity(), DownloadUtils.PERMS, 8020);
             return true;
         }
         if (itemId == R.id.action_dms) {
             final EditText input = new EditText(context);
             input.setHint(R.string.reply_hint);
-            new AlertDialog.Builder(context)
+            final AlertDialog ad = new AlertDialog.Builder(context)
                     .setTitle(R.string.reply_story)
                     .setView(input)
-                    .setPositiveButton(R.string.confirm, (d, w) -> new CreateThreadAction(cookie, currentStory.getUserId(), thread -> {
-                        if (thread == null) {
-                            Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
-                            return;
-                        }
-                        try {
-                            final Call<DirectThreadBroadcastResponse> request = directMessagesService
-                                    .broadcastStoryReply(BroadcastOptions.ThreadIdOrUserIds.of(thread.getThreadId()),
-                                                         input.getText().toString(),
-                                                         currentStory.getStoryMediaId(),
-                                                         String.valueOf(currentStory.getUserId()));
-                            request.enqueue(new Callback<DirectThreadBroadcastResponse>() {
-                                @Override
-                                public void onResponse(@NonNull final Call<DirectThreadBroadcastResponse> call,
-                                                       @NonNull final Response<DirectThreadBroadcastResponse> response) {
-                                    if (!response.isSuccessful()) {
-                                        Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
-                                        return;
-                                    }
-                                    Toast.makeText(context, R.string.answered_story, Toast.LENGTH_SHORT).show();
+                    .setPositiveButton(R.string.confirm, (d, w) -> directMessagesService.createThread(
+                            csrfToken,
+                            userId,
+                            deviceId,
+                            Collections.singletonList(currentStory.getUserId()),
+                            null,
+                            CoroutineUtilsKt.getContinuation((thread, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
+                                if (throwable != null) {
+                                    Log.e(TAG, "onOptionsItemSelected: ", throwable);
+                                    Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
+                                    return;
                                 }
+                                directMessagesService.broadcastStoryReply(
+                                        csrfToken,
+                                        userId,
+                                        deviceId,
+                                        ThreadIdOrUserIds.of(thread.getThreadId()),
+                                        input.getText().toString(),
+                                        currentStory.getStoryMediaId(),
+                                        String.valueOf(currentStory.getUserId()),
+                                        CoroutineUtilsKt.getContinuation(
+                                                (directThreadBroadcastResponse, throwable1) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
+                                                    if (throwable1 != null) {
+                                                        Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
+                                                        Log.e(TAG, "onFailure: ", throwable1);
+                                                        return;
+                                                    }
+                                                    Toast.makeText(context, R.string.answered_story, Toast.LENGTH_SHORT).show();
+                                                }), Dispatchers.getIO()
+                                        )
 
-                                @Override
-                                public void onFailure(@NonNull final Call<DirectThreadBroadcastResponse> call, @NonNull final Throwable t) {
-                                    try {
-                                        Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
-                                        Log.e(TAG, "onFailure: ", t);
-                                    } catch (Throwable ignored) {}
-                                }
-                            });
-                        } catch (UnsupportedEncodingException e) {
-                            Log.e(TAG, "Error", e);
-                        }
-                    }).execute())
+                                );
+                            }), Dispatchers.getIO())
+                    ))
                     .setNegativeButton(R.string.cancel, null)
                     .show();
+            ad.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(false);
+            input.addTextChangedListener(new TextWatcher() {
+                @Override
+                public void beforeTextChanged(final CharSequence s, final int start, final int count, final int after) {}
+
+                @Override
+                public void onTextChanged(final CharSequence s, final int start, final int before, final int count) {
+                    ad.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(!TextUtils.isEmpty(s));
+                }
+
+                @Override
+                public void afterTextChanged(final Editable s) {}
+            });
             return true;
         }
         if (itemId == R.id.action_profile) {
@@ -274,7 +288,9 @@ public class StoryViewerFragment extends Fragment {
     @Override
     public void onPause() {
         super.onPause();
-        releasePlayer();
+        if (player != null) {
+            player.pause();
+        }
     }
 
     @Override
@@ -413,10 +429,10 @@ public class StoryViewerFragment extends Fragment {
                         return true;
                     }
                 } catch (final Exception e) {
-                    //                    if (logCollector != null)
-                    //                        logCollector.appendException(e, LogCollector.LogFile.ACTIVITY_STORY_VIEWER, "setupListeners",
-                    //                                                     new Pair<>("swipeEvent", swipeEvent),
-                    //                                                     new Pair<>("diffX", diffX));
+                    // if (logCollector != null)
+                    //     logCollector.appendException(e, LogCollector.LogFile.ACTIVITY_STORY_VIEWER, "setupListeners",
+                    //                                  new Pair<>("swipeEvent", swipeEvent),
+                    //                                  new Pair<>("diffX", diffX));
                     if (BuildConfig.DEBUG) Log.e(TAG, "Error", e);
                 }
                 return false;
@@ -445,7 +461,10 @@ public class StoryViewerFragment extends Fragment {
         binding.swipeUp.setOnClickListener(v -> {
             final Object tag = v.getTag();
             if (tag instanceof CharSequence) {
-                Utils.openURL(context, tag.toString());
+                new AlertDialog.Builder(context)
+                        .setTitle(R.string.swipe_up_confirmation)
+                        .setMessage(tag.toString()).setPositiveButton(R.string.yes, (d, w) -> Utils.openURL(context, tag.toString()))
+                        .setNegativeButton(R.string.no, (d, w) -> d.dismiss()).show();
             }
         });
         binding.viewStoryPost.setOnClickListener(v -> {
@@ -457,40 +476,43 @@ public class StoryViewerFragment extends Fragment {
                     .setView(R.layout.dialog_opening_post)
                     .create();
             alertDialog.show();
-            mediaService.fetch(Long.valueOf(mediaId), new ServiceCallback<Media>() {
-                @Override
-                public void onSuccess(final Media feedModel) {
-                    final PostViewV2Fragment fragment = PostViewV2Fragment
-                            .builder(feedModel)
-                            .build();
-                    fragment.setOnShowListener(dialog -> alertDialog.dismiss());
-                    fragment.show(getChildFragmentManager(), "post_view");
-                }
-
-                @Override
-                public void onFailure(final Throwable t) {
-                    alertDialog.dismiss();
-                    Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
-                }
-            });
+            mediaRepository.fetch(
+                    Long.parseLong(mediaId),
+                    CoroutineUtilsKt.getContinuation((media, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
+                        if (throwable != null) {
+                            alertDialog.dismiss();
+                            Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+                        final NavController navController = NavHostFragment.findNavController(StoryViewerFragment.this);
+                        final Bundle bundle = new Bundle();
+                        bundle.putSerializable(PostViewV2Fragment.ARG_MEDIA, media);
+                        try {
+                            navController.navigate(R.id.action_global_post_view, bundle);
+                            alertDialog.dismiss();
+                        } catch (Exception e) {
+                            Log.e(TAG, "openPostDialog: ", e);
+                        }
+                    }), Dispatchers.getIO())
+            );
         });
         final View.OnClickListener storyActionListener = v -> {
             final Object tag = v.getTag();
             if (tag instanceof PollModel) {
                 poll = (PollModel) tag;
                 if (poll.getMyChoice() > -1) {
-                    new AlertDialog.Builder(context).setTitle(R.string.voted_story_poll)
-                                                    .setAdapter(new ArrayAdapter<>(context, android.R.layout.simple_list_item_1,
-                                                                                   new String[]{
-                                                                                           (poll.getMyChoice() == 0 ? "√ " : "") + poll
-                                                                                                   .getLeftChoice() + " (" + poll
-                                                                                                   .getLeftCount() + ")",
-                                                                                           (poll.getMyChoice() == 1 ? "√ " : "") + poll
-                                                                                                   .getRightChoice() + " (" + poll
-                                                                                                   .getRightCount() + ")"
-                                                                                   }), null)
-                                                    .setPositiveButton(R.string.ok, null)
-                                                    .show();
+                    new AlertDialog.Builder(context)
+                            .setTitle(R.string.voted_story_poll)
+                            .setAdapter(new ArrayAdapter<>(
+                                                context,
+                                                android.R.layout.simple_list_item_1,
+                                                new String[]{
+                                                        (poll.getMyChoice() == 0 ? "√ " : "") + poll.getLeftChoice() + " (" + poll.getLeftCount() + ")",
+                                                        (poll.getMyChoice() == 1 ? "√ " : "") + poll.getRightChoice() + " (" + poll.getRightCount() + ")"
+                                                }),
+                                        null)
+                            .setPositiveButton(R.string.ok, null)
+                            .show();
                 } else {
                     new AlertDialog.Builder(context)
                             .setTitle(poll.getQuestion())
@@ -499,29 +521,32 @@ public class StoryViewerFragment extends Fragment {
                                     poll.getRightChoice() + " (" + poll.getRightCount() + ")"
                             }), (d, w) -> {
                                 sticking = true;
-                                storiesService.respondToPoll(
+                                storiesRepository.respondToPoll(
+                                        csrfToken,
+                                        userId,
+                                        deviceId,
                                         currentStory.getStoryMediaId().split("_")[0],
                                         poll.getId(),
                                         w,
-                                        new ServiceCallback<StoryStickerResponse>() {
-                                            @Override
-                                            public void onSuccess(final StoryStickerResponse result) {
-                                                sticking = false;
-                                                try {
-                                                    poll.setMyChoice(w);
-                                                    Toast.makeText(context, R.string.votef_story_poll, Toast.LENGTH_SHORT).show();
-                                                } catch (Exception ignored) {}
-                                            }
-
-                                            @Override
-                                            public void onFailure(final Throwable t) {
-                                                sticking = false;
-                                                Log.e(TAG, "Error responding", t);
-                                                try {
-                                                    Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
-                                                } catch (Exception ignored) {}
-                                            }
-                                        });
+                                        CoroutineUtilsKt.getContinuation(
+                                                (storyStickerResponse, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
+                                                    if (throwable != null) {
+                                                        sticking = false;
+                                                        Log.e(TAG, "Error responding", throwable);
+                                                        try {
+                                                            Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
+                                                        } catch (Exception ignored) {}
+                                                        return;
+                                                    }
+                                                    sticking = false;
+                                                    try {
+                                                        poll.setMyChoice(w);
+                                                        Toast.makeText(context, R.string.votef_story_poll, Toast.LENGTH_SHORT).show();
+                                                    } catch (Exception ignored) {}
+                                                }),
+                                                Dispatchers.getIO()
+                                        )
+                                );
                             })
                             .setPositiveButton(R.string.cancel, null)
                             .show();
@@ -530,36 +555,52 @@ public class StoryViewerFragment extends Fragment {
                 question = (QuestionModel) tag;
                 final EditText input = new EditText(context);
                 input.setHint(R.string.answer_hint);
-                new AlertDialog.Builder(context)
+                final AlertDialog ad = new AlertDialog.Builder(context)
                         .setTitle(question.getQuestion())
                         .setView(input)
                         .setPositiveButton(R.string.confirm, (d, w) -> {
                             sticking = true;
-                            storiesService.respondToQuestion(
+                            storiesRepository.respondToQuestion(
+                                    csrfToken,
+                                    userId,
+                                    deviceId,
                                     currentStory.getStoryMediaId().split("_")[0],
                                     question.getId(),
                                     input.getText().toString(),
-                                    new ServiceCallback<StoryStickerResponse>() {
-                                        @Override
-                                        public void onSuccess(final StoryStickerResponse result) {
-                                            sticking = false;
-                                            try {
-                                                Toast.makeText(context, R.string.answered_story, Toast.LENGTH_SHORT).show();
-                                            } catch (Exception ignored) {}
-                                        }
-
-                                        @Override
-                                        public void onFailure(final Throwable t) {
-                                            sticking = false;
-                                            Log.e(TAG, "Error responding", t);
-                                            try {
-                                                Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
-                                            } catch (Exception ignored) {}
-                                        }
-                                    });
+                                    CoroutineUtilsKt.getContinuation(
+                                            (storyStickerResponse, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
+                                                if (throwable != null) {
+                                                    sticking = false;
+                                                    Log.e(TAG, "Error responding", throwable);
+                                                    try {
+                                                        Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
+                                                    } catch (Exception ignored) {}
+                                                    return;
+                                                }
+                                                sticking = false;
+                                                try {
+                                                    Toast.makeText(context, R.string.answered_story, Toast.LENGTH_SHORT).show();
+                                                } catch (Exception ignored) {}
+                                            }),
+                                            Dispatchers.getIO()
+                                    )
+                            );
                         })
                         .setNegativeButton(R.string.cancel, null)
                         .show();
+                ad.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(false);
+                input.addTextChangedListener(new TextWatcher() {
+                    @Override
+                    public void beforeTextChanged(final CharSequence s, final int start, final int count, final int after) {}
+
+                    @Override
+                    public void onTextChanged(final CharSequence s, final int start, final int before, final int count) {
+                        ad.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(!TextUtils.isEmpty(s));
+                    }
+
+                    @Override
+                    public void afterTextChanged(final Editable s) {}
+                });
             } else if (tag instanceof String[]) {
                 mentions = (String[]) tag;
                 new AlertDialog.Builder(context)
@@ -577,29 +618,32 @@ public class StoryViewerFragment extends Fragment {
                         .setAdapter(new ArrayAdapter<>(context, android.R.layout.simple_list_item_1, choices), (d, w) -> {
                             if (quiz.getMyChoice() == -1) {
                                 sticking = true;
-                                storiesService.respondToQuiz(
+                                storiesRepository.respondToQuiz(
+                                        csrfToken,
+                                        userId,
+                                        deviceId,
                                         currentStory.getStoryMediaId().split("_")[0],
                                         quiz.getId(),
                                         w,
-                                        new ServiceCallback<StoryStickerResponse>() {
-                                            @Override
-                                            public void onSuccess(final StoryStickerResponse result) {
-                                                sticking = false;
-                                                try {
-                                                    quiz.setMyChoice(w);
-                                                    Toast.makeText(context, R.string.answered_story, Toast.LENGTH_SHORT).show();
-                                                } catch (Exception ignored) {}
-                                            }
-
-                                            @Override
-                                            public void onFailure(final Throwable t) {
-                                                sticking = false;
-                                                Log.e(TAG, "Error responding", t);
-                                                try {
-                                                    Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
-                                                } catch (Exception ignored) {}
-                                            }
-                                        });
+                                        CoroutineUtilsKt.getContinuation(
+                                                (storyStickerResponse, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
+                                                    if (throwable != null) {
+                                                        sticking = false;
+                                                        Log.e(TAG, "Error responding", throwable);
+                                                        try {
+                                                            Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
+                                                        } catch (Exception ignored) {}
+                                                        return;
+                                                    }
+                                                    sticking = false;
+                                                    try {
+                                                        quiz.setMyChoice(w);
+                                                        Toast.makeText(context, R.string.answered_story, Toast.LENGTH_SHORT).show();
+                                                    } catch (Exception ignored) {}
+                                                }),
+                                                Dispatchers.getIO()
+                                        )
+                                );
                             }
                         })
                         .setPositiveButton(R.string.cancel, null)
@@ -645,29 +689,31 @@ public class StoryViewerFragment extends Fragment {
                             .setView(sliderView)
                             .setPositiveButton(R.string.confirm, (d, w) -> {
                                 sticking = true;
-                                storiesService.respondToSlider(
+                                storiesRepository.respondToSlider(
+                                        csrfToken,
+                                        userId,
+                                        deviceId,
                                         currentStory.getStoryMediaId().split("_")[0],
                                         slider.getId(),
                                         sliderValue,
-                                        new ServiceCallback<StoryStickerResponse>() {
-                                            @Override
-                                            public void onSuccess(final StoryStickerResponse result) {
-                                                sticking = false;
-                                                try {
-                                                    slider.setMyChoice(sliderValue);
-                                                    Toast.makeText(context, R.string.answered_story, Toast.LENGTH_SHORT).show();
-                                                } catch (Exception ignored) {}
-                                            }
-
-                                            @Override
-                                            public void onFailure(final Throwable t) {
-                                                sticking = false;
-                                                Log.e(TAG, "Error responding", t);
-                                                try {
-                                                    Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
-                                                } catch (Exception ignored) {}
-                                            }
-                                        });
+                                        CoroutineUtilsKt.getContinuation(
+                                                (storyStickerResponse, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
+                                                    if (throwable != null) {
+                                                        sticking = false;
+                                                        Log.e(TAG, "Error responding", throwable);
+                                                        try {
+                                                            Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
+                                                        } catch (Exception ignored) {}
+                                                        return;
+                                                    }
+                                                    sticking = false;
+                                                    try {
+                                                        slider.setMyChoice(sliderValue);
+                                                        Toast.makeText(context, R.string.answered_story, Toast.LENGTH_SHORT).show();
+                                                    } catch (Exception ignored) {}
+                                                }), Dispatchers.getIO()
+                                        )
+                                );
                             })
                             .setNegativeButton(R.string.cancel, null)
                             .show();
@@ -721,7 +767,7 @@ public class StoryViewerFragment extends Fragment {
                 final HighlightModel model = models.get(currentFeedStoryIndex);
                 currentStoryMediaId = model.getId();
                 fetchOptions = StoryViewerOptions.forHighlight(model.getId());
-                currentStoryUsername = model.getTitle();
+                highlightTitle = model.getTitle();
                 break;
             }
             case FEED_STORY_POSITION: {
@@ -759,27 +805,26 @@ public class StoryViewerFragment extends Fragment {
         setTitle(type);
         storiesViewModel.getList().setValue(Collections.emptyList());
         if (type == Type.STORY) {
-            storiesService.fetch(options.getId(), new ServiceCallback<StoryModel>() {
-                @Override
-                public void onSuccess(final StoryModel storyModel) {
-                    fetching = false;
-                    binding.storiesList.setVisibility(View.GONE);
-                    if (storyModel == null) {
-                        storiesViewModel.getList().setValue(Collections.emptyList());
-                        currentStory = null;
-                        return;
-                    }
-                    storiesViewModel.getList().setValue(Collections.singletonList(storyModel));
-                    currentStory = storyModel;
-                    refreshStory();
-                }
-
-                @Override
-                public void onFailure(final Throwable t) {
-                    Toast.makeText(context, t.getMessage(), Toast.LENGTH_SHORT).show();
-                    Log.e(TAG, "Error", t);
-                }
-            });
+            storiesRepository.fetch(
+                    options.getId(),
+                    CoroutineUtilsKt.getContinuation((storyModel, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
+                        if (throwable != null) {
+                            Toast.makeText(context, throwable.getMessage(), Toast.LENGTH_SHORT).show();
+                            Log.e(TAG, "Error", throwable);
+                            return;
+                        }
+                        fetching = false;
+                        binding.storiesList.setVisibility(View.GONE);
+                        if (storyModel == null) {
+                            storiesViewModel.getList().setValue(Collections.emptyList());
+                            currentStory = null;
+                            return;
+                        }
+                        storiesViewModel.getList().setValue(Collections.singletonList(storyModel));
+                        currentStory = storyModel;
+                        refreshStory();
+                    }), Dispatchers.getIO())
+            );
             return;
         }
         if (currentStoryMediaId == null) return;
@@ -813,7 +858,17 @@ public class StoryViewerFragment extends Fragment {
             storyCallback.onSuccess(Collections.singletonList(live));
             return;
         }
-        storiesService.getUserStory(fetchOptions, storyCallback);
+        storiesRepository.getUserStory(
+                fetchOptions,
+                CoroutineUtilsKt.getContinuation((storyModels, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
+                    if (throwable != null) {
+                        storyCallback.onFailure(throwable);
+                        return;
+                    }
+                    //noinspection unchecked
+                    storyCallback.onSuccess((List<StoryModel>) storyModels);
+                }), Dispatchers.getIO())
+        );
     }
 
     private void setTitle(final Type type) {
@@ -821,8 +876,8 @@ public class StoryViewerFragment extends Fragment {
         if (type == Type.HIGHLIGHT) {
             final ActionBar actionBar = fragmentActivity.getSupportActionBar();
             if (actionBar != null) {
-                actionBarTitle = options.getName();
-                actionBar.setTitle(options.getName());
+                actionBarTitle = highlightTitle;
+                actionBar.setTitle(highlightTitle);
             }
         } else if (hasUsername) {
             currentStoryUsername = currentStoryUsername.replace("@", "");
@@ -834,7 +889,7 @@ public class StoryViewerFragment extends Fragment {
         }
     }
 
-    private void refreshStory() {
+    private synchronized void refreshStory() {
         if (binding.storiesList.getVisibility() == View.VISIBLE) {
             final List<StoryModel> storyModels = storiesViewModel.getList().getValue();
             if (storyModels != null && storyModels.size() > 0) {
@@ -907,7 +962,7 @@ public class StoryViewerFragment extends Fragment {
         else setupImage();
 
         final ActionBar actionBar = fragmentActivity.getSupportActionBar();
-        actionBarSubtitle = Utils.datetimeParser.format(new Date(currentStory.getTimestamp() * 1000L));
+        actionBarSubtitle = TextUtils.epochSecondToString(currentStory.getTimestamp());
         if (actionBar != null) {
             try {
                 actionBar.setSubtitle(actionBarSubtitle);
@@ -917,10 +972,15 @@ public class StoryViewerFragment extends Fragment {
         }
 
         if (settingsHelper.getBoolean(MARK_AS_SEEN))
-            storiesService.seen(currentStory.getStoryMediaId(),
-                                currentStory.getTimestamp(),
-                                System.currentTimeMillis() / 1000,
-                                null);
+            storiesRepository.seen(
+                    csrfToken,
+                    userId,
+                    deviceId,
+                    currentStory.getStoryMediaId(),
+                    currentStory.getTimestamp(),
+                    System.currentTimeMillis() / 1000,
+                    CoroutineUtilsKt.getContinuation((s, throwable) -> {}, Dispatchers.getIO())
+            );
     }
 
     private void downloadStory() {
@@ -959,7 +1019,7 @@ public class StoryViewerFragment extends Fragment {
                                                               downloadVisible = true;
                                                               menuDownload.setVisible(true);
                                                           }
-                                                          if (currentStory.canReply() && menuDm != null) {
+                                                          if (currentStory.getCanReply() && menuDm != null) {
                                                               dmVisible = true;
                                                               menuDm.setVisible(true);
                                                           }
@@ -984,7 +1044,7 @@ public class StoryViewerFragment extends Fragment {
         if (context == null) return;
         player = new SimpleExoPlayer.Builder(context).build();
         binding.playerView.setPlayer(player);
-        player.setPlayWhenReady(settingsHelper.getBoolean(Constants.AUTOPLAY_VIDEOS));
+        player.setPlayWhenReady(settingsHelper.getBoolean(PreferenceKeys.AUTOPLAY_VIDEOS));
 
         final Uri uri = Uri.parse(url);
         final MediaItem mediaItem = MediaItem.fromUri(uri);
@@ -1000,7 +1060,7 @@ public class StoryViewerFragment extends Fragment {
                     downloadVisible = true;
                     menuDownload.setVisible(true);
                 }
-                if (currentStory.canReply() && menuDm != null) {
+                if (currentStory.getCanReply() && menuDm != null) {
                     dmVisible = true;
                     menuDm.setVisible(true);
                 }
@@ -1020,7 +1080,7 @@ public class StoryViewerFragment extends Fragment {
                     downloadVisible = true;
                     menuDownload.setVisible(true);
                 }
-                if (currentStory.canReply() && menuDm != null) {
+                if (currentStory.getCanReply() && menuDm != null) {
                     dmVisible = true;
                     menuDm.setVisible(true);
                 }
@@ -1085,7 +1145,7 @@ public class StoryViewerFragment extends Fragment {
         if (context == null) return;
         player = new SimpleExoPlayer.Builder(context).build();
         binding.playerView.setPlayer(player);
-        player.setPlayWhenReady(settingsHelper.getBoolean(Constants.AUTOPLAY_VIDEOS));
+        player.setPlayWhenReady(settingsHelper.getBoolean(PreferenceKeys.AUTOPLAY_VIDEOS));
 
         final Uri uri = Uri.parse(url);
         final MediaItem mediaItem = MediaItem.fromUri(uri);
@@ -1136,7 +1196,6 @@ public class StoryViewerFragment extends Fragment {
             }
         });
     }
-
 
     private void openProfile(final String username) {
         final ActionBar actionBar = fragmentActivity.getSupportActionBar();

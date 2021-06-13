@@ -29,7 +29,7 @@ public class ThemePreferencesFragment extends BasePreferencesFragment {
         for (int i = 0; i < length; i++) {
             values[i] = String.valueOf(i);
         }
-        preference.setKey(Constants.APP_THEME);
+        preference.setKey(PreferenceKeys.APP_THEME);
         preference.setTitle(R.string.theme_settings);
         preference.setDialogTitle(R.string.theme_settings);
         preference.setEntries(R.array.theme_presets);

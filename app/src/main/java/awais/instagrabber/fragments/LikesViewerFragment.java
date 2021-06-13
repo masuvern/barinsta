@@ -11,6 +11,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.navigation.fragment.NavHostFragment;
+import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
@@ -24,22 +25,25 @@ import awais.instagrabber.customviews.helpers.RecyclerLazyLoader;
 import awais.instagrabber.databinding.FragmentLikesBinding;
 import awais.instagrabber.repositories.responses.GraphQLUserListFetchResponse;
 import awais.instagrabber.repositories.responses.User;
+import awais.instagrabber.utils.AppExecutors;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.CookieUtils;
+import awais.instagrabber.utils.CoroutineUtilsKt;
 import awais.instagrabber.utils.TextUtils;
-import awais.instagrabber.webservices.GraphQLService;
-import awais.instagrabber.webservices.MediaService;
+import awais.instagrabber.webservices.GraphQLRepository;
+import awais.instagrabber.webservices.MediaRepository;
 import awais.instagrabber.webservices.ServiceCallback;
+import kotlinx.coroutines.Dispatchers;
 
 import static awais.instagrabber.utils.Utils.settingsHelper;
 
 public final class LikesViewerFragment extends BottomSheetDialogFragment implements SwipeRefreshLayout.OnRefreshListener {
-    private static final String TAG = "LikesViewerFragment";
+    private static final String TAG = LikesViewerFragment.class.getSimpleName();
 
     private FragmentLikesBinding binding;
     private RecyclerLazyLoader lazyLoader;
-    private MediaService mediaService;
-    private GraphQLService graphQLService;
+    private MediaRepository mediaRepository;
+    private GraphQLRepository graphQLRepository;
     private boolean isLoggedIn;
     private String postId, endCursor;
     private boolean isComment;
@@ -58,6 +62,7 @@ public final class LikesViewerFragment extends BottomSheetDialogFragment impleme
             });
             binding.rvLikes.setAdapter(likesAdapter);
             binding.rvLikes.setLayoutManager(new LinearLayoutManager(getContext()));
+            binding.rvLikes.addItemDecoration(new DividerItemDecoration(getContext(), DividerItemDecoration.VERTICAL));
             binding.swipeRefreshLayout.setRefreshing(false);
         }
 
@@ -71,7 +76,7 @@ public final class LikesViewerFragment extends BottomSheetDialogFragment impleme
         }
     };
 
-    private final ServiceCallback<GraphQLUserListFetchResponse> acb = new ServiceCallback<GraphQLUserListFetchResponse>() {
+    private final ServiceCallback<GraphQLUserListFetchResponse> anonCb = new ServiceCallback<GraphQLUserListFetchResponse>() {
         @Override
         public void onSuccess(final GraphQLUserListFetchResponse result) {
             endCursor = result.getNextMaxId();
@@ -102,10 +107,13 @@ public final class LikesViewerFragment extends BottomSheetDialogFragment impleme
     public void onCreate(@Nullable final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         final String cookie = settingsHelper.getString(Constants.COOKIE);
-        isLoggedIn = !TextUtils.isEmpty(cookie) && CookieUtils.getUserIdFromCookie(cookie) > 0;
-        // final AppCompatActivity fragmentActivity = (AppCompatActivity) getActivity();
-        mediaService = isLoggedIn ? MediaService.getInstance(null, null, 0) : null;
-        graphQLService = isLoggedIn ? null : GraphQLService.getInstance();
+        final long userId = CookieUtils.getUserIdFromCookie(cookie);
+        isLoggedIn = !TextUtils.isEmpty(cookie) && userId != 0;
+        // final String deviceUuid = settingsHelper.getString(Constants.DEVICE_UUID);
+        final String csrfToken = CookieUtils.getCsrfTokenFromCookie(cookie);
+        if (csrfToken == null) return;
+        mediaRepository = isLoggedIn ? MediaRepository.Companion.getInstance() : null;
+        graphQLRepository = isLoggedIn ? null : GraphQLRepository.Companion.getInstance();
         // setHasOptionsMenu(true);
     }
 
@@ -127,8 +135,31 @@ public final class LikesViewerFragment extends BottomSheetDialogFragment impleme
     public void onRefresh() {
         if (isComment && !isLoggedIn) {
             lazyLoader.resetState();
-            graphQLService.fetchCommentLikers(postId, null, acb);
-        } else mediaService.fetchLikes(postId, isComment, cb);
+            graphQLRepository.fetchCommentLikers(
+                    postId,
+                    null,
+                    CoroutineUtilsKt.getContinuation((response, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
+                        if (throwable != null) {
+                            anonCb.onFailure(throwable);
+                            return;
+                        }
+                        anonCb.onSuccess(response);
+                    }), Dispatchers.getIO())
+            );
+        } else {
+            mediaRepository.fetchLikes(
+                    postId,
+                    isComment,
+                    CoroutineUtilsKt.getContinuation((users, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
+                        if (throwable != null) {
+                            cb.onFailure(throwable);
+                            return;
+                        }
+                        //noinspection unchecked
+                        cb.onSuccess((List<User>) users);
+                    }), Dispatchers.getIO())
+            );
+        }
     }
 
     private void init() {
@@ -141,9 +172,21 @@ public final class LikesViewerFragment extends BottomSheetDialogFragment impleme
         if (isComment && !isLoggedIn) {
             final LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
             binding.rvLikes.setLayoutManager(layoutManager);
+            binding.rvLikes.addItemDecoration(new DividerItemDecoration(getContext(), DividerItemDecoration.HORIZONTAL));
             lazyLoader = new RecyclerLazyLoader(layoutManager, (page, totalItemsCount) -> {
-                if (!TextUtils.isEmpty(endCursor))
-                    graphQLService.fetchCommentLikers(postId, endCursor, acb);
+                if (!TextUtils.isEmpty(endCursor)) {
+                    graphQLRepository.fetchCommentLikers(
+                            postId,
+                            endCursor,
+                            CoroutineUtilsKt.getContinuation((response, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
+                                if (throwable != null) {
+                                    anonCb.onFailure(throwable);
+                                    return;
+                                }
+                                anonCb.onSuccess(response);
+                            }), Dispatchers.getIO())
+                    );
+                }
                 endCursor = null;
             });
             binding.rvLikes.addOnScrollListener(lazyLoader);

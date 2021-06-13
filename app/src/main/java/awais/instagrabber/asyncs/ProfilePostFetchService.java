@@ -7,14 +7,16 @@ import awais.instagrabber.interfaces.FetchListener;
 import awais.instagrabber.repositories.responses.Media;
 import awais.instagrabber.repositories.responses.PostsFetchResponse;
 import awais.instagrabber.repositories.responses.User;
-import awais.instagrabber.webservices.GraphQLService;
+import awais.instagrabber.utils.CoroutineUtilsKt;
+import awais.instagrabber.webservices.GraphQLRepository;
 import awais.instagrabber.webservices.ProfileService;
 import awais.instagrabber.webservices.ServiceCallback;
+import kotlinx.coroutines.Dispatchers;
 
 public class ProfilePostFetchService implements PostFetcher.PostFetchService {
     private static final String TAG = "ProfilePostFetchService";
     private final ProfileService profileService;
-    private final GraphQLService graphQLService;
+    private final GraphQLRepository graphQLRepository;
     private final User profileModel;
     private final boolean isLoggedIn;
     private String nextMaxId;
@@ -23,7 +25,7 @@ public class ProfilePostFetchService implements PostFetcher.PostFetchService {
     public ProfilePostFetchService(final User profileModel, final boolean isLoggedIn) {
         this.profileModel = profileModel;
         this.isLoggedIn = isLoggedIn;
-        graphQLService = isLoggedIn ? null : GraphQLService.getInstance();
+        graphQLRepository = isLoggedIn ? null : GraphQLRepository.Companion.getInstance();
         profileService = isLoggedIn ? ProfileService.getInstance() : null;
     }
 
@@ -49,7 +51,19 @@ public class ProfilePostFetchService implements PostFetcher.PostFetchService {
             }
         };
         if (isLoggedIn) profileService.fetchPosts(profileModel.getPk(), nextMaxId, cb);
-        else graphQLService.fetchProfilePosts(profileModel.getPk(), 30, nextMaxId, profileModel, cb);
+        else graphQLRepository.fetchProfilePosts(
+                profileModel.getPk(),
+                30,
+                nextMaxId,
+                profileModel,
+                CoroutineUtilsKt.getContinuation((postsFetchResponse, throwable) -> {
+                    if (throwable != null) {
+                        cb.onFailure(throwable);
+                        return;
+                    }
+                    cb.onSuccess(postsFetchResponse);
+                }, Dispatchers.getIO())
+        );
     }
 
     @Override

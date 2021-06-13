@@ -3,6 +3,8 @@ package awais.instagrabber.dialogs;
 import android.app.Dialog;
 import android.content.Context;
 import android.os.Bundle;
+import android.text.method.LinkMovementMethod;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -25,27 +27,28 @@ public class ConfirmDialogFragment extends DialogFragment {
     @NonNull
     public static ConfirmDialogFragment newInstance(final int requestCode,
                                                     @StringRes final int title,
-                                                    @StringRes final int message,
+                                                    @NonNull final CharSequence message,
                                                     @StringRes final int positiveText,
                                                     @StringRes final int negativeText,
                                                     @StringRes final int neutralText) {
-        return newInstance(requestCode, title, (Integer) message, positiveText, negativeText, neutralText);
+        return newInstance(requestCode, title, 0, message, positiveText, negativeText, neutralText);
     }
 
     @NonNull
     public static ConfirmDialogFragment newInstance(final int requestCode,
                                                     @StringRes final int title,
-                                                    final String message,
+                                                    @StringRes final int messageResId,
                                                     @StringRes final int positiveText,
                                                     @StringRes final int negativeText,
                                                     @StringRes final int neutralText) {
-        return newInstance(requestCode, title, (Object) message, positiveText, negativeText, neutralText);
+        return newInstance(requestCode, title, messageResId, null, positiveText, negativeText, neutralText);
     }
 
     @NonNull
     private static ConfirmDialogFragment newInstance(final int requestCode,
                                                      @StringRes final int title,
-                                                     final Object message,
+                                                     @StringRes final int messageResId,
+                                                     @Nullable final CharSequence message,
                                                      @StringRes final int positiveText,
                                                      @StringRes final int negativeText,
                                                      @StringRes final int neutralText) {
@@ -54,12 +57,10 @@ public class ConfirmDialogFragment extends DialogFragment {
         if (title != 0) {
             args.putInt("title", title);
         }
-        if (message != null) {
-            if (message instanceof Integer) {
-                args.putInt("message", (int) message);
-            } else if (message instanceof String) {
-                args.putString("message", (String) message);
-            }
+        if (messageResId != 0) {
+            args.putInt("messageResId", messageResId);
+        } else if (message != null) {
+            args.putCharSequence("message", message);
         }
         if (positiveText != 0) {
             args.putInt("positive", positiveText);
@@ -98,7 +99,8 @@ public class ConfirmDialogFragment extends DialogFragment {
     public Dialog onCreateDialog(@Nullable final Bundle savedInstanceState) {
         final Bundle arguments = getArguments();
         int title = 0;
-        String message = null;
+        int messageResId = 0;
+        CharSequence message = null;
         int neutralButtonText = 0;
         int negativeButtonText = 0;
 
@@ -106,7 +108,8 @@ public class ConfirmDialogFragment extends DialogFragment {
         final int requestCode;
         if (arguments != null) {
             title = arguments.getInt("title", 0);
-            message = getMessage(arguments);
+            messageResId = arguments.getInt("messageResId", 0);
+            message = arguments.getCharSequence("message", null);
             positiveButtonText = arguments.getInt("positive", defaultPositiveButtonText);
             negativeButtonText = arguments.getInt("negative", 0);
             neutralButtonText = arguments.getInt("neutral", 0);
@@ -123,7 +126,9 @@ public class ConfirmDialogFragment extends DialogFragment {
         if (title != 0) {
             builder.setTitle(title);
         }
-        if (message != null) {
+        if (messageResId != 0) {
+            builder.setMessage(messageResId);
+        } else if (message != null) {
             builder.setMessage(message);
         }
         if (negativeButtonText != 0) {
@@ -141,17 +146,13 @@ public class ConfirmDialogFragment extends DialogFragment {
         return builder.create();
     }
 
-    private String getMessage(@NonNull final Bundle arguments) {
-        String message = null;
-        final Object messageObject = arguments.get("message");
-        if (messageObject != null) {
-            if (messageObject instanceof Integer) {
-                message = getString((int) messageObject);
-            } else if (messageObject instanceof String) {
-                message = (String) messageObject;
-            }
-        }
-        return message;
+    @Override
+    public void onStart() {
+        super.onStart();
+        final Dialog dialog = getDialog();
+        if (dialog == null) return;
+        final TextView view = dialog.findViewById(android.R.id.message);
+        view.setMovementMethod(LinkMovementMethod.getInstance());
     }
 
     public interface ConfirmDialogFragmentCallback {

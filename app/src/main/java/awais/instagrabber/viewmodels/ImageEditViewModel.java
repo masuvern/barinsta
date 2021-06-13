@@ -11,9 +11,9 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import java.io.File;
-import java.text.SimpleDateFormat;
+import java.time.format.DateTimeFormatter;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -36,8 +36,8 @@ public class ImageEditViewModel extends AndroidViewModel {
     private static final String CROP = "crop";
     private static final String RESULT = "result";
     private static final String FILE_FORMAT = "yyyyMMddHHmmssSSS";
-    private static final SimpleDateFormat SIMPLE_DATE_FORMAT = new SimpleDateFormat(FILE_FORMAT, Locale.US);
     private static final String MIME_TYPE = Utils.mimeTypeMap.getMimeTypeFromExtension("jpg");
+    private static final DateTimeFormatter SIMPLE_DATE_FORMAT = DateTimeFormatter.ofPattern(FILE_FORMAT, Locale.US);
 
     private Uri originalUri;
     private SavedImageEditState savedImageEditState;
@@ -58,7 +58,7 @@ public class ImageEditViewModel extends AndroidViewModel {
 
     public ImageEditViewModel(final Application application) {
         super(application);
-        sessionId = SIMPLE_DATE_FORMAT.format(new Date());
+        sessionId = LocalDateTime.now().format(SIMPLE_DATE_FORMAT);
         outputDir = DownloadUtils.getImageEditDir(sessionId);
         destinationFile = outputDir.createFile(MIME_TYPE, RESULT + ".jpg");
         destinationUri = destinationFile.getUri();
@@ -138,7 +138,7 @@ public class ImageEditViewModel extends AndroidViewModel {
     private void applyFilters() {
         final GPUImage gpuImage = new GPUImage(getApplication());
         if ((tuningFilters != null && !tuningFilters.isEmpty()) || appliedFilter != null) {
-            AppExecutors.getInstance().tasksThread().submit(() -> {
+            AppExecutors.INSTANCE.getTasksThread().submit(() -> {
                 final List<GPUImageFilter> list = new ArrayList<>();
                 if (tuningFilters != null) {
                     for (Filter<? extends GPUImageFilter> tuningFilter : tuningFilters) {

@@ -1,10 +1,12 @@
 package awais.instagrabber.customviews;
 
 import android.content.Context;
+import android.text.InputFilter;
 import android.util.AttributeSet;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.emoji.widget.EmojiTextViewHelper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,6 +25,8 @@ public class RamboTextViewV2 extends AutoLinkTextView {
     private final List<OnURLClickListener> onURLClickListeners = new ArrayList<>();
     private final List<OnEmailClickListener> onEmailClickListeners = new ArrayList<>();
 
+    private EmojiTextViewHelper emojiTextViewHelper;
+
     public RamboTextViewV2(@NonNull final Context context,
                            @Nullable final AttributeSet attrs) {
         super(context, attrs);
@@ -30,6 +34,7 @@ public class RamboTextViewV2 extends AutoLinkTextView {
     }
 
     private void init() {
+        getEmojiTextViewHelper().updateTransformationMethod();
         addAutoLinkMode(MODE_HASHTAG.INSTANCE, MODE_MENTION.INSTANCE, MODE_EMAIL.INSTANCE, MODE_URL.INSTANCE);
         onAutoLinkClick(autoLinkItem -> {
             final Mode mode = autoLinkItem.getMode();
@@ -57,6 +62,26 @@ public class RamboTextViewV2 extends AutoLinkTextView {
                 }
             }
         });
+        onAutoLinkLongClick(autoLinkItem -> {});
+    }
+
+    @Override
+    public void setFilters(InputFilter[] filters) {
+        super.setFilters(getEmojiTextViewHelper().getFilters(filters));
+    }
+
+    @Override
+    public void setAllCaps(boolean allCaps) {
+        super.setAllCaps(allCaps);
+        getEmojiTextViewHelper().setAllCaps(allCaps);
+    }
+
+
+    private EmojiTextViewHelper getEmojiTextViewHelper() {
+        if (emojiTextViewHelper == null) {
+            emojiTextViewHelper = new EmojiTextViewHelper(this);
+        }
+        return emojiTextViewHelper;
     }
 
     public void addOnMentionClickListener(final OnMentionClickListener onMentionClickListener) {

@@ -1,6 +1,7 @@
 package awais.instagrabber.repositories.responses;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 import awais.instagrabber.models.enums.FollowingType;
 
@@ -41,5 +42,22 @@ public final class Hashtag implements Serializable {
 
     public String getSubtitle() {
         return searchResultSubtitle;
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        final Hashtag hashtag = (Hashtag) o;
+        return mediaCount == hashtag.mediaCount &&
+                following == hashtag.following &&
+                Objects.equals(id, hashtag.id) &&
+                Objects.equals(name, hashtag.name) &&
+                Objects.equals(searchResultSubtitle, hashtag.searchResultSubtitle);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(following, mediaCount, id, name, searchResultSubtitle);
     }
 }

@@ -20,6 +20,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.NotificationManagerCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.NavController;
 import androidx.navigation.NavDirections;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -33,20 +34,21 @@ import awais.instagrabber.adapters.NotificationsAdapter.OnNotificationClickListe
 import awais.instagrabber.databinding.FragmentNotificationsViewerBinding;
 import awais.instagrabber.models.enums.NotificationType;
 import awais.instagrabber.repositories.requests.StoryViewerOptions;
-import awais.instagrabber.repositories.responses.FriendshipChangeResponse;
-import awais.instagrabber.repositories.responses.Media;
 import awais.instagrabber.repositories.responses.notification.Notification;
 import awais.instagrabber.repositories.responses.notification.NotificationArgs;
 import awais.instagrabber.repositories.responses.notification.NotificationImage;
+import awais.instagrabber.utils.AppExecutors;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.CookieUtils;
+import awais.instagrabber.utils.CoroutineUtilsKt;
 import awais.instagrabber.utils.TextUtils;
 import awais.instagrabber.utils.Utils;
 import awais.instagrabber.viewmodels.NotificationViewModel;
-import awais.instagrabber.webservices.FriendshipService;
-import awais.instagrabber.webservices.MediaService;
+import awais.instagrabber.webservices.FriendshipRepository;
+import awais.instagrabber.webservices.MediaRepository;
 import awais.instagrabber.webservices.NewsService;
 import awais.instagrabber.webservices.ServiceCallback;
+import kotlinx.coroutines.Dispatchers;
 
 import static awais.instagrabber.utils.Utils.settingsHelper;
 
@@ -58,13 +60,14 @@ public final class NotificationsViewerFragment extends Fragment implements Swipe
     private SwipeRefreshLayout root;
     private boolean shouldRefresh = true;
     private NotificationViewModel notificationViewModel;
-    private FriendshipService friendshipService;
-    private MediaService mediaService;
+    private FriendshipRepository friendshipRepository;
+    private MediaRepository mediaRepository;
     private NewsService newsService;
     private String csrfToken, deviceUuid;
     private String type;
     private long targetId;
     private Context context;
+    private long userId;
 
     private final ServiceCallback<List<Notification>> cb = new ServiceCallback<List<Notification>>() {
         @Override
@@ -94,8 +97,8 @@ public final class NotificationsViewerFragment extends Fragment implements Swipe
             final long mediaId = Long.parseLong(notificationImage.getId().split("_")[0]);
             if (model.getType() == NotificationType.RESPONDED_STORY) {
                 final StoryViewerOptions options = StoryViewerOptions.forStory(
-                                        mediaId,
-                                        model.getArgs().getUsername());
+                        mediaId,
+                        model.getArgs().getUsername());
                 final Bundle bundle = new Bundle();
                 bundle.putSerializable("options", options);
                 NavHostFragment.findNavController(NotificationsViewerFragment.this).navigate(R.id.action_notifications_to_story, bundle);
@@ -105,22 +108,25 @@ public final class NotificationsViewerFragment extends Fragment implements Swipe
                         .setView(R.layout.dialog_opening_post)
                         .create();
                 alertDialog.show();
-                mediaService.fetch(mediaId, new ServiceCallback<Media>() {
-                    @Override
-                    public void onSuccess(final Media feedModel) {
-                        final PostViewV2Fragment fragment = PostViewV2Fragment
-                                .builder(feedModel)
-                                .build();
-                        fragment.setOnShowListener(dialog -> alertDialog.dismiss());
-                        fragment.show(getChildFragmentManager(), "post_view");
-                    }
-
-                    @Override
-                    public void onFailure(final Throwable t) {
-                        alertDialog.dismiss();
-                        Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
-                    }
-                });
+                mediaRepository.fetch(
+                        mediaId,
+                        CoroutineUtilsKt.getContinuation((media, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
+                            if (throwable != null) {
+                                alertDialog.dismiss();
+                                Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
+                                return;
+                            }
+                            final NavController navController = NavHostFragment.findNavController(NotificationsViewerFragment.this);
+                            final Bundle bundle = new Bundle();
+                            bundle.putSerializable(PostViewV2Fragment.ARG_MEDIA, media);
+                            try {
+                                navController.navigate(R.id.action_global_post_view, bundle);
+                                alertDialog.dismiss();
+                            } catch (Exception e) {
+                                Log.e(TAG, "onSuccess: ", e);
+                            }
+                        }), Dispatchers.getIO())
+                );
             }
         }
 
@@ -162,34 +168,40 @@ public final class NotificationsViewerFragment extends Fragment implements Swipe
                             break;
                         case 1:
                             if (model.getType() == NotificationType.REQUEST) {
-                                friendshipService.approve(args.getUserId(), new ServiceCallback<FriendshipChangeResponse>() {
-                                    @Override
-                                    public void onSuccess(final FriendshipChangeResponse result) {
-                                        onRefresh();
-                                        Log.e(TAG, "approve: status was not ok!");
-                                    }
-
-                                    @Override
-                                    public void onFailure(final Throwable t) {
-                                        Log.e(TAG, "approve: onFailure: ", t);
-                                    }
-                                });
+                                friendshipRepository.approve(
+                                        csrfToken,
+                                        userId,
+                                        deviceUuid,
+                                        args.getUserId(),
+                                        CoroutineUtilsKt.getContinuation(
+                                                (response, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
+                                                    if (throwable != null) {
+                                                        Log.e(TAG, "approve: onFailure: ", throwable);
+                                                        return;
+                                                    }
+                                                    onRefresh();
+                                                }),
+                                                Dispatchers.getIO()
+                                        )
+                                );
                                 return;
                             }
                             clickListener.onPreviewClick(model);
                             break;
                         case 2:
-                            friendshipService.ignore(args.getUserId(), new ServiceCallback<FriendshipChangeResponse>() {
-                                @Override
-                                public void onSuccess(final FriendshipChangeResponse result) {
-                                    onRefresh();
-                                }
-
-                                @Override
-                                public void onFailure(final Throwable t) {
-                                    Log.e(TAG, "ignore: onFailure: ", t);
-                                }
-                            });
+                            friendshipRepository.ignore(
+                                    csrfToken,
+                                    userId,
+                                    deviceUuid,
+                                    args.getUserId(),
+                                    CoroutineUtilsKt.getContinuation((response, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
+                                        if (throwable != null) {
+                                            Log.e(TAG, "approve: onFailure: ", throwable);
+                                            return;
+                                        }
+                                        onRefresh();
+                                    }), Dispatchers.getIO())
+                            );
                             break;
                     }
                 };
@@ -213,11 +225,11 @@ public final class NotificationsViewerFragment extends Fragment implements Swipe
         if (TextUtils.isEmpty(cookie)) {
             Toast.makeText(context, R.string.activity_notloggedin, Toast.LENGTH_SHORT).show();
         }
-        mediaService = MediaService.getInstance(null, null, 0);
-        final long userId = CookieUtils.getUserIdFromCookie(cookie);
+        userId = CookieUtils.getUserIdFromCookie(cookie);
         deviceUuid = Utils.settingsHelper.getString(Constants.DEVICE_UUID);
         csrfToken = CookieUtils.getCsrfTokenFromCookie(cookie);
-        friendshipService = FriendshipService.getInstance(deviceUuid, csrfToken, userId);
+        friendshipRepository = FriendshipRepository.Companion.getInstance();
+        mediaRepository = MediaRepository.Companion.getInstance();
         newsService = NewsService.getInstance();
     }
 

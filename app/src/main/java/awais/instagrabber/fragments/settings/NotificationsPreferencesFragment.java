@@ -7,7 +7,6 @@ import androidx.preference.Preference;
 import androidx.preference.PreferenceScreen;
 
 import awais.instagrabber.R;
-import awais.instagrabber.utils.Constants;
 
 public class NotificationsPreferencesFragment extends BasePreferencesFragment {
     @Override
@@ -21,7 +20,7 @@ public class NotificationsPreferencesFragment extends BasePreferencesFragment {
     private Preference getActivityNotificationsPreference(@NonNull final Context context) {
         return PreferenceHelper.getSwitchPreference(
                 context,
-                Constants.CHECK_ACTIVITY,
+                PreferenceKeys.CHECK_ACTIVITY,
                 R.string.activity_setting,
                 -1,
                 false,

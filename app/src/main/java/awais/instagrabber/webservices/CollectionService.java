@@ -17,7 +17,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class CollectionService extends BaseService {
+public class CollectionService {
     private static final String TAG = "ProfileService";
 
     private final CollectionRepository repository;
@@ -32,7 +32,7 @@ public class CollectionService extends BaseService {
         this.deviceUuid = deviceUuid;
         this.csrfToken = csrfToken;
         this.userId = userId;
-        repository = RetrofitFactory.getInstance()
+        repository = RetrofitFactory.INSTANCE
                                     .getRetrofit()
                                     .create(CollectionRepository.class);
     }

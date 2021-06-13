@@ -56,6 +56,8 @@
     </plurals>
     <string name="main_posts_following">%s\nSiguiendo</string>
     <string name="post_viewer_autoplay_video">Autorreproducir vídeos</string>
+    <string name="post_viewer_background_play">Continuar vídeos en segundo plano</string>
+    <string name="post_viewer_background_play_summary">No pausar vídeos cuando la aplicación está fuera de enfoque</string>
     <string name="post_viewer_muted_autoplay">Siempre silenciar vídeos</string>
     <string name="post_viewer_show_captions">Mostrar siempre subtítulos del post</string>
     <string name="post_viewer_download_dialog_title">Seleccionar qué descargar</string>
@@ -121,6 +123,7 @@
     <string name="mute_posts">Silenciar publicaciones</string>
     <string name="unmute_stories">Quitar silencio a historias</string>
     <string name="unmute_posts">Quitar silencio a publicaciones</string>
+    <string name="remove_follower">Quitar seguidor</string>
     <string name="bio_copy">Copiar biografía</string>
     <string name="bio_translate">Traducir biografía</string>
     <string name="status_mutual">Mutuo</string>
@@ -230,7 +233,7 @@
     <string name="request_approve">Aprobar solicitud</string>
     <string name="request_reject">Rechazar solicitud</string>
     <string name="share_public_post">Compartir esta publicación pública a…</string>
-    <string name="share_private_post">¡Esta es una publicación privada! ¡Comparta con aquellos que puedan verla!</string>
+    <string name="share_private_post">¡Esta es una publicación privada! Comparte con quienes puedan verla.</string>
     <string name="discover_empty">Esta categoría está de alguna manera vacía…</string>
     <string name="update_available">¡Hay una actualización disponible! (%s)</string>
     <string name="update_notice">Recordatorio: si ha descargado de F-Droid, ¡debe actualizar desde él! Lo mismo se aplica a GitHub.</string>
@@ -262,6 +265,7 @@
     <string name="skip_update_checkbox">No mostrar de nuevo hasta la siguiente actualización</string>
     <string name="version">Versión</string>
     <string name="pref_start_screen">Pantalla de inicio</string>
+    <string name="pref_search_focus_keyboard" comment="basically bring up the keyboard immediately when someone does search">Mostrar teclado al buscar</string>
     <string name="pref_category_general">General</string>
     <string name="pref_category_theme">Tema</string>
     <string name="pref_category_downloads">Descargas</string>
@@ -365,6 +369,10 @@
         <item quantity="one">%d me gusta</item>
         <item quantity="other">%d me gustas</item>
     </plurals>
+    <plurals name="replies_count">
+        <item quantity="one">%d respuesta</item>
+        <item quantity="other">%d respuestas</item>
+    </plurals>
     <plurals name="comments_count">
         <item quantity="one">%d comentario</item>
         <item quantity="other">%d comentarios</item>
@@ -461,16 +469,16 @@
     <string name="removed_keywords">Se eliminó la palabra clave: %s de la lista de filtros</string>
     <string name="marked_as_seen">Marcado como visto</string>
     <string name="delete_unsuccessful">Eliminación fallida</string>
-    <string name="throttle_error">Throttled by Instagram because of too many API requests. Wait for some time before retrying.</string>
+    <string name="throttle_error">Restringido por Instagram por hacer demasiadas solicitudes de API. Espera un tiempo antes de reintentar.</string>
     <string name="error">Error</string>
-    <string name="account_logged_out">This account has been logged out.</string>
-    <string name="login_required">Login required!</string>
-    <string name="sentry_block">Sentry block.</string>
-    <string name="inactive_user">User is inactive!</string>
+    <string name="account_logged_out">Esta cuenta ha sido desconectada.</string>
+    <string name="login_required">¡Inicio de sesión requerido!</string>
+    <string name="sentry_block">Bloqueo de Sentry.</string>
+    <string name="inactive_user">¡Usuario inactivo!</string>
     <string name="crash_report_subject">Informe de fallos de Barinsta</string>
     <string name="crash_report_title">Seleccione una aplicación de correo electrónico para enviar registros de errores</string>
-    <string name="not_found">Not found!</string>
-    <string name="rate_limit">Your IP has been rate limited by Instagram. Wait for an hour and try again.</string>
+    <string name="not_found">¡No encontrado!</string>
+    <string name="rate_limit">Tu IP ha sido limitada por Instagram. Espera una hora e inténtalo de nuevo.</string>
     <string name="skip_update">Omitir esta actualización</string>
     <string name="on_latest_version">Ya tienes la última versión</string>
     <string name="tab_order">Orden de pantalla</string>
@@ -479,4 +487,11 @@
     <string name="dm_remove_warning">Si se guarda, todas las funcionalidades relacionadas con MDs se desactivarán en el próximo lanzamiento</string>
     <string name="copy_caption">Copiar título</string>
     <string name="copy_reply">Copiar respuesta</string>
+    <string name="top">Arriba</string>
+    <string name="recent">Reciente</string>
+    <string name="clear">Eliminar</string>
+    <string name="no_external_map_app">¡No se encontró una aplicación de mapa!</string>
+    <string name="click_to_show_full">Clic para ver el recuento completo de me gustas</string>
+    <string name="no_profile_pic_found">¡No se encontró foto de perfil!</string>
+    <string name="swipe_up_confirmation">¿Está seguro de querer abrir este enlace?</string>
 </resources>

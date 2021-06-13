@@ -7,13 +7,15 @@ import awais.instagrabber.interfaces.FetchListener;
 import awais.instagrabber.repositories.responses.Hashtag;
 import awais.instagrabber.repositories.responses.Media;
 import awais.instagrabber.repositories.responses.PostsFetchResponse;
-import awais.instagrabber.webservices.GraphQLService;
+import awais.instagrabber.utils.CoroutineUtilsKt;
+import awais.instagrabber.webservices.GraphQLRepository;
 import awais.instagrabber.webservices.ServiceCallback;
 import awais.instagrabber.webservices.TagsService;
+import kotlinx.coroutines.Dispatchers;
 
 public class HashtagPostFetchService implements PostFetcher.PostFetchService {
     private final TagsService tagsService;
-    private final GraphQLService graphQLService;
+    private final GraphQLRepository graphQLRepository;
     private final Hashtag hashtagModel;
     private String nextMaxId;
     private boolean moreAvailable;
@@ -23,7 +25,7 @@ public class HashtagPostFetchService implements PostFetcher.PostFetchService {
         this.hashtagModel = hashtagModel;
         this.isLoggedIn = isLoggedIn;
         tagsService = isLoggedIn ? TagsService.getInstance() : null;
-        graphQLService = isLoggedIn ? null : GraphQLService.getInstance();
+        graphQLRepository = isLoggedIn ? null : GraphQLRepository.Companion.getInstance();
     }
 
     @Override
@@ -48,7 +50,17 @@ public class HashtagPostFetchService implements PostFetcher.PostFetchService {
             }
         };
         if (isLoggedIn) tagsService.fetchPosts(hashtagModel.getName().toLowerCase(), nextMaxId, cb);
-        else graphQLService.fetchHashtagPosts(hashtagModel.getName().toLowerCase(), nextMaxId, cb);
+        else graphQLRepository.fetchHashtagPosts(
+                hashtagModel.getName().toLowerCase(),
+                nextMaxId,
+                CoroutineUtilsKt.getContinuation((postsFetchResponse, throwable) -> {
+                    if (throwable != null) {
+                        cb.onFailure(throwable);
+                        return;
+                    }
+                    cb.onSuccess(postsFetchResponse);
+                }, Dispatchers.getIO())
+        );
     }
 
     @Override

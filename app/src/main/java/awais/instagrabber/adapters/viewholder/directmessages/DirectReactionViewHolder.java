@@ -31,7 +31,7 @@ public class DirectReactionViewHolder extends RecyclerView.ViewHolder {
         this.onReactionClickListener = onReactionClickListener;
         binding.info.setVisibility(View.GONE);
         binding.secondaryImage.setVisibility(View.VISIBLE);
-        emojiParser = EmojiParser.getInstance();
+        emojiParser = EmojiParser.Companion.getInstance(itemView.getContext());
     }
 
     public void bind(final DirectItemEmojiReaction reaction,

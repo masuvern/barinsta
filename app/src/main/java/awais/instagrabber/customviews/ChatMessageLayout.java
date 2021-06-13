@@ -105,12 +105,15 @@ public class ChatMessageLayout extends FrameLayout {
                 viewPartMainLastLineWidth = viewPartMainLineCount > 0
                                             ? ((TextView) firstChild).getLayout().getLineWidth(viewPartMainLineCount - 1)
                                             : 0;
+                // also include start left padding
+                viewPartMainLastLineWidth += firstChild.getPaddingLeft();
             }
 
-            if (viewPartMainLineCount > 1 && !(viewPartMainLastLineWidth + viewPartInfoWidth > viewPartMain.getMeasuredWidth())) {
+            final float lastLineWithInfoWidth = viewPartMainLastLineWidth + viewPartInfoWidth;
+            if (viewPartMainLineCount > 1 && lastLineWithInfoWidth <= viewPartMain.getMeasuredWidth()) {
                 widthSize += viewPartMainWidth;
                 heightSize += viewPartMainHeight;
-            } else if (viewPartMainLineCount > 1 && (viewPartMainLastLineWidth + viewPartInfoWidth > availableWidth)) {
+            } else if (viewPartMainLineCount > 1 && (lastLineWithInfoWidth > availableWidth)) {
                 widthSize += viewPartMainWidth;
                 heightSize += viewPartMainHeight + viewPartInfoHeight;
             } else if (viewPartMainLineCount == 1 && (viewPartMainWidth + viewPartInfoWidth > availableWidth)) {
@@ -120,6 +123,16 @@ public class ChatMessageLayout extends FrameLayout {
                 heightSize += viewPartMainHeight;
                 widthSize += viewPartMainWidth + viewPartInfoWidth;
             }
+
+            // if (isInEditMode()) {
+            //     TextView wDebugView = (TextView) ((ViewGroup) this.getParent()).findViewWithTag("debug");
+            //     wDebugView.setText(lastLineWithInfoWidth
+            //                                + "\n" + availableWidth
+            //                                + "\n" + viewPartMain.getMeasuredWidth()
+            //                                + "\n" + (lastLineWithInfoWidth <= viewPartMain.getMeasuredWidth())
+            //                                + "\n" + (lastLineWithInfoWidth > availableWidth)
+            //                                + "\n" + (viewPartMainWidth + viewPartInfoWidth > availableWidth));
+            // }
         }
         setMeasuredDimension(widthSize, heightSize);
         super.onMeasure(MeasureSpec.makeMeasureSpec(widthSize, MeasureSpec.EXACTLY), MeasureSpec.makeMeasureSpec(heightSize, MeasureSpec.EXACTLY));

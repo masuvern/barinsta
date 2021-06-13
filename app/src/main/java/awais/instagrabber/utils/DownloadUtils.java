@@ -36,6 +36,7 @@ import java.util.UUID;
 import java.util.regex.Pattern;
 
 import awais.instagrabber.R;
+import awais.instagrabber.fragments.settings.PreferenceKeys;
 import awais.instagrabber.models.StoryModel;
 import awais.instagrabber.models.enums.MediaItemType;
 import awais.instagrabber.repositories.responses.Audio;
@@ -472,7 +473,7 @@ public final class DownloadUtils {
                     }
                     if (!TextUtils.isEmpty(media.getCode())) {
                         fileName = media.getCode();
-                        if (Utils.settingsHelper.getBoolean(Constants.DOWNLOAD_PREPEND_USER_NAME) && mediaUser != null) {
+                        if (Utils.settingsHelper.getBoolean(PreferenceKeys.DOWNLOAD_PREPEND_USER_NAME) && mediaUser != null) {
                             fileName = mediaUser.getUsername() + "_" + fileName;
                         }
                     }

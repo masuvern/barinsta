@@ -16,10 +16,10 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
 
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
+import java.time.format.DateTimeFormatter;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 
 import awais.instagrabber.databinding.DialogTimeSettingsBinding;
 import awais.instagrabber.utils.LocaleUtils;
@@ -28,12 +28,12 @@ import awais.instagrabber.utils.TextUtils;
 public final class TimeSettingsDialog extends DialogFragment implements AdapterView.OnItemSelectedListener, CompoundButton.OnCheckedChangeListener,
         View.OnClickListener, TextWatcher {
     private DialogTimeSettingsBinding timeSettingsBinding;
-    private final Date magicDate;
-    private SimpleDateFormat currentFormat;
+    private final LocalDateTime magicDate;
+    private DateTimeFormatter currentFormat;
     private String selectedFormat;
-    private boolean customDateTimeFormatEnabled;
-    private String customDateTimeFormat;
-    private String dateTimeSelection;
+    private final boolean customDateTimeFormatEnabled;
+    private final String customDateTimeFormat;
+    private final String dateTimeSelection;
     private final boolean swapDateTimeEnabled;
     private final OnConfirmListener onConfirmListener;
 
@@ -47,9 +47,10 @@ public final class TimeSettingsDialog extends DialogFragment implements AdapterV
         this.dateTimeSelection = dateTimeSelection;
         this.swapDateTimeEnabled = swapDateTimeEnabled;
         this.onConfirmListener = onConfirmListener;
-        final Calendar instance = GregorianCalendar.getInstance();
-        instance.set(2020, 5, 22, 8, 17, 13);
-        magicDate = instance.getTime();
+        magicDate = LocalDateTime.ofInstant(
+                Instant.now(),
+                ZoneId.systemDefault()
+        );
     }
 
     @Override
@@ -82,10 +83,9 @@ public final class TimeSettingsDialog extends DialogFragment implements AdapterV
     }
 
     private void refreshTimeFormat() {
-        if (timeSettingsBinding.cbCustomFormat.isChecked()) {
-            timeSettingsBinding.btnConfirm.setEnabled(false);
-            checkCustomTimeFormat();
-        } else {
+        if (timeSettingsBinding.cbCustomFormat.isChecked())
+            selectedFormat = timeSettingsBinding.etCustomFormat.getText().toString();
+        else {
             final String sepStr = String.valueOf(timeSettingsBinding.spSeparator.getSelectedItem());
             final String timeStr = String.valueOf(timeSettingsBinding.spTimeFormat.getSelectedItem());
             final String dateStr = String.valueOf(timeSettingsBinding.spDateFormat.getSelectedItem());
@@ -96,24 +96,14 @@ public final class TimeSettingsDialog extends DialogFragment implements AdapterV
             selectedFormat = (isSwapTime ? dateStr : timeStr)
                     + (isBlankSeparator ? " " : " '" + sepStr + "' ")
                     + (isSwapTime ? timeStr : dateStr);
-
-            timeSettingsBinding.btnConfirm.setEnabled(true);
-            currentFormat = new SimpleDateFormat(selectedFormat, LocaleUtils.getCurrentLocale());
-            timeSettingsBinding.timePreview.setText(currentFormat.format(magicDate));
         }
-    }
 
-    private void checkCustomTimeFormat() {
+        timeSettingsBinding.btnConfirm.setEnabled(true);
         try {
-            //noinspection ConstantConditions
-            final String string = timeSettingsBinding.etCustomFormat.getText().toString();
-            if (TextUtils.isEmpty(string)) throw new NullPointerException();
-            currentFormat = new SimpleDateFormat(string, LocaleUtils.getCurrentLocale());
-            final String format = currentFormat.format(magicDate);
-            timeSettingsBinding.timePreview.setText(format);
-
-            timeSettingsBinding.btnConfirm.setEnabled(true);
-        } catch (final Exception e) {
+            currentFormat = DateTimeFormatter.ofPattern(selectedFormat, LocaleUtils.getCurrentLocale());
+            timeSettingsBinding.timePreview.setText(magicDate.format(currentFormat));
+        }
+        catch (Exception e) {
             timeSettingsBinding.btnConfirm.setEnabled(false);
             timeSettingsBinding.timePreview.setText(null);
         }
@@ -142,22 +132,19 @@ public final class TimeSettingsDialog extends DialogFragment implements AdapterV
 
     @Override
     public void onTextChanged(final CharSequence s, final int start, final int before, final int count) {
-        checkCustomTimeFormat();
+        refreshTimeFormat();
     }
 
     @Override
     public void onClick(final View v) {
         if (v == timeSettingsBinding.btnConfirm) {
-            final Editable etCustomFormatText = timeSettingsBinding.etCustomFormat.getText();
             if (onConfirmListener != null) {
                 onConfirmListener.onConfirm(
                         timeSettingsBinding.cbCustomFormat.isChecked(),
-                        etCustomFormatText == null ? null : etCustomFormatText.toString(),
                         timeSettingsBinding.spTimeFormat.getSelectedItemPosition(),
                         timeSettingsBinding.spSeparator.getSelectedItemPosition(),
                         timeSettingsBinding.spDateFormat.getSelectedItemPosition(),
                         selectedFormat,
-                        currentFormat,
                         timeSettingsBinding.cbSwapTimeDate.isChecked());
             }
             dismiss();
@@ -170,12 +157,10 @@ public final class TimeSettingsDialog extends DialogFragment implements AdapterV
 
     public interface OnConfirmListener {
         void onConfirm(boolean isCustomFormat,
-                       String formatSelection,
                        int spTimeFormatSelectedItemPosition,
                        int spSeparatorSelectedItemPosition,
                        int spDateFormatSelectedItemPosition,
                        final String selectedFormat,
-                       final SimpleDateFormat currentFormat,
                        final boolean swapDateTime);
     }
 

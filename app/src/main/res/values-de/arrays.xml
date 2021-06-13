@@ -24,6 +24,8 @@
         <item translatable="false">日本語</item>
         <item translatable="false">Ελληνικά</item>
         <item translatable="false">Euskara</item>
+        <item translatable="false">Svenska</item>
+        <item translatable="false">한국어</item>
     </string-array>
     <string-array name="theme_presets">
         <item>Auto / Systemstandard</item>
@@ -54,7 +56,7 @@
     <!--    <item>@navigation/more_nav_graph</item>-->
     <!--</array>-->
     <string-array name="dm_auto_refresh_freq_units">
-        <item>secs</item>
-        <item>mins</item>
+        <item>Sek.</item>
+        <item>Min.</item>
     </string-array>
 </resources>

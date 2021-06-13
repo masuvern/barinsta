@@ -23,23 +23,23 @@ import org.json.JSONObject;
 
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 import awais.instagrabber.BuildConfig;
-import awais.instagrabber.db.datasources.AccountDataSource;
-import awais.instagrabber.db.datasources.FavoriteDataSource;
 import awais.instagrabber.db.entities.Account;
 import awais.instagrabber.db.entities.Favorite;
 import awais.instagrabber.db.repositories.AccountRepository;
 import awais.instagrabber.db.repositories.FavoriteRepository;
-import awais.instagrabber.db.repositories.RepositoryCallback;
 import awais.instagrabber.interfaces.FetchListener;
 import awais.instagrabber.models.enums.FavoriteType;
 import awais.instagrabber.utils.PasswordUtils.IncorrectPasswordException;
+import kotlinx.coroutines.Dispatchers;
 
 import static awais.instagrabber.utils.Utils.settingsHelper;
 
@@ -81,8 +81,6 @@ public final class ExportImportUtils {
                     throw e;
                 } catch (final Exception e) {
                     if (fetchListener != null) fetchListener.onResult(false);
-                    //                    if (logCollector != null)
-                    //                        logCollector.appendException(e, LogFile.UTILS_IMPORT, "Import::pass");
                     if (BuildConfig.DEBUG) Log.e(TAG, "Error importing backup", e);
                 }
             } else if (configType == 'Z') {
@@ -100,7 +98,6 @@ public final class ExportImportUtils {
             throw e;
         } catch (final Exception e) {
             if (fetchListener != null) fetchListener.onResult(false);
-            // if (logCollector != null) logCollector.appendException(e, LogFile.UTILS_IMPORT, "Import");
             if (BuildConfig.DEBUG) Log.e(TAG, "", e);
         }
     }
@@ -123,7 +120,6 @@ public final class ExportImportUtils {
             if (fetchListener != null) fetchListener.onResult(true);
         } catch (final Exception e) {
             if (fetchListener != null) fetchListener.onResult(false);
-            // if (logCollector != null) logCollector.appendException(e, LogFile.UTILS_IMPORT, "importJson");
             if (BuildConfig.DEBUG) Log.e(TAG, "", e);
         }
     }
@@ -152,26 +148,31 @@ public final class ExportImportUtils {
             if (query == null || favoriteType == null) {
                 continue;
             }
+            final long epochMillis = favsObject.getLong("d");
             final Favorite favorite = new Favorite(
                     0,
                     query,
                     favoriteType,
                     favsObject.optString("s"),
                     favoriteType == FavoriteType.USER ? favsObject.optString("pic_url") : null,
-                    new Date(favsObject.getLong("d")));
+                    LocalDateTime.ofInstant(Instant.ofEpochMilli(epochMillis), ZoneId.systemDefault())
+            );
             // Log.d(TAG, "importJson: favoriteModel: " + favoriteModel);
-            final FavoriteRepository favRepo = FavoriteRepository.getInstance(FavoriteDataSource.getInstance(context));
-            favRepo.getFavorite(query, favoriteType, new RepositoryCallback<Favorite>() {
-                @Override
-                public void onSuccess(final Favorite result) {
-                    // local has priority since it's more frequently updated
-                }
-
-                @Override
-                public void onDataNotAvailable() {
-                    favRepo.insertOrUpdateFavorite(favorite, null);
-                }
-            });
+            final FavoriteRepository favRepo = FavoriteRepository.Companion.getInstance(context);
+            favRepo.getFavorite(
+                    query,
+                    favoriteType,
+                    CoroutineUtilsKt.getContinuation((favorite1, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
+                        if (throwable != null) {
+                            Log.e(TAG, "importFavorites: ", throwable);
+                            return;
+                        }
+                        if (favorite1 == null) {
+                            favRepo.insertOrUpdateFavorite(favorite, CoroutineUtilsKt.getContinuation((unit, throwable1) -> {}, Dispatchers.getIO()));
+                        }
+                        // local has priority since it's more frequently updated
+                    }), Dispatchers.getIO())
+            );
         }
     }
 
@@ -197,8 +198,9 @@ public final class ExportImportUtils {
             Log.e(TAG, "importAccounts: Error parsing json", e);
             return;
         }
-        AccountRepository.getInstance(AccountDataSource.getInstance(context))
-                         .insertOrUpdateAccounts(accounts, null);
+        AccountRepository.Companion
+                .getInstance(context)
+                .insertOrUpdateAccounts(accounts, CoroutineUtilsKt.getContinuation((unit, throwable) -> {}, Dispatchers.getIO()));
     }
 
     private static void importSettings(final JSONObject jsonObject) {
@@ -253,8 +255,6 @@ public final class ExportImportUtils {
                     exportBytes = PasswordUtils.enc(exportString, bytes);
                 } catch (final Exception e) {
                     if (fetchListener != null) fetchListener.onResult(false);
-                    // if (logCollector != null)
-                    //     logCollector.appendException(e, LogFile.UTILS_EXPORT, "Export::isPass");
                     if (BuildConfig.DEBUG) Log.e(TAG, "", e);
                 }
             } else {
@@ -268,9 +268,7 @@ public final class ExportImportUtils {
                     if (fetchListener != null) fetchListener.onResult(true);
                 } catch (Exception e) {
                     if (fetchListener != null) fetchListener.onResult(false);
-                    // if (logCollector != null)
-                    //     logCollector.appendException(e, LogFile.UTILS_EXPORT, "Export::notPass");
-                    Log.e(TAG, "exportData", e);
+                    if (BuildConfig.DEBUG) Log.e(TAG, "", e);
                 }
                 return;
             }
@@ -338,7 +336,7 @@ public final class ExportImportUtils {
                     Log.e(TAG, "onFailure: ", t);
                     callback.onCreated(null);
                 }
-            }, AppExecutors.getInstance().tasksThread());
+            }, AppExecutors.INSTANCE.getTasksThread());
             return;
         } catch (final Exception e) {
             //            if (logCollector != null) logCollector.appendException(e, LogFile.UTILS_EXPORT, "getExportString");
@@ -350,7 +348,7 @@ public final class ExportImportUtils {
     @NonNull
     private static ListenableFuture<JSONObject> getSettings(@NonNull final Context context) {
         final SharedPreferences sharedPreferences = context.getSharedPreferences(Constants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
-        return AppExecutors.getInstance().tasksThread().submit(() -> {
+        return AppExecutors.INSTANCE.getTasksThread().submit(() -> {
             final Map<String, ?> allPrefs = sharedPreferences.getAll();
             if (allPrefs == null) {
                 return new JSONObject();
@@ -374,73 +372,65 @@ public final class ExportImportUtils {
 
     private static ListenableFuture<JSONArray> getFavorites(final Context context) {
         final SettableFuture<JSONArray> future = SettableFuture.create();
-        final FavoriteRepository favoriteRepository = FavoriteRepository.getInstance(FavoriteDataSource.getInstance(context));
-        favoriteRepository.getAllFavorites(new RepositoryCallback<List<Favorite>>() {
-            @Override
-            public void onSuccess(final List<Favorite> favorites) {
-                final JSONArray jsonArray = new JSONArray();
-                try {
-                    for (final Favorite favorite : favorites) {
-                        final JSONObject jsonObject = new JSONObject();
-                        jsonObject.put("q", favorite.getQuery());
-                        jsonObject.put("type", favorite.getType().toString());
-                        jsonObject.put("s", favorite.getDisplayName());
-                        jsonObject.put("pic_url", favorite.getPicUrl());
-                        jsonObject.put("d", favorite.getDateAdded().getTime());
-                        jsonArray.put(jsonObject);
+        final FavoriteRepository favoriteRepository = FavoriteRepository.Companion.getInstance(context);
+        favoriteRepository.getAllFavorites(
+                CoroutineUtilsKt.getContinuation((favorites, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
+                    if (throwable != null) {
+                        future.set(new JSONArray());
+                        Log.e(TAG, "getFavorites: ", throwable);
+                        return;
                     }
-                } catch (Exception e) {
-                    //                    if (logCollector != null) {
-                    //                        logCollector.appendException(e, LogFile.UTILS_EXPORT, "getFavorites");
-                    //                    }
-                    if (BuildConfig.DEBUG) {
-                        Log.e(TAG, "Error exporting favorites", e);
+                    final JSONArray jsonArray = new JSONArray();
+                    try {
+                        for (final Favorite favorite : favorites) {
+                            final JSONObject jsonObject = new JSONObject();
+                            jsonObject.put("q", favorite.getQuery());
+                            jsonObject.put("type", favorite.getType().toString());
+                            jsonObject.put("s", favorite.getDisplayName());
+                            jsonObject.put("pic_url", favorite.getPicUrl());
+                            jsonObject.put("d", favorite.getDateAdded().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli());
+                            jsonArray.put(jsonObject);
+                        }
+                    } catch (Exception e) {
+                        if (BuildConfig.DEBUG) {
+                            Log.e(TAG, "Error exporting favorites", e);
+                        }
                     }
-                }
-                future.set(jsonArray);
-            }
-
-            @Override
-            public void onDataNotAvailable() {
-                future.set(new JSONArray());
-            }
-        });
+                    future.set(jsonArray);
+                }), Dispatchers.getIO())
+        );
         return future;
     }
 
     private static ListenableFuture<JSONArray> getCookies(final Context context) {
         final SettableFuture<JSONArray> future = SettableFuture.create();
-        final AccountRepository accountRepository = AccountRepository.getInstance(AccountDataSource.getInstance(context));
-        accountRepository.getAllAccounts(new RepositoryCallback<List<Account>>() {
-            @Override
-            public void onSuccess(final List<Account> accounts) {
-                final JSONArray jsonArray = new JSONArray();
-                try {
-                    for (final Account cookie : accounts) {
-                        final JSONObject jsonObject = new JSONObject();
-                        jsonObject.put("i", cookie.getUid());
-                        jsonObject.put("u", cookie.getUsername());
-                        jsonObject.put("c", cookie.getCookie());
-                        jsonObject.put("full_name", cookie.getFullName());
-                        jsonObject.put("profile_pic", cookie.getProfilePic());
-                        jsonArray.put(jsonObject);
+        final AccountRepository accountRepository = AccountRepository.Companion.getInstance(context);
+        accountRepository.getAllAccounts(
+                CoroutineUtilsKt.getContinuation((accounts, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
+                    if (throwable != null) {
+                        Log.e(TAG, "getCookies: ", throwable);
+                        future.set(new JSONArray());
+                        return;
                     }
-                } catch (Exception e) {
-                    //                    if (logCollector != null) {
-                    //                        logCollector.appendException(e, LogFile.UTILS_EXPORT, "getCookies");
-                    //                    }
-                    if (BuildConfig.DEBUG) {
-                        Log.e(TAG, "Error exporting accounts", e);
+                    final JSONArray jsonArray = new JSONArray();
+                    try {
+                        for (final Account cookie : accounts) {
+                            final JSONObject jsonObject = new JSONObject();
+                            jsonObject.put("i", cookie.getUid());
+                            jsonObject.put("u", cookie.getUsername());
+                            jsonObject.put("c", cookie.getCookie());
+                            jsonObject.put("full_name", cookie.getFullName());
+                            jsonObject.put("profile_pic", cookie.getProfilePic());
+                            jsonArray.put(jsonObject);
+                        }
+                    } catch (Exception e) {
+                        if (BuildConfig.DEBUG) {
+                            Log.e(TAG, "Error exporting accounts", e);
+                        }
                     }
-                }
-                future.set(jsonArray);
-            }
-
-            @Override
-            public void onDataNotAvailable() {
-                future.set(new JSONArray());
-            }
-        });
+                    future.set(jsonArray);
+                }), Dispatchers.getIO())
+        );
         return future;
     }
 

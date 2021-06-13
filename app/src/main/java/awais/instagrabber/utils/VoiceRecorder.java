@@ -12,9 +12,10 @@ import androidx.annotation.NonNull;
 import androidx.documentfile.provider.DocumentFile;
 
 import java.io.IOException;
-import java.text.SimpleDateFormat;
+import java.io.File;
+import java.time.format.DateTimeFormatter;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
@@ -27,7 +28,7 @@ public class VoiceRecorder {
     private static final int AUDIO_BIT_DEPTH = 16;
     private static final int AUDIO_BIT_RATE = AUDIO_SAMPLE_RATE * AUDIO_BIT_DEPTH;
     private static final String FILE_FORMAT = "yyyy-MM-dd-HH-mm-ss-SSS";
-    private static final SimpleDateFormat SIMPLE_DATE_FORMAT = new SimpleDateFormat(FILE_FORMAT, Locale.US);
+    private static final DateTimeFormatter SIMPLE_DATE_FORMAT = DateTimeFormatter.ofPattern(FILE_FORMAT, Locale.US);
 
     private final List<Float> waveform = new ArrayList<>();
     private final DocumentFile recordingsDir;
@@ -152,7 +153,7 @@ public class VoiceRecorder {
 
     @NonNull
     private DocumentFile getAudioRecordFile() {
-        final String name = String.format("%s-%s.%s", FILE_PREFIX, SIMPLE_DATE_FORMAT.format(new Date()), EXTENSION);
+        final String name = String.format("%s-%s.%s", FILE_PREFIX, LocalDateTime.now().format(SIMPLE_DATE_FORMAT), EXTENSION);
         DocumentFile file = recordingsDir.findFile(name);
         if (file == null || !file.exists()) {
             file = recordingsDir.createFile(MIME_TYPE, name);

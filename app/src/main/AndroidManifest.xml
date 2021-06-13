@@ -26,8 +26,7 @@
         <activity
             android:name=".activities.MainActivity"
             android:launchMode="singleTop"
-            android:taskAffinity=".Main"
-            android:windowSoftInputMode="adjustResize">
+            android:taskAffinity=".Main">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <action android:name="android.intent.action.VIEW" />
@@ -51,13 +50,14 @@
 
                 <data android:scheme="http" />
                 <data android:scheme="https" />
-                <data android:host="ig.me" />
-                <data android:host="www.ig.me" />
+                <data android:host="instagr.am" />
+                <data android:host="www.instagr.am" />
                 <data android:host="instagram.com" />
                 <data android:host="www.instagram.com" />
                 <data android:pathPrefix="/" />
                 <data android:pathPrefix="/p" />
                 <data android:pathPrefix="/explore/tags" />
+                <data android:pathPrefix="/explore/locations" />
             </intent-filter>
         </activity>
         <activity
@@ -76,41 +76,6 @@
             android:screenOrientation="portrait"
             android:taskAffinity="awais.instagrabber.errorreport"
             android:theme="@android:style/Theme.DeviceDefault.Dialog" />
-        <activity
-            android:name=".activities.DirectDownload"
-            android:allowEmbedded="false"
-            android:allowTaskReparenting="false"
-            android:autoRemoveFromRecents="true"
-            android:clearTaskOnLaunch="true"
-            android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
-            android:description="@string/direct_download_desc"
-            android:documentLaunchMode="never"
-            android:excludeFromRecents="true"
-            android:finishOnTaskLaunch="true"
-            android:label="@string/direct_download"
-            android:launchMode="singleTask"
-            android:lockTaskMode="never"
-            android:noHistory="false"
-            android:theme="@style/Theme.AppCompat.Translucent">
-            <intent-filter>
-                <action android:name="android.intent.action.SEND" />
-                <action android:name="android.intent.action.SEARCH" />
-                <action android:name="android.intent.action.WEB_SEARCH" />
-
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-
-                <data android:mimeType="text/plain" />
-            </intent-filter>
-            <intent-filter>
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-
-                <data android:host="ig.me" />
-                <data android:scheme="http" />
-                <data android:scheme="https" />
-            </intent-filter>
-        </activity>
         <activity
             android:name=".activities.Login"
             android:label="@string/login"

@@ -59,6 +59,8 @@
     </plurals>
     <string name="main_posts_following">%s\nFollowing</string>
     <string name="post_viewer_autoplay_video">Autoplay videos</string>
+    <string name="post_viewer_background_play">Continue videos in background</string>
+    <string name="post_viewer_background_play_summary">Do not pause videos when the app is out of focus</string>
     <string name="post_viewer_muted_autoplay">Always mute videos</string>
     <string name="post_viewer_show_captions">Always show post captions</string>
     <string name="post_viewer_download_dialog_title">Select what to download</string>
@@ -124,6 +126,7 @@
     <string name="mute_posts">Mute posts</string>
     <string name="unmute_stories">Unmute stories</string>
     <string name="unmute_posts">Unmute posts</string>
+    <string name="remove_follower">Remove follower</string>
     <string name="bio_copy">Copy bio</string>
     <string name="bio_translate">Translate bio</string>
     <string name="status_mutual">Mutual</string>
@@ -233,7 +236,7 @@
     <string name="request_approve">Approve request</string>
     <string name="request_reject">Reject request</string>
     <string name="share_public_post">Share this public post to…</string>
-    <string name="share_private_post">This is a private post! Share to those who can view them!</string>
+    <string name="share_private_post">This is a private post! Share to those who can view it.</string>
     <string name="discover_empty">This category is somehow empty…</string>
     <string name="update_available">An update is available! (%s)</string>
     <string name="update_notice">Reminder: If you downloaded from F-Droid, you must update from it! Same applies for GitHub.</string>
@@ -267,6 +270,7 @@
     <string name="skip_update_checkbox">Do not show again until next update</string>
     <string name="version">Version</string>
     <string name="pref_start_screen">Start screen</string>
+    <string name="pref_search_focus_keyboard" comment="basically bring up the keyboard immediately when someone does search">Show keyboard on search</string>
     <string name="pref_category_general">General</string>
     <string name="pref_category_theme">Theme</string>
     <string name="pref_category_downloads">Downloads</string>
@@ -379,6 +383,10 @@
         <item quantity="one">%d like</item>
         <item quantity="other">%d likes</item>
     </plurals>
+    <plurals name="replies_count">
+        <item quantity="one">%d reply</item>
+        <item quantity="other">%d replies</item>
+    </plurals>
     <plurals name="comments_count">
         <item quantity="one">%d comment</item>
         <item quantity="other">%d comments</item>
@@ -484,7 +492,7 @@
     <string name="crash_report_subject">Barinsta Crash Report</string>
     <string name="crash_report_title">Select an email app to send crash logs</string>
     <string name="not_found">Not found!</string>
-    <string name="rate_limit">Your IP has been rate limited by Instagram. Wait for an hour and try again.</string>
+    <string name="rate_limit">Your IP has been rate limited by Instagram. Wait for an hour and try again. &lt;a href=\"https://redd.it/msxlko\">Learn more.&lt;/a></string>
     <string name="skip_update">Skip this update</string>
     <string name="on_latest_version">You\'re already on the latest version</string>
     <string name="tab_order">Screen order</string>
@@ -503,4 +511,14 @@
     <string name="select_a_folder">No folder selected!</string>
     <string name="dir_select_success_message">Success! Please wait. Starting app…</string>
     <string name="barinsta_folder">Barinsta folder</string>
+    <string name="top">Top</string>
+    <string name="recent">Recent</string>
+    <string name="clear">Clear</string>
+    <string name="no_external_map_app">No Map app found!</string>
+    <string name="click_to_show_full">Click to show full like count</string>
+    <string name="no_profile_pic_found">No profile pic found!</string>
+    <string name="swipe_up_confirmation">Are you sure you want to open this link?</string>
+    <string name="sending">Sending...</string>
+    <string name="share_via_dm">Share via DM</string>
+    <string name="share_link">Share link…</string>
 </resources>

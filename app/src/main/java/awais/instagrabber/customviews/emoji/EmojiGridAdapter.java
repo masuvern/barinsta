@@ -43,18 +43,23 @@ public class EmojiGridAdapter extends RecyclerView.Adapter<EmojiGridAdapter.Emoj
     private final EmojiVariantManager emojiVariantManager;
     private final AppExecutors appExecutors;
 
-    public EmojiGridAdapter(@NonNull final EmojiCategoryType emojiCategoryType,
+    public EmojiGridAdapter(@NonNull final EmojiParser emojiParser,
+                            final EmojiCategoryType emojiCategoryType,
                             final OnEmojiClickListener onEmojiClickListener,
                             final OnEmojiLongClickListener onEmojiLongClickListener) {
         this.onEmojiClickListener = onEmojiClickListener;
         this.onEmojiLongClickListener = onEmojiLongClickListener;
         differ = new AsyncListDiffer<>(new AdapterListUpdateCallback(this),
                                        new AsyncDifferConfig.Builder<>(diffCallback).build());
-        final EmojiParser emojiParser = EmojiParser.getInstance();
         final Map<EmojiCategoryType, EmojiCategory> categoryMap = emojiParser.getCategoryMap();
         emojiVariantManager = EmojiVariantManager.getInstance();
-        appExecutors = AppExecutors.getInstance();
+        appExecutors = AppExecutors.INSTANCE;
         setHasStableIds(true);
+        if (emojiCategoryType == null) {
+            // show all if type is null
+            differ.submitList(ImmutableList.copyOf(emojiParser.getAllEmojis().values()));
+            return;
+        }
         final EmojiCategory emojiCategory = categoryMap.get(emojiCategoryType);
         if (emojiCategory == null) {
             differ.submitList(Collections.emptyList());
@@ -76,13 +81,13 @@ public class EmojiGridAdapter extends RecyclerView.Adapter<EmojiGridAdapter.Emoj
         final Emoji emoji = differ.getCurrentList().get(position);
         final String variant = emojiVariantManager.getVariant(emoji.getUnicode());
         if (variant != null) {
-            appExecutors.tasksThread().execute(() -> {
+            appExecutors.getTasksThread().execute(() -> {
                 final Optional<Emoji> first = emoji.getVariants()
                                                    .stream()
                                                    .filter(e -> e.getUnicode().equals(variant))
                                                    .findFirst();
                 if (!first.isPresent()) return;
-                appExecutors.mainThread().execute(() -> holder.bind(position, first.get(), emoji));
+                appExecutors.getMainThread().execute(() -> holder.bind(position, first.get(), emoji));
             });
             return;
         }
@@ -105,7 +110,7 @@ public class EmojiGridAdapter extends RecyclerView.Adapter<EmojiGridAdapter.Emoj
     }
 
     public static class EmojiViewHolder extends RecyclerView.ViewHolder {
-        private final AppExecutors appExecutors = AppExecutors.getInstance();
+        // private final AppExecutors appExecutors = AppExecutors.getInstance();
         private final ItemEmojiGridBinding binding;
         private final OnEmojiClickListener onEmojiClickListener;
         private final OnEmojiLongClickListener onEmojiLongClickListener;
@@ -123,17 +128,17 @@ public class EmojiGridAdapter extends RecyclerView.Adapter<EmojiGridAdapter.Emoj
             binding.image.setImageDrawable(null);
             binding.indicator.setVisibility(View.GONE);
             itemView.setOnLongClickListener(null);
-            itemView.post(() -> {
-                binding.image.setImageDrawable(emoji.getDrawable());
-                final boolean hasVariants = !parent.getVariants().isEmpty();
-                binding.indicator.setVisibility(hasVariants ? View.VISIBLE : View.GONE);
-                if (onEmojiClickListener != null) {
-                    itemView.setOnClickListener(v -> onEmojiClickListener.onClick(v, emoji));
-                }
-                if (hasVariants && onEmojiLongClickListener != null) {
-                    itemView.setOnLongClickListener(v -> onEmojiLongClickListener.onLongClick(position, v, parent));
-                }
-            });
+            // itemView.post(() -> {
+            binding.image.setImageDrawable(emoji.getDrawable());
+            final boolean hasVariants = !parent.getVariants().isEmpty();
+            binding.indicator.setVisibility(hasVariants ? View.VISIBLE : View.GONE);
+            if (onEmojiClickListener != null) {
+                itemView.setOnClickListener(v -> onEmojiClickListener.onClick(v, emoji));
+            }
+            if (hasVariants && onEmojiLongClickListener != null) {
+                itemView.setOnLongClickListener(v -> onEmojiLongClickListener.onLongClick(position, v, parent));
+            }
+            // });
         }
     }
 

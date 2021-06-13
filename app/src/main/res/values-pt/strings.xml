@@ -56,6 +56,8 @@
     </plurals>
     <string name="main_posts_following">%s\nSeguindo</string>
     <string name="post_viewer_autoplay_video">Reprodução automática de vídeos</string>
+    <string name="post_viewer_background_play">Continuar vídeos em segundo plano</string>
+    <string name="post_viewer_background_play_summary">Não pausar vídeos quando o aplicativo está fora de foco</string>
     <string name="post_viewer_muted_autoplay">Sempre silenciar vídeos</string>
     <string name="post_viewer_show_captions">Sempre mostrar as legendas das publicações</string>
     <string name="post_viewer_download_dialog_title">Selecionar o que baixar</string>
@@ -121,6 +123,7 @@
     <string name="mute_posts">Silenciar publicações</string>
     <string name="unmute_stories">Reativar stories</string>
     <string name="unmute_posts">Reativar publicações</string>
+    <string name="remove_follower">Remover seguidor</string>
     <string name="bio_copy">Copiar bio</string>
     <string name="bio_translate">Traduzir bio</string>
     <string name="status_mutual">Mútuo</string>
@@ -230,7 +233,7 @@
     <string name="request_approve">Aprovar pedido</string>
     <string name="request_reject">Rejeitar pedido</string>
     <string name="share_public_post">Compartilhar esta publicação pública com…</string>
-    <string name="share_private_post">Esta é uma publicação privada! Compartilhe com quem pode visualizá-la!</string>
+    <string name="share_private_post">Este é um posto privado! Compartilhe com aqueles que podem vê-lo.</string>
     <string name="discover_empty">Esta categoria está vazia…</string>
     <string name="update_available">Uma atualização está disponível! (%s)</string>
     <string name="update_notice">Lembrete: se você baixou do F-Droid, você deve atualizar a partir dele! O mesmo se aplica ao GitHub.</string>
@@ -262,6 +265,7 @@
     <string name="skip_update_checkbox">Não mostrar novamente até a próxima atualização</string>
     <string name="version">Versão</string>
     <string name="pref_start_screen">Tela inicial</string>
+    <string name="pref_search_focus_keyboard" comment="basically bring up the keyboard immediately when someone does search">Mostrar teclado na busca</string>
     <string name="pref_category_general">Geral</string>
     <string name="pref_category_theme">Tema</string>
     <string name="pref_category_downloads">Downloads</string>
@@ -364,6 +368,10 @@
     <plurals name="likes_count">
         <item quantity="one">%d curtida</item>
         <item quantity="other">%d curtidas</item>
+    </plurals>
+    <plurals name="replies_count">
+        <item quantity="one">%d resposta</item>
+        <item quantity="other">%d respostas</item>
     </plurals>
     <plurals name="comments_count">
         <item quantity="one">%d comentário</item>
@@ -479,4 +487,11 @@
     <string name="dm_remove_warning">Se salvo, todos os recursos relacionados a DM serão desativados no próximo início</string>
     <string name="copy_caption">Copiar legenda</string>
     <string name="copy_reply">Copiar resposta</string>
+    <string name="top">Início</string>
+    <string name="recent">Recente</string>
+    <string name="clear">Limpar</string>
+    <string name="no_external_map_app">Nenhum aplicativo de mapa foi encontrado!</string>
+    <string name="click_to_show_full">Clique para mostrar a contagem completa de curtidas</string>
+    <string name="no_profile_pic_found">Nenhuma foto de perfil encontrada!</string>
+    <string name="swipe_up_confirmation">Tem certeza que quer abrir este link?</string>
 </resources>

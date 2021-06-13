@@ -14,7 +14,7 @@ import java.util.HashSet;
 
 import awais.instagrabber.R;
 import awais.instagrabber.adapters.KeywordsFilterAdapter;
-import awais.instagrabber.utils.Constants;
+import awais.instagrabber.fragments.settings.PreferenceKeys;
 import awais.instagrabber.utils.SettingsHelper;
 
 public class KeywordsFilterDialogViewHolder extends RecyclerView.ViewHolder {
@@ -34,7 +34,7 @@ public class KeywordsFilterDialogViewHolder extends RecyclerView.ViewHolder {
             final String s = items.get(position);
             SettingsHelper settingsHelper = new SettingsHelper(context);
             items.remove(position);
-            settingsHelper.putStringSet(Constants.KEYWORD_FILTERS, new HashSet<>(items));
+            settingsHelper.putStringSet(PreferenceKeys.KEYWORD_FILTERS, new HashSet<>(items));
             adapter.notifyDataSetChanged();
             final String message = context.getString(R.string.removed_keywords, s);
             Toast.makeText(context, message, Toast.LENGTH_SHORT).show();

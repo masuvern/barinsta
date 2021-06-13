@@ -9,6 +9,7 @@
     <dimen name="image_size_40">40dp</dimen>
 
     <dimen name="profile_pic_size_tiny">24dp</dimen>
+    <dimen name="profile_pic_size_smaller">32dp</dimen>
     <dimen name="profile_pic_size_small">40dp</dimen>
     <dimen name="profile_pic_size_regular">48dp</dimen>
     <dimen name="profile_pic_size_large">90dp</dimen>

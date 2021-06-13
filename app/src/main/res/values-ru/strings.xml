@@ -23,10 +23,10 @@
     <string name="update_check">Проверять наличие обновлений при запуске</string>
     <string name="flag_secure">Блокировать скриншоты &amp; превью приложения</string>
     <string name="download_user_folder">Скачать публикации в папки с именем пользователя</string>
-    <string name="download_prepend_username">Prepend Username to Filename</string>
+    <string name="download_prepend_username">Добавить имя пользователя к имени файла</string>
     <string name="mark_as_seen_setting">Отметить истории как увиденные после просмотра</string>
     <string name="mark_as_seen_setting_summary">Автор истории узнает, что вы просмотрели её</string>
-    <string name="hide_muted_reels_setting">Hide muted stories from feed</string>
+    <string name="hide_muted_reels_setting">Скрыть заглушённые истории из ленты новостей</string>
     <string name="dm_mark_as_seen_setting">Отметить ЛС как увиденные после просмотра</string>
     <string name="dm_mark_as_seen_setting_summary">Другие участники узнают, что вы просмотрели его</string>
     <string name="activity_setting">Включить уведомления об активности</string>
@@ -62,6 +62,8 @@
     </plurals>
     <string name="main_posts_following">%s\nПоследователей</string>
     <string name="post_viewer_autoplay_video">Автовоспроизведение видео</string>
+    <string name="post_viewer_background_play">Воспроизведение видео в фоновом режиме</string>
+    <string name="post_viewer_background_play_summary">Не приостанавливать видео, когда приложение свернуто</string>
     <string name="post_viewer_muted_autoplay">Всегда заглушать видео</string>
     <string name="post_viewer_show_captions">Всегда отображать подписи к постам</string>
     <string name="post_viewer_download_dialog_title">Выберите, что скачивать</string>
@@ -129,6 +131,7 @@
     <string name="mute_posts">Заглушить публикации</string>
     <string name="unmute_stories">Включить звук историй</string>
     <string name="unmute_posts">Включить звук публикаций</string>
+    <string name="remove_follower">Remove follower</string>
     <string name="bio_copy">Копировать биографию</string>
     <string name="bio_translate">Перевести биографию</string>
     <string name="status_mutual">Взаимное</string>
@@ -238,7 +241,7 @@
     <string name="request_approve">Одобрить запрос</string>
     <string name="request_reject">Отклонить запрос</string>
     <string name="share_public_post">Поделиться публичной записью с…</string>
-    <string name="share_private_post">Это личная запись! Поделитесь с теми, кто может их просматривать!</string>
+    <string name="share_private_post">This is a private post! Share to those who can view it.</string>
     <string name="discover_empty">Эта категория каким-то образом пуста…</string>
     <string name="update_available">Доступно обновление! (%s)</string>
     <string name="update_notice">Напоминание: Если вы скачали с F-Droid, вы должны обновлять с него! Это же относится и к GitHub.</string>
@@ -270,6 +273,7 @@
     <string name="skip_update_checkbox">Не показывать снова до следующего обновления</string>
     <string name="version">Версия</string>
     <string name="pref_start_screen">Начальный экран</string>
+    <string name="pref_search_focus_keyboard" comment="basically bring up the keyboard immediately when someone does search">Show keyboard on search</string>
     <string name="pref_category_general">Общее</string>
     <string name="pref_category_theme">Тема</string>
     <string name="pref_category_downloads">Загрузки</string>
@@ -375,6 +379,12 @@
         <item quantity="many">%d понравилось</item>
         <item quantity="other">%d понравилось</item>
     </plurals>
+    <plurals name="replies_count">
+        <item quantity="one">%d ответ</item>
+        <item quantity="few">%d ответа</item>
+        <item quantity="many">%d ответов</item>
+        <item quantity="other">%d ответы</item>
+    </plurals>
     <plurals name="comments_count">
         <item quantity="one">%d комментарий</item>
         <item quantity="few">%d комментария</item>
@@ -477,22 +487,29 @@
     <string name="removed_keywords">Удалено ключевое слово: %s из списка фильтров</string>
     <string name="marked_as_seen">Отмечено как просмотренное</string>
     <string name="delete_unsuccessful">Не удалось удалить</string>
-    <string name="throttle_error">Throttled by Instagram because of too many API requests. Wait for some time before retrying.</string>
-    <string name="error">Error</string>
-    <string name="account_logged_out">This account has been logged out.</string>
-    <string name="login_required">Login required!</string>
-    <string name="sentry_block">Sentry block.</string>
-    <string name="inactive_user">User is inactive!</string>
+    <string name="throttle_error">Замято Instagram\'ом из-за слишком большого количества запросов API. Подождите некоторое время перед повторной попыткой.</string>
+    <string name="error">Ошибка</string>
+    <string name="account_logged_out">Эта учётная запись вышла из системы.</string>
+    <string name="login_required">Требуется вход в систему!</string>
+    <string name="sentry_block">Блокировка \"часового\".</string>
+    <string name="inactive_user">Пользователь неактивен!</string>
     <string name="crash_report_subject">Barinsta Crash Report</string>
     <string name="crash_report_title">Выберите приложение для отправки логов ошибки</string>
-    <string name="not_found">Not found!</string>
-    <string name="rate_limit">Your IP has been rate limited by Instagram. Wait for an hour and try again.</string>
-    <string name="skip_update">Skip this update</string>
-    <string name="on_latest_version">You\'re already on the latest version</string>
-    <string name="tab_order">Screen order</string>
-    <string name="other_tabs">Other tabs</string>
-    <string name="tab_order_start_next_launch">The tab order will be reflected on next launch</string>
-    <string name="dm_remove_warning">If saved, all DM related features will be disabled on next launch</string>
+    <string name="not_found">Не найдено!</string>
+    <string name="rate_limit">Ваш IP-адрес был ограничен Instagram. Подождите час и повторите попытку.</string>
+    <string name="skip_update">Пропустить это обновление</string>
+    <string name="on_latest_version">Вы уже используете последнюю версию</string>
+    <string name="tab_order">Порядок экрана</string>
+    <string name="other_tabs">Другие вкладки</string>
+    <string name="tab_order_start_next_launch">Порядок вкладок будет отражён при следующем запуске</string>
+    <string name="dm_remove_warning">При сохранении, все функции, связанные с ЛС, будут отключены при следующем запуске</string>
     <string name="copy_caption">Копировать подпись</string>
     <string name="copy_reply">Копировать ответ</string>
+    <string name="top">В лидерах</string>
+    <string name="recent">Недавние</string>
+    <string name="clear">Очистить</string>
+    <string name="no_external_map_app">Не найдено картографического приложения!</string>
+    <string name="click_to_show_full">Click to show full like count</string>
+    <string name="no_profile_pic_found">Картинка профиля не найдена!</string>
+    <string name="swipe_up_confirmation">Are you sure you want to open this link?</string>
 </resources>

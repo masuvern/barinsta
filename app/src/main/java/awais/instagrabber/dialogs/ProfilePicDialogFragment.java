@@ -23,15 +23,21 @@ import com.facebook.drawee.controller.BaseControllerListener;
 import com.facebook.drawee.interfaces.DraweeController;
 import com.facebook.imagepipeline.image.ImageInfo;
 
+// import java.io.File;
+
+import awais.instagrabber.R;
+import awais.instagrabber.customviews.drawee.AnimatedZoomableController;
+import awais.instagrabber.customviews.drawee.DoubleTapGestureListener;
 import awais.instagrabber.databinding.DialogProfilepicBinding;
-import awais.instagrabber.repositories.responses.User;
+import awais.instagrabber.utils.AppExecutors;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.CookieUtils;
+import awais.instagrabber.utils.CoroutineUtilsKt;
 import awais.instagrabber.utils.DownloadUtils;
 import awais.instagrabber.utils.TextUtils;
 import awais.instagrabber.utils.Utils;
-import awais.instagrabber.webservices.ServiceCallback;
-import awais.instagrabber.webservices.UserService;
+import awais.instagrabber.webservices.UserRepository;
+import kotlinx.coroutines.Dispatchers;
 
 import static awais.instagrabber.utils.Utils.settingsHelper;
 
@@ -126,26 +132,29 @@ public class ProfilePicDialogFragment extends DialogFragment {
 
     private void fetchAvatar() {
         if (isLoggedIn) {
-            final UserService userService = UserService.getInstance();
-            userService.getUserInfo(id, new ServiceCallback<User>() {
-                @Override
-                public void onSuccess(final User result) {
-                    if (result != null) {
-                        setupPhoto(result.getHDProfilePicUrl());
-                    }
-                }
-
-                @Override
-                public void onFailure(final Throwable t) {
+            final UserRepository repository = UserRepository.Companion.getInstance();
+            repository.getUserInfo(id, CoroutineUtilsKt.getContinuation((user, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
+                if (throwable != null) {
                     final Context context = getContext();
                     if (context == null) {
                         dismiss();
                         return;
                     }
-                    Toast.makeText(context, t.getMessage(), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(context, throwable.getMessage(), Toast.LENGTH_SHORT).show();
                     dismiss();
+                    return;
                 }
-            });
+                if (user != null) {
+                    final String url = user.getHDProfilePicUrl();
+                    if (TextUtils.isEmpty(url)) {
+                        final Context context = getContext();
+                        if (context == null) return;
+                        Toast.makeText(context, R.string.no_profile_pic_found, Toast.LENGTH_LONG).show();
+                        return;
+                    }
+                    setupPhoto(url);
+                }
+            }), Dispatchers.getIO()));
         } else setupPhoto(fallbackUrl);
     }
 
@@ -175,6 +184,13 @@ public class ProfilePicDialogFragment extends DialogFragment {
                 })
                 .build();
         binding.imageViewer.setController(controller);
+        final AnimatedZoomableController zoomableController = (AnimatedZoomableController) binding.imageViewer.getZoomableController();
+        zoomableController.setMaxScaleFactor(3f);
+        zoomableController.setGestureZoomEnabled(true);
+        zoomableController.setEnabled(true);
+        binding.imageViewer.setZoomingEnabled(true);
+        final DoubleTapGestureListener tapListener = new DoubleTapGestureListener(binding.imageViewer);
+        binding.imageViewer.setTapListener(tapListener);
     }
 
     private void downloadProfilePicture() {

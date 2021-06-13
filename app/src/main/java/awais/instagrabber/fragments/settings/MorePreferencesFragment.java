@@ -4,11 +4,13 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
+import android.os.Bundle;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.FragmentManager;
@@ -19,29 +21,25 @@ import androidx.preference.Preference;
 import androidx.preference.PreferenceCategory;
 import androidx.preference.PreferenceScreen;
 import androidx.preference.PreferenceViewHolder;
-
-import java.util.List;
+import androidx.recyclerview.widget.RecyclerView;
 
 import awais.instagrabber.BuildConfig;
 import awais.instagrabber.R;
 import awais.instagrabber.activities.Login;
 import awais.instagrabber.activities.MainActivity;
 import awais.instagrabber.databinding.PrefAccountSwitcherBinding;
-import awais.instagrabber.db.datasources.AccountDataSource;
-import awais.instagrabber.db.entities.Account;
 import awais.instagrabber.db.repositories.AccountRepository;
-import awais.instagrabber.db.repositories.RepositoryCallback;
 import awais.instagrabber.dialogs.AccountSwitcherDialogFragment;
-import awais.instagrabber.repositories.responses.User;
 import awais.instagrabber.utils.AppExecutors;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.CookieUtils;
+import awais.instagrabber.utils.CoroutineUtilsKt;
 import awais.instagrabber.utils.FlavorTown;
 import awais.instagrabber.utils.ProcessPhoenix;
 import awais.instagrabber.utils.TextUtils;
 import awais.instagrabber.utils.Utils;
-import awais.instagrabber.webservices.ServiceCallback;
-import awais.instagrabber.webservices.UserService;
+import awais.instagrabber.webservices.UserRepository;
+import kotlinx.coroutines.Dispatchers;
 
 import static awais.instagrabber.utils.Utils.settingsHelper;
 
@@ -54,15 +52,28 @@ public class MorePreferencesFragment extends BasePreferencesFragment {
     }
 
     @Override
+    public RecyclerView onCreateRecyclerView(final LayoutInflater inflater, final ViewGroup parent, final Bundle savedInstanceState) {
+        final RecyclerView recyclerView = super.onCreateRecyclerView(inflater, parent, savedInstanceState);
+        final Context context = getContext();
+        if (recyclerView != null && context != null) {
+            recyclerView.setClipToPadding(false);
+            recyclerView.setPadding(recyclerView.getPaddingLeft(),
+                                    recyclerView.getPaddingTop(),
+                                    recyclerView.getPaddingRight(),
+                                    Utils.getActionBarHeight(context));
+        }
+        return recyclerView;
+    }
+
+    @Override
     void setupPreferenceScreen(final PreferenceScreen screen) {
         final String cookie = settingsHelper.getString(Constants.COOKIE);
         final boolean isLoggedIn = !TextUtils.isEmpty(cookie) && CookieUtils.getUserIdFromCookie(cookie) > 0;
         final MainActivity activity = (MainActivity) getActivity();
         // screen.addPreference(new MoreHeaderPreference(getContext()));
         final Context context = getContext();
-        final Resources resources = context.getResources();
         if (context == null) return;
-        accountRepository = AccountRepository.getInstance(AccountDataSource.getInstance(context));
+        accountRepository = AccountRepository.Companion.getInstance(context);
         final PreferenceCategory accountCategory = new PreferenceCategory(context);
         accountCategory.setTitle(R.string.account);
         accountCategory.setIconSpaceReserved(false);
@@ -77,73 +88,81 @@ public class MorePreferencesFragment extends BasePreferencesFragment {
                 // shouldRecreate();
                 Toast.makeText(context1, R.string.logout_success, Toast.LENGTH_SHORT).show();
                 settingsHelper.putString(Constants.COOKIE, "");
-                AppExecutors.getInstance().mainThread().execute(() -> {
-                    ProcessPhoenix.triggerRebirth(context1);
-                }, 200);
+                AppExecutors.INSTANCE.getMainThread().execute(() -> ProcessPhoenix.triggerRebirth(context1), 200);
                 return true;
             }));
         }
-        accountRepository.getAllAccounts(new RepositoryCallback<List<Account>>() {
-            @Override
-            public void onSuccess(@NonNull final List<Account> accounts) {
-                if (!isLoggedIn) {
-                    if (accounts.size() > 0) {
-                        final AccountSwitcherPreference preference = getAccountSwitcherPreference(null, context);
-                        if (preference == null) return;
-                        accountCategory.addPreference(preference);
-                    }
-                    // Need to show something to trigger login activity
-                    final Preference preference1 = getPreference(R.string.add_account, R.drawable.ic_add, preference -> {
-                        startActivityForResult(new Intent(getContext(), Login.class), Constants.LOGIN_RESULT_CODE);
-                        return true;
-                    });
-                    if (preference1 == null) return;
-                    accountCategory.addPreference(preference1);
-                }
-                if (accounts.size() > 0) {
-                    accountCategory
-                            .addPreference(getPreference(R.string.remove_all_acc, null, R.drawable.ic_account_multiple_remove_24, preference -> {
-                                if (getContext() == null) return false;
-                                new AlertDialog.Builder(getContext())
-                                        .setTitle(R.string.logout)
-                                        .setMessage(R.string.remove_all_acc_warning)
-                                        .setPositiveButton(R.string.yes, (dialog, which) -> {
-                                            CookieUtils.removeAllAccounts(context, new RepositoryCallback<Void>() {
-                                                @Override
-                                                public void onSuccess(final Void result) {
-                                                    // shouldRecreate();
-                                                    final Context context1 = getContext();
-                                                    if (context1 == null) return;
-                                                    Toast.makeText(context1, R.string.logout_success, Toast.LENGTH_SHORT).show();
-                                                    settingsHelper.putString(Constants.COOKIE, "");
-                                                    AppExecutors.getInstance().mainThread().execute(() -> {
-                                                        ProcessPhoenix.triggerRebirth(context1);
-                                                    }, 200);
-                                                }
-
-                                                @Override
-                                                public void onDataNotAvailable() {}
-                                            });
-                                        })
-                                        .setNegativeButton(R.string.cancel, null)
-                                        .show();
+        accountRepository.getAllAccounts(
+                CoroutineUtilsKt.getContinuation((accounts, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
+                    if (throwable != null) {
+                        Log.d(TAG, "getAllAccounts", throwable);
+                        if (!isLoggedIn) {
+                            // Need to show something to trigger login activity
+                            accountCategory.addPreference(getPreference(R.string.add_account, R.drawable.ic_add, preference -> {
+                                startActivityForResult(new Intent(getContext(), Login.class), Constants.LOGIN_RESULT_CODE);
                                 return true;
                             }));
-                }
-            }
-
-            @Override
-            public void onDataNotAvailable() {
-                Log.d(TAG, "onDataNotAvailable");
-                if (!isLoggedIn) {
-                    // Need to show something to trigger login activity
-                    accountCategory.addPreference(getPreference(R.string.add_account, R.drawable.ic_add, preference -> {
-                        startActivityForResult(new Intent(getContext(), Login.class), Constants.LOGIN_RESULT_CODE);
-                        return true;
-                    }));
-                }
-            }
-        });
+                        }
+                        return;
+                    }
+                    if (!isLoggedIn) {
+                        if (accounts.size() > 0) {
+                            final Context context1 = getContext();
+                            final AccountSwitcherPreference preference = getAccountSwitcherPreference(null, context1);
+                            if (preference == null) return;
+                            accountCategory.addPreference(preference);
+                        }
+                        // Need to show something to trigger login activity
+                        final Preference preference1 = getPreference(R.string.add_account, R.drawable.ic_add, preference -> {
+                            final Context context1 = getContext();
+                            if (context1 == null) return false;
+                            startActivityForResult(new Intent(context1, Login.class), Constants.LOGIN_RESULT_CODE);
+                            return true;
+                        });
+                        if (preference1 == null) return;
+                        accountCategory.addPreference(preference1);
+                    }
+                    if (accounts.size() > 0) {
+                        final Preference preference1 = getPreference(
+                                R.string.remove_all_acc,
+                                null,
+                                R.drawable.ic_account_multiple_remove_24,
+                                preference -> {
+                                    if (getContext() == null) return false;
+                                    new AlertDialog.Builder(getContext())
+                                            .setTitle(R.string.logout)
+                                            .setMessage(R.string.remove_all_acc_warning)
+                                            .setPositiveButton(R.string.yes, (dialog, which) -> {
+                                                final Context context1 = getContext();
+                                                if (context1 == null) return;
+                                                CookieUtils.removeAllAccounts(
+                                                        context1,
+                                                        CoroutineUtilsKt.getContinuation(
+                                                                (unit, throwable1) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
+                                                                    if (throwable1 != null) {
+                                                                        return;
+                                                                    }
+                                                                    final Context context2 = getContext();
+                                                                    if (context2 == null) return;
+                                                                    Toast.makeText(context2, R.string.logout_success, Toast.LENGTH_SHORT).show();
+                                                                    settingsHelper.putString(Constants.COOKIE, "");
+                                                                    AppExecutors.INSTANCE
+                                                                            .getMainThread()
+                                                                            .execute(() -> ProcessPhoenix.triggerRebirth(context1), 200);
+                                                                }),
+                                                                Dispatchers.getIO()
+                                                        )
+                                                );
+                                            })
+                                            .setNegativeButton(R.string.cancel, null)
+                                            .show();
+                                    return true;
+                                });
+                        if (preference1 == null) return;
+                        accountCategory.addPreference(preference1);
+                    }
+                }), Dispatchers.getIO())
+        );
 
         // final PreferenceCategory generalCategory = new PreferenceCategory(context);
         // generalCategory.setTitle(R.string.pref_category_general);
@@ -236,12 +255,14 @@ public class MorePreferencesFragment extends BasePreferencesFragment {
                                            -1,
                                            preference -> {
                                                if (BuildConfig.isPre) return true;
+                                               if (activity == null) return false;
                                                FlavorTown.updateCheck(activity, true);
                                                return true;
                                            }));
         screen.addPreference(getDivider(context));
 
         final Preference reminderPreference = getPreference(R.string.reminder, R.string.reminder_summary, R.drawable.ic_warning, null);
+        if (reminderPreference == null) return;
         reminderPreference.setSelectable(false);
         screen.addPreference(reminderPreference);
     }
@@ -263,47 +284,37 @@ public class MorePreferencesFragment extends BasePreferencesFragment {
 
             // adds cookies to database for quick access
             final long uid = CookieUtils.getUserIdFromCookie(cookie);
-            final UserService userService = UserService.getInstance();
-            userService.getUserInfo(uid, new ServiceCallback<User>() {
-                @Override
-                public void onSuccess(final User result) {
-                    // Log.d(TAG, "adding userInfo: " + result);
-                    if (result != null) {
-                        accountRepository.insertOrUpdateAccount(
-                                uid,
-                                result.getUsername(),
-                                cookie,
-                                result.getFullName(),
-                                result.getProfilePicUrl(),
-                                new RepositoryCallback<Account>() {
-                                    @Override
-                                    public void onSuccess(final Account result) {
-                                        // final FragmentActivity activity = getActivity();
-                                        // if (activity == null) return;
-                                        // activity.recreate();
-                                        AppExecutors.getInstance().mainThread().execute(() -> {
-                                            final Context context = getContext();
-                                            if (context == null) return;
-                                            ProcessPhoenix.triggerRebirth(context);
-                                        }, 200);
-                                    }
-
-                                    @Override
-                                    public void onDataNotAvailable() {
-                                        Log.e(TAG, "onDataNotAvailable: insert failed");
-                                    }
-                                });
-                    }
+            final UserRepository userRepository = UserRepository.Companion.getInstance();
+            userRepository.getUserInfo(uid, CoroutineUtilsKt.getContinuation((user, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
+                if (throwable != null) {
+                    Log.e(TAG, "Error fetching user info", throwable);
+                    return;
                 }
-
-                @Override
-                public void onFailure(final Throwable t) {
-                    Log.e(TAG, "Error fetching user info", t);
+                if (user != null) {
+                    accountRepository.insertOrUpdateAccount(
+                            uid,
+                            user.getUsername(),
+                            cookie,
+                            user.getFullName(),
+                            user.getProfilePicUrl(),
+                            CoroutineUtilsKt.getContinuation((account, throwable1) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
+                                if (throwable1 != null) {
+                                    Log.e(TAG, "onActivityResult: ", throwable1);
+                                    return;
+                                }
+                                AppExecutors.INSTANCE.getMainThread().execute(() -> {
+                                    final Context context = getContext();
+                                    if (context == null) return;
+                                    ProcessPhoenix.triggerRebirth(context);
+                                }, 200);
+                            }), Dispatchers.getIO())
+                    );
                 }
-            });
+            }), Dispatchers.getIO()));
         }
     }
 
+    @Nullable
     private AccountSwitcherPreference getAccountSwitcherPreference(final String cookie, final Context context) {
         if (context == null) return null;
         return new AccountSwitcherPreference(context, cookie, accountRepository, v -> showAccountSwitcherDialog());
@@ -318,12 +329,14 @@ public class MorePreferencesFragment extends BasePreferencesFragment {
         dialogFragment.show(fragmentManager, "accountSwitcher");
     }
 
+    @Nullable
     private Preference getPreference(final int title,
                                      final int icon,
                                      final Preference.OnPreferenceClickListener clickListener) {
         return getPreference(title, -1, icon, clickListener);
     }
 
+    @Nullable
     private Preference getPreference(final int title,
                                      final int summary,
                                      final int icon,
@@ -339,6 +352,7 @@ public class MorePreferencesFragment extends BasePreferencesFragment {
         return getPreference(title, string, icon, clickListener);
     }
 
+    @Nullable
     private Preference getPreference(final int title,
                                      final String summary,
                                      final int icon,
@@ -356,15 +370,14 @@ public class MorePreferencesFragment extends BasePreferencesFragment {
         return preference;
     }
 
-
-    public static class MoreHeaderPreference extends Preference {
-
-        public MoreHeaderPreference(final Context context) {
-            super(context);
-            setLayoutResource(R.layout.pref_more_header);
-            setSelectable(false);
-        }
-    }
+    // public static class MoreHeaderPreference extends Preference {
+    //
+    //     public MoreHeaderPreference(final Context context) {
+    //         super(context);
+    //         setLayoutResource(R.layout.pref_more_header);
+    //         setSelectable(false);
+    //     }
+    // }
 
     public static class AccountSwitcherPreference extends Preference {
 
@@ -391,20 +404,21 @@ public class MorePreferencesFragment extends BasePreferencesFragment {
             final PrefAccountSwitcherBinding binding = PrefAccountSwitcherBinding.bind(root);
             final long uid = CookieUtils.getUserIdFromCookie(cookie);
             if (uid <= 0) return;
-            accountRepository.getAccount(uid, new RepositoryCallback<Account>() {
-                @Override
-                public void onSuccess(final Account account) {
-                    binding.getRoot().post(() -> {
-                        binding.fullName.setText(account.getFullName());
-                        binding.username.setText("@" + account.getUsername());
-                        binding.profilePic.setImageURI(account.getProfilePic());
-                        binding.getRoot().requestLayout();
-                    });
-                }
-
-                @Override
-                public void onDataNotAvailable() {}
-            });
+            accountRepository.getAccount(
+                    uid,
+                    CoroutineUtilsKt.getContinuation((account, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
+                        if (throwable != null) {
+                            Log.e(TAG, "onBindViewHolder: ", throwable);
+                            return;
+                        }
+                        binding.getRoot().post(() -> {
+                            binding.fullName.setText(account.getFullName());
+                            binding.username.setText("@" + account.getUsername());
+                            binding.profilePic.setImageURI(account.getProfilePic());
+                            binding.getRoot().requestLayout();
+                        });
+                    }), Dispatchers.getIO())
+            );
         }
     }
 }

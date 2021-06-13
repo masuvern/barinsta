@@ -5,7 +5,6 @@ import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.graphics.Point;
 import android.graphics.drawable.Drawable;
-import android.text.format.DateFormat;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewConfiguration;
@@ -25,6 +24,9 @@ import androidx.transition.TransitionManager;
 import com.google.android.material.transition.MaterialFade;
 import com.google.common.collect.ImmutableList;
 
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -144,7 +146,7 @@ public abstract class DirectItemViewHolder extends RecyclerView.ViewHolder imple
         }
         setupReply(item, messageDirection);
         setReactions(item, position);
-        if (item.getRepliedToMessage() == null && item.showForwardAttribution()) {
+        if (item.getRepliedToMessage() == null && item.getShowForwardAttribution()) {
             setForwardInfo(messageDirection);
         }
     }
@@ -163,7 +165,9 @@ public abstract class DirectItemViewHolder extends RecyclerView.ViewHolder imple
             binding.ivProfilePic.setVisibility(messageDirection == MessageDirection.INCOMING && thread.isGroup() ? View.VISIBLE : View.GONE);
             binding.tvUsername.setVisibility(messageDirection == MessageDirection.INCOMING && thread.isGroup() ? View.VISIBLE : View.GONE);
             if (messageDirection == MessageDirection.INCOMING && thread.isGroup()) {
-                final User user = getUser(item.getUserId(), thread.getUsers());
+                final List<User> allUsers = new LinkedList(thread.getUsers());
+                allUsers.addAll(thread.getLeftUsers());
+                final User user = getUser(item.getUserId(), allUsers);
                 if (user != null) {
                     binding.tvUsername.setText(user.getUsername());
                     binding.ivProfilePic.setImageURI(user.getProfilePicUrl());
@@ -193,7 +197,10 @@ public abstract class DirectItemViewHolder extends RecyclerView.ViewHolder imple
         if (showMessageInfo()) {
             binding.messageInfo.setVisibility(View.VISIBLE);
             binding.deliveryStatus.setVisibility(messageDirection == MessageDirection.OUTGOING ? View.VISIBLE : View.GONE);
-            binding.messageTime.setText(DateFormat.getTimeFormat(itemView.getContext()).format(item.getDate()));
+            if (item.getDate() != null) {
+                final DateTimeFormatter dateFormatter = DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT);
+                binding.messageTime.setText(dateFormatter.format(item.getDate()));
+            }
             if (messageDirection == MessageDirection.OUTGOING) {
                 if (item.isPending()) {
                     binding.deliveryStatus.setImageResource(R.drawable.ic_check_24);
@@ -216,7 +223,9 @@ public abstract class DirectItemViewHolder extends RecyclerView.ViewHolder imple
 
     private void setupReply(final DirectItem item, final MessageDirection messageDirection) {
         if (item.getRepliedToMessage() != null) {
-            setReply(item, messageDirection, thread.getUsers());
+            final List<User> allUsers = new LinkedList(thread.getUsers());
+            allUsers.addAll(thread.getLeftUsers());
+            setReply(item, messageDirection, allUsers);
         } else {
             binding.quoteLine.setVisibility(View.GONE);
             binding.replyContainer.setVisibility(View.GONE);
@@ -551,6 +560,10 @@ public abstract class DirectItemViewHolder extends RecyclerView.ViewHolder imple
         menu.setOnDismissListener(() -> setSelected(false));
         menu.setOnReactionClickListener(emoji -> callback.onReaction(item, emoji));
         menu.setOnOptionSelectListener((itemId, cb) -> callback.onOptionSelect(item, itemId, cb));
+        menu.setOnAddReactionListener(() -> {
+            menu.dismiss();
+            itemView.postDelayed(() -> callback.onAddReactionListener(item), 300);
+        });
         menu.show(itemView, location);
     }
 

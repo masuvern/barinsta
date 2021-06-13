@@ -18,8 +18,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.time.format.DateTimeFormatter;
+import java.time.LocalDateTime;
 import java.util.Locale;
 
 import awais.instagrabber.databinding.DialogCreateBackupBinding;
@@ -33,8 +33,9 @@ import static android.app.Activity.RESULT_OK;
 public class CreateBackupDialogFragment extends DialogFragment {
     private static final String TAG = CreateBackupDialogFragment.class.getSimpleName();
     private static final int STORAGE_PERM_REQUEST_CODE = 8020;
-    private static final SimpleDateFormat BACKUP_FILE_DATE_TIME_FORMAT = new SimpleDateFormat("yyyyMMddHHmmss", Locale.US);
+    private static final DateTimeFormatter BACKUP_FILE_DATE_TIME_FORMAT = DateTimeFormatter.ofPattern("yyyyMMddHHmmss", Locale.US);
     private static final int CREATE_FILE_REQUEST_CODE = 1;
+
 
     private final OnResultListener onResultListener;
     private DialogCreateBackupBinding binding;

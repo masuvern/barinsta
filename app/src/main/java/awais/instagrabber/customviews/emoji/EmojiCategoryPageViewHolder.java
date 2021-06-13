@@ -6,12 +6,14 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import awais.instagrabber.customviews.emoji.EmojiPicker.OnEmojiClickListener;
+import awais.instagrabber.utils.emoji.EmojiParser;
 
 public class EmojiCategoryPageViewHolder extends RecyclerView.ViewHolder {
     // private static final String TAG = EmojiCategoryPageViewHolder.class.getSimpleName();
 
     private final View rootView;
     private final OnEmojiClickListener onEmojiClickListener;
+    private final EmojiParser emojiParser = EmojiParser.Companion.getInstance(itemView.getContext());
 
     public EmojiCategoryPageViewHolder(@NonNull final View rootView,
                                        @NonNull final RecyclerView itemView,
@@ -24,6 +26,7 @@ public class EmojiCategoryPageViewHolder extends RecyclerView.ViewHolder {
     public void bind(final EmojiCategory emojiCategory) {
         final RecyclerView emojiGrid = (RecyclerView) itemView;
         final EmojiGridAdapter adapter = new EmojiGridAdapter(
+                emojiParser,
                 emojiCategory.getType(),
                 onEmojiClickListener,
                 (position, view, parent) -> {

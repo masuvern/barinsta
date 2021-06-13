@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<awais.instagrabber.customviews.InsetsNotifyingCoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main_container"
@@ -29,10 +29,32 @@
                 android:id="@+id/toolbar"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
-                android:background="?attr/colorSurface"
+                android:background="?attr/toolbarColor"
                 app:layout_collapseMode="pin"
                 app:title="@string/app_name"
-                tools:menu="@menu/main_menu" />
+                tools:menu="@menu/main_menu">
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/search_input_layout"
+                    style="?searchInputStyle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:visibility="gone"
+                    app:boxStrokeColor="@null"
+                    app:boxStrokeWidth="0dp"
+                    app:boxStrokeWidthFocused="0dp"
+                    app:endIconContentDescription="@string/clear"
+                    app:endIconDrawable="@drawable/ic_close_24"
+                    app:endIconMode="custom"
+                    app:hintEnabled="false"
+                    tools:visibility="visible">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="@string/search" />
+                </com.google.android.material.textfield.TextInputLayout>
+            </com.google.android.material.appbar.MaterialToolbar>
         </com.google.android.material.appbar.CollapsingToolbarLayout>
     </com.google.android.material.appbar.AppBarLayout>
 
@@ -40,13 +62,14 @@
         android:id="@+id/main_nav_host"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:clipToPadding="false"
         app:layout_behavior="@string/appbar_scrolling_view_behavior" />
 
+    <!--app:layout_behavior="@string/hide_bottom_view_on_scroll_behavior"-->
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottomNavView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
-        app:labelVisibilityMode="auto"
-        app:layout_behavior="@string/hide_bottom_view_on_scroll_behavior" />
-</androidx.coordinatorlayout.widget.CoordinatorLayout>
+        app:labelVisibilityMode="auto" />
+</awais.instagrabber.customviews.InsetsNotifyingCoordinatorLayout>

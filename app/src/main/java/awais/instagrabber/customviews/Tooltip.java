@@ -9,12 +9,14 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewPropertyAnimator;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.widget.AppCompatTextView;
 
 import awais.instagrabber.utils.AppExecutors;
 import awais.instagrabber.utils.Utils;
 import awais.instagrabber.utils.ViewUtils;
 
+import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 
 public class Tooltip extends AppCompatTextView {
 
@@ -22,7 +24,7 @@ public class Tooltip extends AppCompatTextView {
     private ViewPropertyAnimator animator;
     private boolean showing;
 
-    private final AppExecutors appExecutors;
+    private final AppExecutors appExecutors = AppExecutors.INSTANCE;
     private final Runnable dismissRunnable = () -> {
         animator = animate().alpha(0).setListener(new AnimatorListenerAdapter() {
             @Override
@@ -33,17 +35,15 @@ public class Tooltip extends AppCompatTextView {
         animator.start();
     };
 
-    public Tooltip(Context context, ViewGroup parentView, int backgroundColor, int textColor) {
+    public Tooltip(@NonNull Context context, @NonNull ViewGroup parentView, int backgroundColor, int textColor) {
         super(context);
         setBackgroundDrawable(ViewUtils.createRoundRectDrawable(Utils.convertDpToPx(3), backgroundColor));
         setTextColor(textColor);
         setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14);
         setPadding(Utils.convertDpToPx(8), Utils.convertDpToPx(7), Utils.convertDpToPx(8), Utils.convertDpToPx(7));
         setGravity(Gravity.CENTER_VERTICAL);
-        parentView.addView(this, ViewUtils.createFrame(
-                ViewUtils.WRAP_CONTENT, ViewUtils.WRAP_CONTENT, Gravity.START | Gravity.TOP, 5, 0, 5, 3));
+        parentView.addView(this, ViewUtils.createFrame(WRAP_CONTENT, WRAP_CONTENT, Gravity.START | Gravity.TOP, 5, 0, 5, 3));
         setVisibility(GONE);
-        appExecutors = AppExecutors.getInstance();
     }
 
     @Override
@@ -87,8 +87,8 @@ public class Tooltip extends AppCompatTextView {
         updateTooltipPosition();
         showing = true;
 
-        appExecutors.mainThread().cancel(dismissRunnable);
-        appExecutors.mainThread().execute(dismissRunnable, 2000);
+        appExecutors.getMainThread().cancel(dismissRunnable);
+        appExecutors.getMainThread().execute(dismissRunnable, 2000);
         if (animator != null) {
             animator.setListener(null);
             animator.cancel();
@@ -110,7 +110,7 @@ public class Tooltip extends AppCompatTextView {
                 animator = null;
             }
 
-            appExecutors.mainThread().cancel(dismissRunnable);
+            appExecutors.getMainThread().cancel(dismissRunnable);
             dismissRunnable.run();
         }
         showing = false;

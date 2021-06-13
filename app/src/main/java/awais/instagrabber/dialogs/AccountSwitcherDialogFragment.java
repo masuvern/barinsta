@@ -3,6 +3,7 @@ package awais.instagrabber.dialogs;
 import android.app.Dialog;
 import android.content.Context;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,39 +15,38 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.DialogFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 import awais.instagrabber.R;
 import awais.instagrabber.adapters.AccountSwitcherAdapter;
 import awais.instagrabber.databinding.DialogAccountSwitcherBinding;
-import awais.instagrabber.db.datasources.AccountDataSource;
 import awais.instagrabber.db.entities.Account;
 import awais.instagrabber.db.repositories.AccountRepository;
-import awais.instagrabber.db.repositories.RepositoryCallback;
 import awais.instagrabber.utils.AppExecutors;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.CookieUtils;
+import awais.instagrabber.utils.CoroutineUtilsKt;
 import awais.instagrabber.utils.ProcessPhoenix;
 import awais.instagrabber.utils.TextUtils;
 import awais.instagrabber.utils.Utils;
+import kotlinx.coroutines.Dispatchers;
 
 import static awais.instagrabber.utils.Utils.settingsHelper;
 
 public class AccountSwitcherDialogFragment extends DialogFragment {
+    private static final String TAG = AccountSwitcherDialogFragment.class.getSimpleName();
 
     private AccountRepository accountRepository;
 
     private OnAddAccountClickListener onAddAccountClickListener;
     private DialogAccountSwitcherBinding binding;
 
-    public AccountSwitcherDialogFragment() {
-        accountRepository = AccountRepository.getInstance(AccountDataSource.getInstance(getContext()));
-    }
+    public AccountSwitcherDialogFragment() {}
 
     public AccountSwitcherDialogFragment(final OnAddAccountClickListener onAddAccountClickListener) {
         this.onAddAccountClickListener = onAddAccountClickListener;
-        accountRepository = AccountRepository.getInstance(AccountDataSource.getInstance(getContext()));
     }
 
     private final AccountSwitcherAdapter.OnAccountClickListener accountClickListener = (model, isCurrent) -> {
@@ -59,7 +59,7 @@ public class AccountSwitcherDialogFragment extends DialogFragment {
         // final FragmentActivity activity = getActivity();
         // if (activity != null) activity.recreate();
         // dismiss();
-        AppExecutors.getInstance().mainThread().execute(() -> {
+        AppExecutors.INSTANCE.getMainThread().execute(() -> {
             final Context context = getContext();
             if (context == null) return;
             ProcessPhoenix.triggerRebirth(context);
@@ -80,17 +80,15 @@ public class AccountSwitcherDialogFragment extends DialogFragment {
                 .setMessage(getString(R.string.quick_access_confirm_delete, model.getUsername()))
                 .setPositiveButton(R.string.yes, (dialog, which) -> {
                     if (accountRepository == null) return;
-                    accountRepository.deleteAccount(model, new RepositoryCallback<Void>() {
-                        @Override
-                        public void onSuccess(final Void result) {
-                            dismiss();
-                        }
-
-                        @Override
-                        public void onDataNotAvailable() {
-                            dismiss();
-                        }
-                    });
+                    accountRepository.deleteAccount(
+                            model,
+                            CoroutineUtilsKt.getContinuation((unit, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
+                                dismiss();
+                                if (throwable != null) {
+                                    Log.e(TAG, "deleteAccount: ", throwable);
+                                }
+                            }), Dispatchers.getIO())
+                    );
                 })
                 .setNegativeButton(R.string.cancel, null)
                 .show();
@@ -114,6 +112,12 @@ public class AccountSwitcherDialogFragment extends DialogFragment {
     }
 
     @Override
+    public void onAttach(@NonNull final Context context) {
+        super.onAttach(context);
+        accountRepository = AccountRepository.Companion.getInstance(context);
+    }
+
+    @Override
     public void onStart() {
         super.onStart();
         final Dialog dialog = getDialog();
@@ -129,18 +133,19 @@ public class AccountSwitcherDialogFragment extends DialogFragment {
         final AccountSwitcherAdapter adapter = new AccountSwitcherAdapter(accountClickListener, accountLongClickListener);
         binding.accounts.setAdapter(adapter);
         if (accountRepository == null) return;
-        accountRepository.getAllAccounts(new RepositoryCallback<List<Account>>() {
-            @Override
-            public void onSuccess(final List<Account> accounts) {
-                if (accounts == null) return;
-                final String cookie = settingsHelper.getString(Constants.COOKIE);
-                sortUserList(cookie, accounts);
-                adapter.submitList(accounts);
-            }
-
-            @Override
-            public void onDataNotAvailable() {}
-        });
+        accountRepository.getAllAccounts(
+                CoroutineUtilsKt.getContinuation((accounts, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
+                    if (throwable != null) {
+                        Log.e(TAG, "init: ", throwable);
+                        return;
+                    }
+                    if (accounts == null) return;
+                    final String cookie = settingsHelper.getString(Constants.COOKIE);
+                    final List<Account> copy = new ArrayList<>(accounts);
+                    sortUserList(cookie, copy);
+                    adapter.submitList(copy);
+                }), Dispatchers.getIO())
+        );
         binding.addAccountBtn.setOnClickListener(v -> {
             if (onAddAccountClickListener == null) return;
             onAddAccountClickListener.onAddAccountClick(this);

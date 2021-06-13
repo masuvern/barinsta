@@ -24,19 +24,18 @@ import awais.instagrabber.R;
 import awais.instagrabber.fragments.UserSearchFragment;
 import awais.instagrabber.models.Resource;
 import awais.instagrabber.repositories.responses.User;
-import awais.instagrabber.repositories.responses.UserSearchResponse;
 import awais.instagrabber.repositories.responses.directmessages.RankedRecipient;
-import awais.instagrabber.repositories.responses.directmessages.RankedRecipientsResponse;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.CookieUtils;
+import awais.instagrabber.utils.CoroutineUtilsKt;
 import awais.instagrabber.utils.Debouncer;
 import awais.instagrabber.utils.RankedRecipientsCache;
 import awais.instagrabber.utils.TextUtils;
 import awais.instagrabber.webservices.DirectMessagesService;
-import awais.instagrabber.webservices.UserService;
+import awais.instagrabber.webservices.UserRepository;
+import kotlinx.coroutines.Dispatchers;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
-import retrofit2.Callback;
 import retrofit2.Response;
 
 import static awais.instagrabber.utils.Utils.settingsHelper;
@@ -59,7 +58,7 @@ public class UserSearchViewModel extends ViewModel {
     private final MutableLiveData<Boolean> showAction = new MutableLiveData<>(false);
     private final Debouncer<String> searchDebouncer;
     private final Set<RankedRecipient> selectedRecipients = new HashSet<>();
-    private final UserService userService;
+    private final UserRepository userRepository;
     private final DirectMessagesService directMessagesService;
     private final RankedRecipientsCache rankedRecipientsCache;
 
@@ -71,9 +70,9 @@ public class UserSearchViewModel extends ViewModel {
         if (TextUtils.isEmpty(csrfToken) || viewerId <= 0 || TextUtils.isEmpty(deviceUuid)) {
             throw new IllegalArgumentException("User is not logged in!");
         }
-        userService = UserService.getInstance();
-        directMessagesService = DirectMessagesService.getInstance(csrfToken, viewerId, deviceUuid);
-        rankedRecipientsCache = RankedRecipientsCache.getInstance();
+        userRepository = UserRepository.Companion.getInstance();
+        directMessagesService = DirectMessagesService.INSTANCE;
+        rankedRecipientsCache = RankedRecipientsCache.INSTANCE;
         if ((rankedRecipientsCache.isFailed() || rankedRecipientsCache.isExpired()) && !rankedRecipientsCache.isUpdateInitiated()) {
             updateRankedRecipientCache();
         }
@@ -95,37 +94,23 @@ public class UserSearchViewModel extends ViewModel {
 
     private void updateRankedRecipientCache() {
         rankedRecipientsCache.setUpdateInitiated(true);
-        final Call<RankedRecipientsResponse> request = directMessagesService.rankedRecipients(null, null, null);
-        request.enqueue(new Callback<RankedRecipientsResponse>() {
-            @Override
-            public void onResponse(@NonNull final Call<RankedRecipientsResponse> call, @NonNull final Response<RankedRecipientsResponse> response) {
-                if (!response.isSuccessful()) {
-                    handleErrorResponse(response, false);
-                    rankedRecipientsCache.setFailed(true);
+        directMessagesService.rankedRecipients(
+                null,
+                null,
+                null,
+                CoroutineUtilsKt.getContinuation((response, throwable) -> {
+                    if (throwable != null) {
+                        Log.e(TAG, "updateRankedRecipientCache: ", throwable);
+                        rankedRecipientsCache.setUpdateInitiated(false);
+                        rankedRecipientsCache.setFailed(true);
+                        continueSearchIfRequired();
+                        return;
+                    }
+                    rankedRecipientsCache.setResponse(response);
                     rankedRecipientsCache.setUpdateInitiated(false);
                     continueSearchIfRequired();
-                    return;
-                }
-                if (response.body() == null) {
-                    Log.e(TAG, "onResponse: response body is null");
-                    rankedRecipientsCache.setUpdateInitiated(false);
-                    rankedRecipientsCache.setFailed(true);
-                    continueSearchIfRequired();
-                    return;
-                }
-                rankedRecipientsCache.setRankedRecipientsResponse(response.body());
-                rankedRecipientsCache.setUpdateInitiated(false);
-                continueSearchIfRequired();
-            }
-
-            @Override
-            public void onFailure(@NonNull final Call<RankedRecipientsResponse> call, @NonNull final Throwable t) {
-                Log.e(TAG, "onFailure: ", t);
-                rankedRecipientsCache.setUpdateInitiated(false);
-                rankedRecipientsCache.setFailed(true);
-                continueSearchIfRequired();
-            }
-        });
+                }, Dispatchers.getIO())
+        );
     }
 
     private void continueSearchIfRequired() {
@@ -183,78 +168,45 @@ public class UserSearchViewModel extends ViewModel {
     }
 
     private void defaultUserSearch() {
-        searchRequest = userService.search(currentQuery);
-        //noinspection unchecked
-        handleRequest((Call<UserSearchResponse>) searchRequest);
+        userRepository.search(currentQuery, CoroutineUtilsKt.getContinuation((userSearchResponse, throwable) -> {
+            if (throwable != null) {
+                Log.e(TAG, "onFailure: ", throwable);
+                recipients.postValue(Resource.error(throwable.getMessage(), getCachedRecipients()));
+                searchRequest = null;
+                return;
+            }
+            if (userSearchResponse == null) {
+                recipients.postValue(Resource.error(R.string.generic_null_response, getCachedRecipients()));
+                searchRequest = null;
+                return;
+            }
+            final List<RankedRecipient> list = userSearchResponse
+                    .getUsers()
+                    .stream()
+                    .map(RankedRecipient::of)
+                    .collect(Collectors.toList());
+            recipients.postValue(Resource.success(mergeResponseWithCache(list)));
+            searchRequest = null;
+        }));
     }
 
     private void rankedRecipientSearch() {
-        searchRequest = directMessagesService.rankedRecipients(searchMode.getName(), showGroups, currentQuery);
-        //noinspection unchecked
-        handleRankedRecipientRequest((Call<RankedRecipientsResponse>) searchRequest);
-    }
-
-
-    private void handleRankedRecipientRequest(@NonNull final Call<RankedRecipientsResponse> request) {
-        request.enqueue(new Callback<RankedRecipientsResponse>() {
-            @Override
-            public void onResponse(@NonNull final Call<RankedRecipientsResponse> call, @NonNull final Response<RankedRecipientsResponse> response) {
-                if (!response.isSuccessful()) {
-                    handleErrorResponse(response, true);
-                    searchRequest = null;
-                    return;
-                }
-                final RankedRecipientsResponse rankedRecipientsResponse = response.body();
-                if (rankedRecipientsResponse == null) {
-                    recipients.postValue(Resource.error(R.string.generic_null_response, getCachedRecipients()));
-                    searchRequest = null;
-                    return;
-                }
-                final List<RankedRecipient> list = rankedRecipientsResponse.getRankedRecipients();
-                recipients.postValue(Resource.success(mergeResponseWithCache(list)));
-                searchRequest = null;
-            }
-
-            @Override
-            public void onFailure(@NonNull final Call<RankedRecipientsResponse> call, @NonNull final Throwable t) {
-                Log.e(TAG, "onFailure: ", t);
-                recipients.postValue(Resource.error(t.getMessage(), getCachedRecipients()));
-                searchRequest = null;
-            }
-        });
-    }
-
-    private void handleRequest(@NonNull final Call<UserSearchResponse> request) {
-        request.enqueue(new Callback<UserSearchResponse>() {
-            @Override
-            public void onResponse(@NonNull final Call<UserSearchResponse> call, @NonNull final Response<UserSearchResponse> response) {
-                if (!response.isSuccessful()) {
-                    handleErrorResponse(response, true);
-                    searchRequest = null;
-                    return;
-                }
-                final UserSearchResponse userSearchResponse = response.body();
-                if (userSearchResponse == null) {
-                    recipients.postValue(Resource.error(R.string.generic_null_response, getCachedRecipients()));
-                    searchRequest = null;
-                    return;
-                }
-                final List<RankedRecipient> list = userSearchResponse
-                        .getUsers()
-                        .stream()
-                        .map(RankedRecipient::of)
-                        .collect(Collectors.toList());
-                recipients.postValue(Resource.success(mergeResponseWithCache(list)));
-                searchRequest = null;
-            }
-
-            @Override
-            public void onFailure(@NonNull final Call<UserSearchResponse> call, @NonNull final Throwable t) {
-                Log.e(TAG, "onFailure: ", t);
-                recipients.postValue(Resource.error(t.getMessage(), getCachedRecipients()));
-                searchRequest = null;
-            }
-        });
+        directMessagesService.rankedRecipients(
+                searchMode.getName(),
+                showGroups,
+                currentQuery,
+                CoroutineUtilsKt.getContinuation((response, throwable) -> {
+                    if (throwable != null) {
+                        Log.e(TAG, "rankedRecipientSearch: ", throwable);
+                        recipients.postValue(Resource.error(throwable.getMessage(), getCachedRecipients()));
+                        return;
+                    }
+                    final List<RankedRecipient> list = response.getRankedRecipients();
+                    if (list != null) {
+                        recipients.postValue(Resource.success(mergeResponseWithCache(list)));
+                    }
+                }, Dispatchers.getIO())
+        );
     }
 
     private List<RankedRecipient> mergeResponseWithCache(@NonNull final List<RankedRecipient> list) {

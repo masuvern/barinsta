@@ -41,7 +41,7 @@ import awais.instagrabber.webservices.ServiceCallback;
 import static awais.instagrabber.utils.Utils.settingsHelper;
 
 public class SavedCollectionsFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener {
-    private static final String TAG = "SavedCollectionsFragment";
+    private static final String TAG = SavedCollectionsFragment.class.getSimpleName();
     public static boolean pleaseRefresh = false;
 
     private MainActivity fragmentActivity;
@@ -145,15 +145,18 @@ public class SavedCollectionsFragment extends Fragment implements SwipeRefreshLa
         final SavedCollectionsAdapter adapter = new SavedCollectionsAdapter((topicCluster, root, cover, title, titleColor, backgroundColor) -> {
             final NavController navController = NavHostFragment.findNavController(this);
             if (isSaving) {
-                setNavControllerResult(navController, topicCluster.getId());
+                setNavControllerResult(navController, topicCluster.getCollectionId());
                 navController.navigateUp();
-            }
-            else {
-                final FragmentNavigator.Extras.Builder builder = new FragmentNavigator.Extras.Builder()
-                        .addSharedElement(cover, "collection-" + topicCluster.getId());
-                final SavedCollectionsFragmentDirections.ActionSavedCollectionsFragmentToCollectionPostsFragment action = SavedCollectionsFragmentDirections
-                        .actionSavedCollectionsFragmentToCollectionPostsFragment(topicCluster, titleColor, backgroundColor);
-                navController.navigate(action, builder.build());
+            } else {
+                try {
+                    final FragmentNavigator.Extras.Builder builder = new FragmentNavigator.Extras.Builder()
+                            .addSharedElement(cover, "collection-" + topicCluster.getCollectionId());
+                    final SavedCollectionsFragmentDirections.ActionSavedCollectionsFragmentToCollectionPostsFragment action = SavedCollectionsFragmentDirections
+                            .actionSavedCollectionsFragmentToCollectionPostsFragment(topicCluster, titleColor, backgroundColor);
+                    navController.navigate(action, builder.build());
+                } catch (Exception e) {
+                    Log.e(TAG, "setupTopics: ", e);
+                }
             }
         });
         binding.topicsRecyclerView.setAdapter(adapter);

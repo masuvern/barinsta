@@ -228,7 +228,7 @@ public class ZoomableDraweeView extends DraweeView<GenericDraweeHierarchy>
 
     public void setZoomingEnabled(boolean zoomingEnabled) {
         mZoomingEnabled = zoomingEnabled;
-        mZoomableController.setEnabled(false);
+        mZoomableController.setEnabled(zoomingEnabled);
     }
 
     /**

@@ -4,14 +4,14 @@ import awais.instagrabber.repositories.GifRepository;
 import awais.instagrabber.repositories.responses.giphy.GiphyGifResponse;
 import retrofit2.Call;
 
-public class GifService extends BaseService {
+public class GifService {
 
     private final GifRepository repository;
 
     private static GifService instance;
 
     private GifService() {
-        repository = RetrofitFactory.getInstance()
+        repository = RetrofitFactory.INSTANCE
                                     .getRetrofit()
                                     .create(GifRepository.class);
     }

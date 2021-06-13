@@ -61,6 +61,10 @@ public class StoryViewerOptions implements Serializable {
         return new StoryViewerOptions(id, Type.STORY_ARCHIVE);
     }
 
+    public static StoryViewerOptions forStoryArchive(final int position) {
+        return new StoryViewerOptions(position, Type.STORY_ARCHIVE);
+    }
+
     public long getId() {
         return id;
     }

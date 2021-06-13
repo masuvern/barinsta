@@ -22,7 +22,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class TagsService extends BaseService {
+public class TagsService {
 
     private static final String TAG = "TagsService";
 
@@ -31,7 +31,7 @@ public class TagsService extends BaseService {
     private final TagsRepository repository;
 
     private TagsService() {
-        repository = RetrofitFactory.getInstance()
+        repository = RetrofitFactory.INSTANCE
                                     .getRetrofit()
                                     .create(TagsRepository.class);
     }

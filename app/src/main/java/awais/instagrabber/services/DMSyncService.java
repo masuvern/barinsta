@@ -30,7 +30,6 @@ import awais.instagrabber.activities.MainActivity;
 import awais.instagrabber.db.datasources.DMLastNotifiedDataSource;
 import awais.instagrabber.db.entities.DMLastNotified;
 import awais.instagrabber.db.repositories.DMLastNotifiedRepository;
-import awais.instagrabber.db.repositories.RepositoryCallback;
 import awais.instagrabber.fragments.settings.PreferenceKeys;
 import awais.instagrabber.managers.DirectMessagesManager;
 import awais.instagrabber.managers.InboxManager;
@@ -39,11 +38,14 @@ import awais.instagrabber.repositories.responses.directmessages.DirectInbox;
 import awais.instagrabber.repositories.responses.directmessages.DirectItem;
 import awais.instagrabber.repositories.responses.directmessages.DirectThread;
 import awais.instagrabber.repositories.responses.directmessages.DirectThreadLastSeenAt;
+import awais.instagrabber.utils.AppExecutors;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.CookieUtils;
+import awais.instagrabber.utils.CoroutineUtilsKt;
 import awais.instagrabber.utils.DMUtils;
 import awais.instagrabber.utils.DateUtils;
 import awais.instagrabber.utils.TextUtils;
+import kotlinx.coroutines.Dispatchers;
 
 import static awais.instagrabber.utils.Utils.settingsHelper;
 
@@ -59,27 +61,28 @@ public class DMSyncService extends LifecycleService {
         super.onCreate();
         startForeground(Constants.DM_CHECK_NOTIFICATION_ID, buildForegroundNotification());
         Log.d(TAG, "onCreate: Service created");
-        final DirectMessagesManager directMessagesManager = DirectMessagesManager.getInstance();
+        final DirectMessagesManager directMessagesManager = DirectMessagesManager.INSTANCE;
         inboxManager = directMessagesManager.getInboxManager();
-        dmLastNotifiedRepository = DMLastNotifiedRepository.getInstance(DMLastNotifiedDataSource.getInstance(getApplicationContext()));
+        final Context context = getApplicationContext();
+        if (context == null) return;
+        dmLastNotifiedRepository = DMLastNotifiedRepository.getInstance(DMLastNotifiedDataSource.getInstance(context));
     }
 
     private void parseUnread(@NonNull final DirectInbox directInbox) {
-        dmLastNotifiedRepository.getAllDMDmLastNotified(new RepositoryCallback<List<DMLastNotified>>() {
-            @Override
-            public void onSuccess(final List<DMLastNotified> result) {
-                dmLastNotifiedMap = result != null
-                                    ? result.stream().collect(Collectors.toMap(DMLastNotified::getThreadId, Function.identity()))
-                                    : Collections.emptyMap();
-                parseUnreadActual(directInbox);
-            }
-
-            @Override
-            public void onDataNotAvailable() {
-                dmLastNotifiedMap = Collections.emptyMap();
-                parseUnreadActual(directInbox);
-            }
-        });
+        dmLastNotifiedRepository.getAllDMDmLastNotified(
+                CoroutineUtilsKt.getContinuation((result, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
+                    if (throwable != null) {
+                        Log.e(TAG, "parseUnread: ", throwable);
+                        dmLastNotifiedMap = Collections.emptyMap();
+                        parseUnreadActual(directInbox);
+                        return;
+                    }
+                    dmLastNotifiedMap = result != null
+                                        ? result.stream().collect(Collectors.toMap(DMLastNotified::getThreadId, Function.identity()))
+                                        : Collections.emptyMap();
+                    parseUnreadActual(directInbox);
+                }), Dispatchers.getIO())
+        );
         // Log.d(TAG, "inbox observer: " + directInbox);
     }
 
@@ -91,7 +94,7 @@ public class DMSyncService extends LifecycleService {
             return;
         }
         for (final DirectThread thread : threads) {
-            if (thread.isMuted()) continue;
+            if (thread.getMuted()) continue;
             final boolean read = DMUtils.isRead(thread);
             if (read) continue;
             final List<DirectItem> unreadMessages = getUnreadMessages(thread);
@@ -112,22 +115,20 @@ public class DMSyncService extends LifecycleService {
             final DirectItem latestItem = unreadItems.get(unreadItems.size() - 1);
             lastNotifiedListBuilder.add(new DMLastNotified(0,
                                                            unreadMessagesEntry.getKey(),
-                                                           latestItem.getLocalDateTime(),
+                                                           latestItem.getDate(),
                                                            now));
         }
         dmLastNotifiedRepository.insertOrUpdateDMLastNotified(
                 lastNotifiedListBuilder.build(),
-                new RepositoryCallback<Void>() {
-                    @Override
-                    public void onSuccess(final Void result) {
+                CoroutineUtilsKt.getContinuation((unit, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
+                    try {
+                        if (throwable != null) {
+                            Log.e(TAG, "parseUnreadActual: ", throwable);
+                        }
+                    } finally {
                         stopSelf();
                     }
-
-                    @Override
-                    public void onDataNotAvailable() {
-                        stopSelf();
-                    }
-                }
+                }), Dispatchers.getIO())
         );
     }
 
@@ -145,8 +146,8 @@ public class DMSyncService extends LifecycleService {
             if (item.getUserId() == viewerId) break; // Reached a message from the viewer, it is assumed the viewer has read the next messages
             final boolean read = DMUtils.isRead(item, lastSeenAt, Collections.singletonList(viewerId));
             if (read) break;
-            if (dmLastNotified != null && dmLastNotified.getLastNotifiedMsgTs() != null) {
-                if (count == 0 && DateUtils.isBeforeOrEqual(item.getLocalDateTime(), dmLastNotified.getLastNotifiedMsgTs())) {
+            if (dmLastNotified != null && dmLastNotified.getLastNotifiedMsgTs() != null && item.getDate() != null) {
+                if (count == 0 && DateUtils.isBeforeOrEqual(item.getDate(), dmLastNotified.getLastNotifiedMsgTs())) {
                     // The first unread item has been notified and hence all subsequent items can be ignored
                     // since the items are in desc timestamp order
                     break;
@@ -234,7 +235,7 @@ public class DMSyncService extends LifecycleService {
             parseUnread(directInbox);
         });
         Log.d(TAG, "onStartCommand: refreshing inbox");
-        inboxManager.refresh();
+        // inboxManager.refresh();
         return START_NOT_STICKY;
     }
 

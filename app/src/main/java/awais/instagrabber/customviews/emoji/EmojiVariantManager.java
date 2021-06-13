@@ -21,7 +21,7 @@ public class EmojiVariantManager {
     private static final String TAG = EmojiVariantManager.class.getSimpleName();
     private static final Object LOCK = new Object();
 
-    private final AppExecutors appExecutors = AppExecutors.getInstance();
+    private final AppExecutors appExecutors = AppExecutors.INSTANCE;
     private final Map<String, String> selectedVariantMap = new HashMap<>();
 
     private static EmojiVariantManager instance;
@@ -57,7 +57,7 @@ public class EmojiVariantManager {
     public void setVariant(final String parent, final String variant) {
         if (parent == null || variant == null) return;
         selectedVariantMap.put(parent, variant);
-        appExecutors.tasksThread().execute(() -> {
+        appExecutors.getTasksThread().execute(() -> {
             final JSONObject jsonObject = new JSONObject(selectedVariantMap);
             final String json = jsonObject.toString();
             Utils.settingsHelper.putString(PREF_EMOJI_VARIANTS, json);

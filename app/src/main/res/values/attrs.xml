@@ -6,6 +6,7 @@
             <enum name="small" value="1" />
             <enum name="regular" value="2" />
             <enum name="large" value="3" />
+            <enum name="smaller" value="4" />
         </attr>
     </declare-styleable>
     <declare-styleable name="ChatMessageLayout">
@@ -20,6 +21,10 @@
     <attr name="dmWaveformProgressColor" format="reference" />
     <attr name="dmInputTextColor" format="reference" />
 
+    <attr name="toolbarColor" format="reference" />
+    <attr name="searchInputStyle" format="reference" />
+    <attr name="parentCommentHighlightColor" format="reference" />
+
     <declare-styleable name="RecordView">
         <attr name="slide_to_cancel_text" format="string" />
         <attr name="slide_to_cancel_text_color" format="reference" />
@@ -33,5 +38,10 @@
     <declare-styleable name="WaveformSeekBar">
         <attr name="waveformBackgroundColor" format="reference" />
         <attr name="waveformProgressColor" format="reference" />
+    </declare-styleable>
+
+    <declare-styleable name="TextViewDrawableSize">
+        <attr name="compoundDrawableWidth" format="dimension" />
+        <attr name="compoundDrawableHeight" format="dimension" />
     </declare-styleable>
 </resources>

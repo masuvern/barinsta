@@ -18,9 +18,9 @@ import awais.instagrabber.adapters.FeedAdapterV2;
 import awais.instagrabber.customviews.VideoPlayerCallbackAdapter;
 import awais.instagrabber.customviews.VideoPlayerViewHelper;
 import awais.instagrabber.databinding.ItemFeedVideoBinding;
+import awais.instagrabber.fragments.settings.PreferenceKeys;
 import awais.instagrabber.repositories.responses.Media;
 import awais.instagrabber.repositories.responses.VideoVersion;
-import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.NumberUtils;
 import awais.instagrabber.utils.ResponseBodyUtils;
 import awais.instagrabber.utils.Utils;
@@ -65,7 +65,7 @@ public class FeedVideoViewHolder extends FeedItemViewHolder {
         // Log.d(TAG, "Binding post: " + feedModel.getPostId());
         this.media = media;
         binding.itemFeedBottom.tvVideoViews.setText(String.valueOf(media.getViewCount()));
-        final float vol = settingsHelper.getBoolean(Constants.MUTED_VIDEOS) ? 0f : 1f;
+        final float vol = settingsHelper.getBoolean(PreferenceKeys.MUTED_VIDEOS) ? 0f : 1f;
         final VideoPlayerViewHelper.VideoPlayerCallback videoPlayerCallback = new VideoPlayerCallbackAdapter() {
 
             @Override
@@ -97,7 +97,7 @@ public class FeedVideoViewHolder extends FeedItemViewHolder {
                                                                                       aspectRatio,
                                                                                       ResponseBodyUtils.getThumbUrl(media),
                                                                                       false,
-                                                                                      null,
+                                                                                      // null,
                                                                                       videoPlayerCallback);
         binding.videoPost.thumbnail.post(() -> {
             if (media.getOriginalHeight() > 0.8 * Utils.displayMetrics.heightPixels) {

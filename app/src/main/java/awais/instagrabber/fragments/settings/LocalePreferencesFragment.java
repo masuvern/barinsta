@@ -7,15 +7,14 @@ import androidx.preference.ListPreference;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceScreen;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.time.format.DateTimeFormatter;
 
 import awais.instagrabber.R;
 import awais.instagrabber.dialogs.TimeSettingsDialog;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.LocaleUtils;
+import awais.instagrabber.utils.TextUtils;
 import awais.instagrabber.utils.UserAgentUtils;
-import awais.instagrabber.utils.Utils;
 
 import static awais.instagrabber.utils.Utils.settingsHelper;
 
@@ -36,7 +35,7 @@ public class LocalePreferencesFragment extends BasePreferencesFragment {
         for (int i = 0; i < length; i++) {
             values[i] = String.valueOf(i);
         }
-        preference.setKey(Constants.APP_LANGUAGE);
+        preference.setKey(PreferenceKeys.APP_LANGUAGE);
         preference.setTitle(R.string.select_language);
         preference.setDialogTitle(R.string.select_language);
         preference.setEntries(R.array.languages);
@@ -55,35 +54,33 @@ public class LocalePreferencesFragment extends BasePreferencesFragment {
     private Preference getPostTimeFormatPreference(@NonNull final Context context) {
         final Preference preference = new Preference(context);
         preference.setTitle(R.string.time_settings);
-        preference.setSummary(Utils.datetimeParser.format(new Date()));
+        preference.setSummary(TextUtils.nowToString());
         preference.setIconSpaceReserved(false);
         preference.setOnPreferenceClickListener(preference1 -> {
             new TimeSettingsDialog(
-                    settingsHelper.getBoolean(Constants.CUSTOM_DATE_TIME_FORMAT_ENABLED),
-                    settingsHelper.getString(Constants.CUSTOM_DATE_TIME_FORMAT),
-                    settingsHelper.getString(Constants.DATE_TIME_SELECTION),
-                    settingsHelper.getBoolean(Constants.SWAP_DATE_TIME_FORMAT_ENABLED),
+                    settingsHelper.getBoolean(PreferenceKeys.CUSTOM_DATE_TIME_FORMAT_ENABLED),
+                    settingsHelper.getString(PreferenceKeys.CUSTOM_DATE_TIME_FORMAT),
+                    settingsHelper.getString(PreferenceKeys.DATE_TIME_SELECTION),
+                    settingsHelper.getBoolean(PreferenceKeys.SWAP_DATE_TIME_FORMAT_ENABLED),
                     (isCustomFormat,
-                     formatSelection,
                      spTimeFormatSelectedItemPosition,
                      spSeparatorSelectedItemPosition,
                      spDateFormatSelectedItemPosition,
                      selectedFormat,
-                     currentFormat,
                      swapDateTime) -> {
+                        settingsHelper.putBoolean(PreferenceKeys.CUSTOM_DATE_TIME_FORMAT_ENABLED, isCustomFormat);
+                        settingsHelper.putBoolean(PreferenceKeys.SWAP_DATE_TIME_FORMAT_ENABLED, swapDateTime);
                         if (isCustomFormat) {
-                            settingsHelper.putString(Constants.CUSTOM_DATE_TIME_FORMAT, formatSelection);
+                            settingsHelper.putString(PreferenceKeys.CUSTOM_DATE_TIME_FORMAT, selectedFormat);
                         } else {
                             final String formatSelectionUpdated = spTimeFormatSelectedItemPosition + ";"
                                     + spSeparatorSelectedItemPosition + ';'
                                     + spDateFormatSelectedItemPosition; // time;separator;date
-                            settingsHelper.putString(Constants.DATE_TIME_FORMAT, selectedFormat);
-                            settingsHelper.putString(Constants.DATE_TIME_SELECTION, formatSelectionUpdated);
+                            settingsHelper.putString(PreferenceKeys.DATE_TIME_FORMAT, selectedFormat);
+                            settingsHelper.putString(PreferenceKeys.DATE_TIME_SELECTION, formatSelectionUpdated);
                         }
-                        settingsHelper.putBoolean(Constants.CUSTOM_DATE_TIME_FORMAT_ENABLED, isCustomFormat);
-                        settingsHelper.putBoolean(Constants.SWAP_DATE_TIME_FORMAT_ENABLED, swapDateTime);
-                        Utils.datetimeParser = (SimpleDateFormat) currentFormat.clone();
-                        preference.setSummary(Utils.datetimeParser.format(new Date()));
+                        TextUtils.setFormatter(DateTimeFormatter.ofPattern(selectedFormat, LocaleUtils.getCurrentLocale()));
+                        preference.setSummary(TextUtils.nowToString());
                     }
             ).show(getParentFragmentManager(), null);
             return true;
