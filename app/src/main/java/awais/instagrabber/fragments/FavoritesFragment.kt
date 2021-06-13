@@ -46,11 +46,20 @@ class FavoritesFragment : Fragment() {
         shouldRefresh = false
     }
 
+    override fun onPause() {
+        super.onPause()
+        adapter.setStateRestorationPolicy(RecyclerView.Adapter.StateRestorationPolicy.PREVENT)
+    }
+
     override fun onResume() {
         super.onResume()
         if (!this::adapter.isInitialized) return
         // refresh list every time in onViewStateRestored since it is cheaper than implementing pull down to refresh
-        favoritesViewModel.list.observe(viewLifecycleOwner, { list: List<Favorite?>? -> adapter.submitList(list) })
+        favoritesViewModel.list.observe(viewLifecycleOwner, {
+            list: List<Favorite?>? -> adapter.submitList(list, Runnable {
+                adapter.setStateRestorationPolicy(RecyclerView.Adapter.StateRestorationPolicy.ALLOW)
+            })
+        })
     }
 
     private fun init() {
