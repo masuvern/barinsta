@@ -628,7 +628,9 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
             usernameTemp = usernameTemp.substring(1);
         }
         if (TextUtils.isEmpty(usernameTemp)) {
-            appStateViewModel.getCurrentUserLiveData().observe(getViewLifecycleOwner(), user -> {
+            appStateViewModel.getCurrentUserLiveData().observe(getViewLifecycleOwner(), userResource -> {
+                if (userResource == null) return;
+                final User user = userResource.data;
                 if (user == null) return;
                 profileModel = user;
                 username = profileModel.getUsername();

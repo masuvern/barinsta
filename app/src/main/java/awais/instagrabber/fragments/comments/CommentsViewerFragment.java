@@ -102,7 +102,10 @@ public final class CommentsViewerFragment extends BottomSheetDialogFragment {
         binding.swipeRefreshLayout.setEnabled(false);
         binding.swipeRefreshLayout.setNestedScrollingEnabled(false);
         root = binding.getRoot();
-        appStateViewModel.getCurrentUserLiveData().observe(getViewLifecycleOwner(), user -> viewModel.setCurrentUser(user));
+        appStateViewModel.getCurrentUserLiveData().observe(getViewLifecycleOwner(), userResource -> {
+            if (userResource == null || userResource.data == null) return;
+            viewModel.setCurrentUser(userResource.data);
+        });
         if (getArguments() == null) return root;
         final CommentsViewerFragmentArgs args = CommentsViewerFragmentArgs.fromBundle(getArguments());
         viewModel.setPostDetails(args.getShortCode(), args.getPostId(), args.getPostUserId());

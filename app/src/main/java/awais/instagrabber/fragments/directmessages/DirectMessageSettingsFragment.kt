@@ -55,7 +55,7 @@ class DirectMessageSettingsFragment : Fragment(), ConfirmDialogFragmentCallback 
         val args = DirectMessageSettingsFragmentArgs.fromBundle(arguments)
         val fragmentActivity = requireActivity() as MainActivity
         val appStateViewModel: AppStateViewModel by activityViewModels()
-        val currentUser = appStateViewModel.currentUser ?: return
+        val currentUser = appStateViewModel.currentUser?.data ?: return
         val viewModelFactory = DirectSettingsViewModelFactory(
             fragmentActivity.application,
             args.threadId,

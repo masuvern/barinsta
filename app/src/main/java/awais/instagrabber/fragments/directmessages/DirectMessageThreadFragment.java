@@ -360,7 +360,9 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
         final Bundle arguments = getArguments();
         if (arguments == null) return;
         final DirectMessageThreadFragmentArgs fragmentArgs = DirectMessageThreadFragmentArgs.fromBundle(arguments);
-        final User currentUser = appStateViewModel.getCurrentUser();
+        final Resource<User> currentUserResource = appStateViewModel.getCurrentUser();
+        if (currentUserResource == null) return;
+        final User currentUser = currentUserResource.data;
         if (currentUser == null) return;
         final DirectThreadViewModelFactory viewModelFactory = new DirectThreadViewModelFactory(
                 fragmentActivity.getApplication(),
@@ -987,7 +989,9 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
             itemsAdapter.setThread(thread);
             return;
         }
-        final User currentUser = appStateViewModel.getCurrentUser();
+        final Resource<User> currentUserResource = appStateViewModel.getCurrentUser();
+        if (currentUserResource == null) return;
+        final User currentUser = currentUserResource.data;
         if (currentUser == null) return;
         itemsAdapter = new DirectItemsAdapter(currentUser, thread, directItemCallback, directItemLongClickListener);
         itemsAdapter.setHasStableIds(true);

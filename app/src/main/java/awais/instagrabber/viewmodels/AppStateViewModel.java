@@ -9,6 +9,7 @@ import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
+import awais.instagrabber.models.Resource;
 import awais.instagrabber.repositories.responses.User;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.CookieUtils;
@@ -23,7 +24,7 @@ public class AppStateViewModel extends AndroidViewModel {
     private static final String TAG = AppStateViewModel.class.getSimpleName();
 
     private final String cookie;
-    private final MutableLiveData<User> currentUser = new MutableLiveData<>();
+    private final MutableLiveData<Resource<User>> currentUser = new MutableLiveData<>(Resource.loading(null));
 
     private UserRepository userRepository;
 
@@ -32,30 +33,38 @@ public class AppStateViewModel extends AndroidViewModel {
         // Log.d(TAG, "AppStateViewModel: constructor");
         cookie = settingsHelper.getString(Constants.COOKIE);
         final boolean isLoggedIn = !TextUtils.isEmpty(cookie) && CookieUtils.getUserIdFromCookie(cookie) != 0;
-        if (!isLoggedIn) return;
+        if (!isLoggedIn) {
+            currentUser.postValue(Resource.success(null));
+            return;
+        }
         userRepository = UserRepository.Companion.getInstance();
         // final AccountRepository accountRepository = AccountRepository.getInstance(AccountDataSource.getInstance(application));
         fetchProfileDetails();
     }
 
     @Nullable
-    public User getCurrentUser() {
+    public Resource<User> getCurrentUser() {
         return currentUser.getValue();
     }
 
-    public LiveData<User> getCurrentUserLiveData() {
+    public LiveData<Resource<User>> getCurrentUserLiveData() {
         return currentUser;
     }
 
     private void fetchProfileDetails() {
+        currentUser.postValue(Resource.loading(null));
         final long uid = CookieUtils.getUserIdFromCookie(cookie);
-        if (userRepository == null) return;
+        if (userRepository == null) {
+            currentUser.postValue(Resource.success(null));
+            return;
+        }
         userRepository.getUserInfo(uid, CoroutineUtilsKt.getContinuation((user, throwable) -> {
             if (throwable != null) {
                 Log.e(TAG, "onFailure: ", throwable);
+                currentUser.postValue(Resource.error(throwable.getMessage(), null));
                 return;
             }
-            currentUser.postValue(user);
+            currentUser.postValue(Resource.success(user));
         }, Dispatchers.getIO()));
     }
 }
