@@ -39,7 +39,7 @@ public class DirectorySelectActivity extends BaseLanguageActivity {
         viewModel = new ViewModelProvider(this).get(DirectorySelectActivityViewModel.class);
         setupObservers();
         binding.selectDir.setOnClickListener(v -> openDirectoryChooser());
-        AppExecutors.getInstance().mainThread().execute(() -> viewModel.setInitialUri(getIntent()));
+        AppExecutors.INSTANCE.getMainThread().execute(() -> viewModel.setInitialUri(getIntent()));
     }
 
     private void setupObservers() {
@@ -81,7 +81,7 @@ public class DirectorySelectActivity extends BaseLanguageActivity {
             showErrorDialog(getString(R.string.select_a_folder));
             return;
         }
-        AppExecutors.getInstance().mainThread().execute(() -> {
+        AppExecutors.INSTANCE.getMainThread().execute(() -> {
             try {
                 viewModel.setupSelectedDir(data);
                 final Intent intent = new Intent(this, MainActivity.class);

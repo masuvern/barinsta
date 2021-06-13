@@ -207,8 +207,7 @@ public class CreateBackupDialogFragment extends DialogFragment {
         Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
         intent.addCategory(Intent.CATEGORY_OPENABLE);
         intent.setType("application/octet-stream");
-        final Date now = new Date();
-        final String fileName = String.format("barinsta_%s.backup", BACKUP_FILE_DATE_TIME_FORMAT.format(now));
+        final String fileName = String.format("barinsta_%s.backup", LocalDateTime.now().format(BACKUP_FILE_DATE_TIME_FORMAT));
         intent.putExtra(Intent.EXTRA_TITLE, fileName);
 
         // Optionally, specify a URI for the directory that should be opened in

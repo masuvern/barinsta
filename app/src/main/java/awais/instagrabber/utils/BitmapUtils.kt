@@ -8,6 +8,7 @@ import android.net.Uri
 import android.util.Log
 import android.util.LruCache
 import androidx.core.util.Pair
+import androidx.documentfile.provider.DocumentFile
 import awais.instagrabber.utils.extensions.TAG
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -192,9 +193,9 @@ object BitmapUtils {
     }
 
     @Throws(IOException::class)
-    fun convertToJpegAndSaveToFile(bitmap: Bitmap, file: File?): File {
-        val tempFile = file ?: DownloadUtils.getTempFile()
-        FileOutputStream(tempFile).use { output ->
+    fun convertToJpegAndSaveToFile(contentResolver: ContentResolver, bitmap: Bitmap, file: DocumentFile?): DocumentFile {
+        val tempFile = file ?: DownloadUtils.getTempFile(null, "jpg")
+        contentResolver.openOutputStream(tempFile.uri).use { output ->
             val compressResult = bitmap.compress(Bitmap.CompressFormat.JPEG, 100, output)
             if (!compressResult) {
                 throw RuntimeException("Compression failed!")

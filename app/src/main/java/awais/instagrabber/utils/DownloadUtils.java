@@ -4,6 +4,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.UriPermission;
+import android.Manifest;
 import android.net.Uri;
 import android.util.Log;
 import android.webkit.MimeTypeMap;
@@ -58,6 +59,9 @@ public final class DownloadUtils {
     private static final String DIR_BACKUPS = "Backups";
 
     private static DocumentFile root;
+
+    public static final String WRITE_PERMISSION = Manifest.permission.WRITE_EXTERNAL_STORAGE;
+    public static final String[] PERMS = new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE};
 
     public static void init(@NonNull final Context context) throws ReselectDocumentTreeException {
         final String barinstaDirUri = Utils.settingsHelper.getString(PREF_BARINSTA_DIR_URI);
@@ -177,7 +181,7 @@ public final class DownloadUtils {
 
     private static List<String> getSubPathForUserFolder(final String username) {
         final List<String> list = new ArrayList<>();
-        if (!Utils.settingsHelper.getBoolean(Constants.DOWNLOAD_USER_FOLDER) || TextUtils.isEmpty(username)) {
+        if (!Utils.settingsHelper.getBoolean(PreferenceKeys.DOWNLOAD_USER_FOLDER) || TextUtils.isEmpty(username)) {
             list.add(DIR_DOWNLOADS);
             return list;
         }
@@ -425,7 +429,7 @@ public final class DownloadUtils {
         final String extension = DownloadUtils.getFileExtensionFromUrl(url);
         final String baseFileName = storyModel.getStoryMediaId() + "_"
                 + storyModel.getTimestamp() + extension;
-        final String usernamePrepend = Utils.settingsHelper.getBoolean(Constants.DOWNLOAD_PREPEND_USER_NAME)
+        final String usernamePrepend = Utils.settingsHelper.getBoolean(PreferenceKeys.DOWNLOAD_PREPEND_USER_NAME)
                                                && storyModel.getUsername() != null ? storyModel.getUsername() + "_" : "";
         final String fileName = usernamePrepend + baseFileName;
         DocumentFile saveFile = downloadDir.findFile(fileName);
@@ -501,7 +505,7 @@ public final class DownloadUtils {
                         if (childPositionIfSingle >= 0 && feedModels.size() == 1 && i != childPositionIfSingle) continue;
                         final Media child = sliderItems.get(i);
                         final String url = getUrlOfType(child);
-                        final String usernamePrepend = Utils.settingsHelper.getBoolean(Constants.DOWNLOAD_PREPEND_USER_NAME) && mediaUser != null
+                        final String usernamePrepend = Utils.settingsHelper.getBoolean(PreferenceKeys.DOWNLOAD_PREPEND_USER_NAME) && mediaUser != null
                                                        ? mediaUser.getUsername()
                                                        : "";
                         final Pair<List<String>, String> pair = getDownloadChildSavePaths(

@@ -24,6 +24,8 @@ import awais.instagrabber.utils.DownloadUtils;
 import awais.instagrabber.utils.TextUtils;
 import awais.instagrabber.utils.Utils;
 
+import static awais.instagrabber.fragments.settings.PreferenceKeys.FOLDER_PATH;
+
 public class DirectorySelectActivityViewModel extends AndroidViewModel {
     private static final String TAG = DirectorySelectActivityViewModel.class.getSimpleName();
 
@@ -67,7 +69,7 @@ public class DirectorySelectActivityViewModel extends AndroidViewModel {
 
     private void setMessage(@Nullable final Uri initialUri) {
         if (initialUri == null) {
-            final String prevVersionFolderPath = Utils.settingsHelper.getString(Constants.FOLDER_PATH);
+            final String prevVersionFolderPath = Utils.settingsHelper.getString(FOLDER_PATH);
             if (TextUtils.isEmpty(prevVersionFolderPath)) {
                 // default message
                 message.postValue(getApplication().getString(R.string.dir_select_default_message));

@@ -57,7 +57,7 @@ public final class MediaUtils {
     public static void getVoiceInfo(@NonNull final ContentResolver contentResolver,
                                     @NonNull final Uri uri,
                                     @NonNull final OnInfoLoadListener<VideoInfo> listener) {
-        AppExecutors.getInstance().tasksThread().submit(() -> {
+        AppExecutors.INSTANCE.getTasksThread().submit(() -> {
             try (ParcelFileDescriptor parcelFileDescriptor = contentResolver.openFileDescriptor(uri, "r")) {
                 if (parcelFileDescriptor == null) {
                     listener.onLoad(null);

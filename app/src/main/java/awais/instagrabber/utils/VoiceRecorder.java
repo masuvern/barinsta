@@ -1,6 +1,7 @@
 package awais.instagrabber.utils;
 
 import android.app.Application;
+import android.content.ContentResolver;
 import android.media.MediaRecorder;
 import android.os.Handler;
 import android.os.Message;
@@ -44,7 +45,7 @@ public class VoiceRecorder {
         this.callback = callback;
     }
 
-    public void startRecording(final Application application) {
+    public void startRecording(final ContentResolver contentResolver) {
         stopped = false;
         ParcelFileDescriptor parcelFileDescriptor = null;
         try {
@@ -53,7 +54,7 @@ public class VoiceRecorder {
             recorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
             deleteTempAudioFile();
             audioTempFile = getAudioRecordFile();
-            parcelFileDescriptor = application.getContentResolver().openFileDescriptor(audioTempFile.getUri(), "rwt");
+            parcelFileDescriptor = contentResolver.openFileDescriptor(audioTempFile.getUri(), "rwt");
             recorder.setOutputFile(parcelFileDescriptor.getFileDescriptor());
             recorder.setAudioEncoder(MediaRecorder.AudioEncoder.HE_AAC);
             recorder.setAudioEncodingBitRate(AUDIO_BIT_RATE);

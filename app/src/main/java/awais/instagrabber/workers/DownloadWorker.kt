@@ -6,8 +6,8 @@ import android.content.ContentResolver
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.media.MediaMetadataRetriever
-import android.media.MediaScannerConnection
 import android.net.Uri
 import android.os.Build
 import android.os.Handler
@@ -15,7 +15,7 @@ import android.os.Looper
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import androidx.core.content.FileProvider
+import androidx.documentfile.provider.DocumentFile
 import androidx.work.CoroutineWorker
 import androidx.work.Data
 import androidx.work.ForegroundInfo
@@ -37,12 +37,11 @@ import kotlinx.coroutines.withContext
 import org.apache.commons.imaging.formats.jpeg.iptc.JpegIptcRewriter
 import java.io.BufferedInputStream
 import java.io.File
-import java.io.FileInputStream
-import java.io.FileOutputStream
 import java.net.URL
 import java.util.*
 import java.util.concurrent.ExecutionException
 import kotlin.math.abs
+
 
 class DownloadWorker(context: Context, workerParams: WorkerParameters) : CoroutineWorker(context, workerParams) {
     private val notificationManager: NotificationManagerCompat = NotificationManagerCompat.from(context)
@@ -89,15 +88,15 @@ class DownloadWorker(context: Context, workerParams: WorkerParameters) : Corouti
         return Result.success()
     }
 
-    private suspend fun download(urlToFilePathMap: Map<String, String>) {
+    private suspend fun download(urlToFilePathMap: Map<String, DocumentFile>) {
         val notificationId = notificationId
         val entries = urlToFilePathMap.entries
         var count = 1
         val total = urlToFilePathMap.size
-        for ((url, value) in entries) {
+        for ((url, file) in entries) {
             updateDownloadProgress(notificationId, count, total, 0f)
             withContext(Dispatchers.IO) {
-                download(notificationId, count, total, url, value)
+                download(notificationId, count, total, url, file)
             }
             count++
         }
@@ -111,47 +110,49 @@ class DownloadWorker(context: Context, workerParams: WorkerParameters) : Corouti
         position: Int,
         total: Int,
         url: String,
-        filePath: String,
+        filePath: DocumentFile,
     ) {
-        val isJpg = filePath.endsWith("jpg")
+        val context = applicationContext.let { it }
+        val contentResolver = context.contentResolver?.let { it } ?: return
+        val filePathType = filePath.type?.let { it } ?: return
+        val isJpg = filePathType.startsWith("image")
         // using temp file approach to remove IPTC so that download progress can be reported
-        val outFile = if (isJpg) DownloadUtils.getTempFile() else File(filePath)
+        val outFile = if (isJpg) DownloadUtils.getTempFile(null, "jpg") else filePath
         try {
             val urlConnection = URL(url).openConnection()
             val fileSize = if (Build.VERSION.SDK_INT >= 24) urlConnection.contentLengthLong else urlConnection.contentLength.toLong()
             var totalRead = 0f
             try {
                 BufferedInputStream(urlConnection.getInputStream()).use { bis ->
-                    FileOutputStream(outFile).use { fos ->
+                    contentResolver.openOutputStream(outFile.uri).use { fos ->
                         val buffer = ByteArray(0x2000)
                         var count: Int
                         while (bis.read(buffer, 0, 0x2000).also { count = it } != -1) {
                             totalRead += count
-                            fos.write(buffer, 0, count)
+                            fos!!.write(buffer, 0, count)
                             setProgressAsync(Data.Builder().putString(URL, url)
                                 .putFloat(PROGRESS, totalRead * 100f / fileSize)
                                 .build())
                             updateDownloadProgress(notificationId, position, total, totalRead * 100f / fileSize)
                         }
-                        fos.flush()
+                        fos!!.flush()
                     }
                 }
             } catch (e: Exception) {
-                Log.e(TAG, "Error while writing data from url: " + url + " to file: " + outFile.absolutePath, e)
+                Log.e(TAG, "Error while writing data from url: " + url + " to file: " + outFile.name, e)
             }
             if (isJpg) {
-                val finalFile = File(filePath)
                 try {
-                    FileInputStream(outFile).use { fis ->
-                        FileOutputStream(finalFile).use { fos ->
+                    contentResolver.openInputStream(outFile.uri).use { fis ->
+                        contentResolver.openOutputStream(filePath.uri).use { fos ->
                             val jpegIptcRewriter = JpegIptcRewriter()
                             jpegIptcRewriter.removeIPTC(fis, fos)
                         }
                     }
                 } catch (e: Exception) {
                     Log.e(TAG, "Error while removing iptc: url: " + url
-                               + ", tempFile: " + outFile.absolutePath
-                               + ", finalFile: " + finalFile.absolutePath, e)
+                               + ", tempFile: " + outFile.name
+                               + ", finalFile: " + filePath.name, e)
                 }
                 val deleted = outFile.delete()
                 if (!deleted) {
@@ -218,53 +219,90 @@ class DownloadWorker(context: Context, workerParams: WorkerParameters) : Corouti
         return builder.build()
     }
 
-    private fun showSummary(urlToFilePathMap: Map<String, String>?) {
+    private fun showSummary(urlToFilePathMap: Map<String, DocumentFile>?) {
         val context = applicationContext
         val filePaths = urlToFilePathMap!!.values
         val notifications: MutableList<NotificationCompat.Builder> = LinkedList()
         val notificationIds: MutableList<Int> = LinkedList()
         var count = 1
-        for (filePath in filePaths) {
-            val file = File(filePath)
-            context.sendBroadcast(Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(file)))
-            MediaScannerConnection.scanFile(context, arrayOf(file.absolutePath), null, null)
-            val uri = FileProvider.getUriForFile(context, BuildConfig.APPLICATION_ID + ".provider", file)
+        for (filePath: DocumentFile in filePaths) {
+            // final File file = new File(filePath);
+            // context.sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, filePath.getUri()));
+            // Utils.scanDocumentFile(context, filePath, (path, uri) -> {});
+            // final Uri uri = FileProvider.getUriForFile(context, BuildConfig.APPLICATION_ID + ".provider", file);
             val contentResolver = context.contentResolver
-            val bitmap = getThumbnail(context, file, uri, contentResolver)
+            var bitmap: Bitmap? = null
+            val mimeType = filePath.type // Utils.getMimeType(uri, contentResolver);
+            if (!isEmpty(mimeType)) {
+                if (mimeType!!.startsWith("image")) {
+                    try {
+                        contentResolver.openInputStream(filePath.uri).use { inputStream ->
+                            bitmap = BitmapFactory.decodeStream(inputStream)
+                        }
+                    } catch (e: java.lang.Exception) {
+                        if (BuildConfig.DEBUG) Log.e(TAG, "", e)
+                    }
+                } else if (mimeType.startsWith("video")) {
+                    val retriever = MediaMetadataRetriever()
+                    try {
+                        try {
+                            retriever.setDataSource(context, filePath.uri)
+                        } catch (e: java.lang.Exception) {
+                            // retriever.setDataSource(file.getAbsolutePath());
+                            Log.e(TAG, "showSummary: ", e)
+                        }
+                        bitmap = retriever.frameAtTime
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) try {
+                            retriever.close()
+                        } catch (e: java.lang.Exception) {
+                            Log.e(TAG, "showSummary: ", e)
+                        }
+                    } catch (e: java.lang.Exception) {
+                        Log.e(TAG, "", e)
+                    }
+                }
+            }
             val downloadComplete = context.getString(R.string.downloader_complete)
-            val intent = Intent(Intent.ACTION_VIEW, uri)
-                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK
-                        or Intent.FLAG_FROM_BACKGROUND
-                        or Intent.FLAG_GRANT_READ_URI_PERMISSION
-                        or Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
-                .putExtra(Intent.EXTRA_STREAM, uri)
+            val intent = Intent(Intent.ACTION_VIEW, filePath.uri)
+                .addFlags(
+                    Intent.FLAG_ACTIVITY_NEW_TASK
+                            or Intent.FLAG_FROM_BACKGROUND
+                            or Intent.FLAG_GRANT_READ_URI_PERMISSION
+                            or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+                )
+                .putExtra(Intent.EXTRA_STREAM, filePath.uri)
             val pendingIntent = PendingIntent.getActivity(
                 context,
                 DOWNLOAD_NOTIFICATION_INTENT_REQUEST_CODE,
                 intent,
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_ONE_SHOT
             )
-            val notificationId = notificationId + count
+            val notificationId: Int = notificationId + count
             notificationIds.add(notificationId)
             count++
-            val builder: NotificationCompat.Builder = NotificationCompat.Builder(context, DOWNLOAD_CHANNEL_ID)
-                .setSmallIcon(R.drawable.ic_download)
-                .setContentText(null)
-                .setContentTitle(downloadComplete)
-                .setWhen(System.currentTimeMillis())
-                .setOnlyAlertOnce(true)
-                .setAutoCancel(true)
-                .setGroup(NOTIF_GROUP_NAME + "_" + id)
-                .setGroupAlertBehavior(NotificationCompat.GROUP_ALERT_SUMMARY)
-                .setContentIntent(pendingIntent)
-                .addAction(R.drawable.ic_delete,
-                    context.getString(R.string.delete),
-                    DeleteImageIntentService.pendingIntent(context, filePath, notificationId))
+            val builder: NotificationCompat.Builder =
+                NotificationCompat.Builder(context, DOWNLOAD_CHANNEL_ID)
+                    .setSmallIcon(R.drawable.ic_download)
+                    .setContentText(null)
+                    .setContentTitle(downloadComplete)
+                    .setWhen(System.currentTimeMillis())
+                    .setOnlyAlertOnce(true)
+                    .setAutoCancel(true)
+                    .setGroup(NOTIF_GROUP_NAME + "_" + id)
+                    .setGroupAlertBehavior(NotificationCompat.GROUP_ALERT_SUMMARY)
+                    .setContentIntent(pendingIntent)
+                    .addAction(
+                        R.drawable.ic_delete,
+                        context.getString(R.string.delete),
+                        DeleteImageIntentService.pendingIntent(context, filePath, notificationId)
+                    )
             if (bitmap != null) {
                 builder.setLargeIcon(bitmap)
-                    .setStyle(NotificationCompat.BigPictureStyle()
-                        .bigPicture(bitmap)
-                        .bigLargeIcon(null))
+                    .setStyle(
+                        NotificationCompat.BigPictureStyle()
+                            .bigPicture(bitmap)
+                            .bigLargeIcon(null)
+                    )
                     .setBadgeIconType(NotificationCompat.BADGE_ICON_SMALL)
             }
             notifications.add(builder)
@@ -344,16 +382,16 @@ class DownloadWorker(context: Context, workerParams: WorkerParameters) : Corouti
         return bitmap
     }
 
-    class DownloadRequest private constructor(val urlToFilePathMap: Map<String, String>) {
+    class DownloadRequest private constructor(val urlToFilePathMap: Map<String, DocumentFile>) {
 
         class Builder {
-            private var urlToFilePathMap: MutableMap<String, String> = mutableMapOf()
-            fun setUrlToFilePathMap(urlToFilePathMap: MutableMap<String, String>): Builder {
+            private var urlToFilePathMap: MutableMap<String, DocumentFile> = mutableMapOf()
+            fun setUrlToFilePathMap(urlToFilePathMap: MutableMap<String, DocumentFile>): Builder {
                 this.urlToFilePathMap = urlToFilePathMap
                 return this
             }
 
-            fun addUrl(url: String, filePath: String): Builder {
+            fun addUrl(url: String, filePath: DocumentFile): Builder {
                 urlToFilePathMap[url] = filePath
                 return this
             }

@@ -115,7 +115,7 @@ public class RestoreBackupDialogFragment extends DialogFragment {
             binding.btnRestore.setEnabled(true);
         }
         uri = data.getData();
-        AppExecutors.getInstance().mainThread().execute(() -> {
+        AppExecutors.INSTANCE.getMainThread().execute(() -> {
             Cursor c = null;
             try {
                 String[] projection = {MediaStore.Files.FileColumns.DISPLAY_NAME};

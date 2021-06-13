@@ -3,6 +3,7 @@ package awais.instagrabber.utils
 import android.content.ContentResolver
 import android.graphics.Bitmap
 import android.net.Uri
+import androidx.documentfile.provider.DocumentFile
 import awais.instagrabber.models.UploadVideoOptions
 import awais.instagrabber.webservices.interceptors.AddCookiesInterceptor
 import kotlinx.coroutines.Dispatchers
@@ -12,8 +13,6 @@ import okio.BufferedSink
 import okio.Okio
 import org.json.JSONObject
 import ru.gildor.coroutines.okhttp.await
-import java.io.File
-import java.io.FileInputStream
 import java.io.IOException
 import java.io.InputStream
 
@@ -29,20 +28,23 @@ object MediaUploader {
     ): MediaUploadResponse = withContext(Dispatchers.IO) {
         val bitmapResult = BitmapUtils.loadBitmap(contentResolver, uri, 1000f, false)
         val bitmap = bitmapResult?.bitmap ?: throw IOException("bitmap is null")
-        uploadPhoto(bitmap)
+        uploadPhoto(contentResolver, bitmap)
     }
 
     @Suppress("BlockingMethodInNonBlockingContext")
     private suspend fun uploadPhoto(
+        contentResolver: ContentResolver,
         bitmap: Bitmap,
     ): MediaUploadResponse = withContext(Dispatchers.IO) {
-        val file: File = BitmapUtils.convertToJpegAndSaveToFile(bitmap, null)
+        val file: DocumentFile = BitmapUtils.convertToJpegAndSaveToFile(contentResolver, bitmap, null)
         val byteLength: Long = file.length()
         val options = createUploadPhotoOptions(byteLength)
         val headers = getUploadPhotoHeaders(options)
         val url = HOST + "/rupload_igphoto/" + options.name + "/"
         try {
-            FileInputStream(file).use { input -> upload(input, url, headers) }
+            contentResolver.openInputStream(file.uri).use { input ->
+                upload(input!!, url, headers)
+            }
         } finally {
             file.delete()
         }
