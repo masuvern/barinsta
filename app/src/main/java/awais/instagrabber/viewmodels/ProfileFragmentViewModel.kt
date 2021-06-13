@@ -1,13 +1,12 @@
 package awais.instagrabber.viewmodels
 
 import android.os.Bundle
-import android.util.Log
 import androidx.lifecycle.*
 import androidx.savedstate.SavedStateRegistryOwner
 import awais.instagrabber.db.repositories.AccountRepository
 import awais.instagrabber.db.repositories.FavoriteRepository
+import awais.instagrabber.models.Resource
 import awais.instagrabber.repositories.responses.User
-import awais.instagrabber.utils.extensions.TAG
 import awais.instagrabber.webservices.*
 
 class ProfileFragmentViewModel(
@@ -20,17 +19,44 @@ class ProfileFragmentViewModel(
     accountRepository: AccountRepository,
     favoriteRepository: FavoriteRepository,
 ) : ViewModel() {
-    private val _profile = MutableLiveData<User?>()
-    val profile: LiveData<User?> = _profile
-    val username: LiveData<String> = Transformations.map(profile) { return@map it?.username ?: "" }
+    private val _profile = MutableLiveData<Resource<User?>>(Resource.loading(null))
+    private val _isLoggedIn = MutableLiveData(false)
 
-    var currentUser: User? = null
-    var isLoggedIn = false
-        get() = currentUser != null
-        private set
+    val profile: LiveData<Resource<User?>> = _profile
+
+    /**
+     * Username of profile without '`@`'
+     */
+    val username: LiveData<String> = Transformations.map(profile) {
+        return@map when (it.status) {
+            Resource.Status.LOADING, Resource.Status.ERROR -> ""
+            Resource.Status.SUCCESS -> it.data?.username ?: ""
+        }
+    }
+    val isLoggedIn: LiveData<Boolean> = _isLoggedIn
+
+    var currentUser: Resource<User?>? = null
+        set(value) {
+            _isLoggedIn.postValue(value?.data != null)
+            // if no profile, and value is valid, set it as profile
+            val profileValue = profile.value
+            if (
+                profileValue?.status != Resource.Status.LOADING
+                && profileValue?.data == null
+                && value?.status == Resource.Status.SUCCESS
+                && value.data != null
+            ) {
+                _profile.postValue(Resource.success(value.data))
+            }
+            field = value
+        }
 
     init {
-        Log.d(TAG, "${state.keys()} $userRepository $friendshipRepository $storiesRepository $mediaRepository")
+        // Log.d(TAG, "${state.keys()} $userRepository $friendshipRepository $storiesRepository $mediaRepository")
+        val usernameFromState = state.get<String?>("username")
+        if (usernameFromState.isNullOrBlank()) {
+            _profile.postValue(Resource.success(null))
+        }
     }
 }
 

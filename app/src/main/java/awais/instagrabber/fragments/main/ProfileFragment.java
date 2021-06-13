@@ -382,7 +382,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
             shouldRefresh = false;
             return root;
         }
-        // appStateViewModel.getCurrentUserLiveData().observe(getViewLifecycleOwner(), user -> viewModel.setCurrentUser(user));
+        appStateViewModel.getCurrentUserLiveData().observe(getViewLifecycleOwner(), user -> viewModel.setCurrentUser(user));
         binding = FragmentProfileBinding.inflate(inflater, container, false);
         root = binding.getRoot();
         profileDetailsBinding = binding.header;
