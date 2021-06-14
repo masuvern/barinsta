@@ -55,9 +55,14 @@ class DownloadWorker(context: Context, workerParams: WorkerParameters) : Corouti
                 .build())
         }
         val downloadRequestString: String
-        val requestFile = File(downloadRequestFilePath)
+        val requestFile = Uri.parse(downloadRequestFilePath)
+        val context = applicationContext
+        val contentResolver = context.contentResolver ?: return Result.failure(Data.Builder()
+                .putString("error", "contentResolver is null")
+                .build())
         try {
-            downloadRequestString = requestFile.bufferedReader().use { it.readText() }
+            val scanner = Scanner(contentResolver.openInputStream(requestFile))
+            downloadRequestString = scanner.useDelimiter("\\A").next()
         } catch (e: Exception) {
             Log.e(TAG, "doWork: ", e)
             return Result.failure(Data.Builder()
@@ -82,7 +87,7 @@ class DownloadWorker(context: Context, workerParams: WorkerParameters) : Corouti
         val urlToFilePathMap = downloadRequest.urlToFilePathMap
         download(urlToFilePathMap)
         Handler(Looper.getMainLooper()).postDelayed({ showSummary(urlToFilePathMap) }, 500)
-        val deleted = requestFile.delete()
+        val deleted = DocumentFile.fromSingleUri(context, requestFile)!!.delete()
         if (!deleted) {
             Log.w(TAG, "doWork: requestFile not deleted!")
         }
