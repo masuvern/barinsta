@@ -1,7 +1,5 @@
 package awais.instagrabber.utils;
 
-import android.content.Context;
-import android.os.Build;
 import android.os.Environment;
 
 import java.io.File;
@@ -9,8 +7,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.regex.Pattern;
-
-import awais.instagrabber.R;
 
 public class DirectoryUtils {
     private static final Pattern DIR_SEPORATOR = Pattern.compile("/");
@@ -73,22 +69,22 @@ public class DirectoryUtils {
         return rv;
     }
 
-    public static File getOutputMediaDirectory(final Context context, final String... dirs) {
-        if (context == null) return null;
-        final File[] externalMediaDirs = context.getExternalMediaDirs();
-        if (externalMediaDirs == null || externalMediaDirs.length == 0) return context.getFilesDir();
-        final File externalMediaDir = externalMediaDirs[0];
-        File subDir = new File(externalMediaDir, context.getString(R.string.app_name));
-        if (dirs != null) {
-            for (final String dir : dirs) {
-                subDir = new File(subDir, dir);
-                //noinspection ResultOfMethodCallIgnored
-                subDir.mkdirs();
-            }
-        }
-        if (!subDir.exists()) {
-            return context.getFilesDir();
-        }
-        return subDir;
-    }
+    // public static File getOutputMediaDirectory(final Context context, final String... dirs) {
+    //     if (context == null) return null;
+    //     final File[] externalMediaDirs = context.getExternalMediaDirs();
+    //     if (externalMediaDirs == null || externalMediaDirs.length == 0) return context.getFilesDir();
+    //     final File externalMediaDir = externalMediaDirs[0];
+    //     File subDir = new File(externalMediaDir, context.getString(R.string.app_name));
+    //     if (dirs != null) {
+    //         for (final String dir : dirs) {
+    //             subDir = new File(subDir, dir);
+    //             //noinspection ResultOfMethodCallIgnored
+    //             subDir.mkdirs();
+    //         }
+    //     }
+    //     if (!subDir.exists()) {
+    //         return context.getFilesDir();
+    //     }
+    //     return subDir;
+    // }
 }

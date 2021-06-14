@@ -3,7 +3,6 @@ package awais.instagrabber.utils;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
-import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Environment;
@@ -11,18 +10,13 @@ import android.os.FileObserver;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.core.content.ContextCompat;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
-
-import com.google.android.material.snackbar.BaseTransientBottomBar;
-import com.google.android.material.snackbar.Snackbar;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -95,15 +89,15 @@ public final class DirectoryChooser extends DialogFragment {
         if (context == null) context = getContext();
         if (context == null) context = getActivity();
         if (context == null) return;
-        if (ContextCompat.checkSelfPermission(context, DownloadUtils.PERMS[0]) != PackageManager.PERMISSION_GRANTED) {
-            final String text = "Storage permissions denied!";
-            if (container == null) {
-                Toast.makeText(context, text, Toast.LENGTH_LONG).show();
-            } else {
-                Snackbar.make(container, text, BaseTransientBottomBar.LENGTH_LONG).show();
-            }
-            dismiss();
-        }
+        // if (ContextCompat.checkSelfPermission(context, DownloadUtils.PERMS[0]) != PackageManager.PERMISSION_GRANTED) {
+        //     final String text = "Storage permissions denied!";
+        //     if (container == null) {
+        //         Toast.makeText(context, text, Toast.LENGTH_LONG).show();
+        //     } else {
+        //         Snackbar.make(container, text, BaseTransientBottomBar.LENGTH_LONG).show();
+        //     }
+        //     dismiss();
+        // }
         final View.OnClickListener clickListener = v -> {
             if (v == binding.btnConfirm) {
                 if (interactionListener != null && isValidFile(selectedDir))

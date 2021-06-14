@@ -20,7 +20,7 @@ android {
         applicationId 'me.austinhuang.instagrabber'
 
         minSdkVersion 21
-        targetSdkVersion 29
+        targetSdkVersion 30
 
         versionCode 63
         versionName '19.2.2'

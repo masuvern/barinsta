@@ -183,11 +183,12 @@ public class ImageEditFragment extends Fragment {
             if (context == null) return;
             final Uri resultUri = viewModel.getResultUri().getValue();
             if (resultUri == null) return;
-            Utils.mediaScanFile(context, new File(resultUri.toString()), (path, uri) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
+            AppExecutors.INSTANCE.getMainThread().execute(() -> {
                 final NavController navController = NavHostFragment.findNavController(this);
                 setNavControllerResult(navController, resultUri);
                 navController.navigateUp();
-            }));
+            });
+            // Utils.mediaScanFile(context, new File(resultUri.toString()), (path, uri) -> );
         });
     }
 

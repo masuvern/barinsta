@@ -19,6 +19,7 @@ object PreferenceKeys {
     const val APP_THEME = "app_theme_v19"
     const val APP_LANGUAGE = "app_language_v19"
     const val STORY_SORT = "story_sort"
+    const val PREF_BARINSTA_DIR_URI = "barinsta_dir_uri"
 
     // set string prefs
     const val KEYWORD_FILTERS = "keyword_filters"

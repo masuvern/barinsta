@@ -27,7 +27,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
-import androidx.core.content.PermissionChecker;
 import androidx.core.graphics.ColorUtils;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.NavController;
@@ -64,9 +63,6 @@ import awais.instagrabber.utils.ResponseBodyUtils;
 import awais.instagrabber.utils.Utils;
 import awais.instagrabber.webservices.CollectionService;
 import awais.instagrabber.webservices.ServiceCallback;
-
-import static androidx.core.content.PermissionChecker.checkSelfPermission;
-import static awais.instagrabber.utils.DownloadUtils.WRITE_PERMISSION;
 
 public class CollectionPostsFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener {
     private static final String TAG = "CollectionPostsFragment";
@@ -106,12 +102,12 @@ public class CollectionPostsFragment extends Fragment implements SwipeRefreshLay
                 if (CollectionPostsFragment.this.selectedFeedModels == null) return false;
                 final Context context = getContext();
                 if (context == null) return false;
-                if (checkSelfPermission(context, WRITE_PERMISSION) == PermissionChecker.PERMISSION_GRANTED) {
-                    DownloadUtils.download(context, ImmutableList.copyOf(CollectionPostsFragment.this.selectedFeedModels));
-                    binding.posts.endSelection();
-                    return true;
-                }
-                requestPermissions(DownloadUtils.PERMS, STORAGE_PERM_REQUEST_CODE_FOR_SELECTION);
+                // if (checkSelfPermission(context, WRITE_PERMISSION) == PermissionChecker.PERMISSION_GRANTED) {
+                DownloadUtils.download(context, ImmutableList.copyOf(CollectionPostsFragment.this.selectedFeedModels));
+                binding.posts.endSelection();
+                // return true;
+                // }
+                // requestPermissions(DownloadUtils.PERMS, STORAGE_PERM_REQUEST_CODE_FOR_SELECTION);
             }
             return false;
         }
@@ -141,13 +137,13 @@ public class CollectionPostsFragment extends Fragment implements SwipeRefreshLay
         public void onDownloadClick(final Media feedModel, final int childPosition) {
             final Context context = getContext();
             if (context == null) return;
-            if (checkSelfPermission(context, WRITE_PERMISSION) == PermissionChecker.PERMISSION_GRANTED) {
-                DownloadUtils.showDownloadDialog(context, feedModel, childPosition);
-                return;
-            }
-            downloadFeedModel = feedModel;
-            downloadChildPosition = -1;
-            requestPermissions(DownloadUtils.PERMS, STORAGE_PERM_REQUEST_CODE);
+            // if (checkSelfPermission(context, WRITE_PERMISSION) == PermissionChecker.PERMISSION_GRANTED) {
+            DownloadUtils.showDownloadDialog(context, feedModel, childPosition);
+            // return;
+            // }
+            // downloadFeedModel = feedModel;
+            // downloadChildPosition = -1;
+            // requestPermissions(DownloadUtils.PERMS, STORAGE_PERM_REQUEST_CODE);
         }
 
         @Override

@@ -69,5 +69,5 @@
         android:layout_height="wrap_content"
         android:layout_gravity="end"
         android:layout_marginTop="16dp"
-        android:text="@string/create_backup" />
+        android:text="@string/backup" />
 </LinearLayout>

@@ -4,22 +4,19 @@ import android.content.Intent
 import android.content.res.Configuration
 import android.hardware.display.DisplayManager
 import android.hardware.display.DisplayManager.DisplayListener
-import android.media.MediaScannerConnection
-import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
-import android.webkit.MimeTypeMap
 import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
+import androidx.documentfile.provider.DocumentFile
 import awais.instagrabber.databinding.ActivityCameraBinding
-import awais.instagrabber.utils.DirectoryUtils
+import awais.instagrabber.utils.DownloadUtils
 import awais.instagrabber.utils.PermissionUtils
 import awais.instagrabber.utils.Utils
 import awais.instagrabber.utils.extensions.TAG
-import com.google.common.io.Files
-import java.io.File
+import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.ExecutionException
@@ -28,10 +25,10 @@ import java.util.concurrent.Executors
 
 class CameraActivity : BaseLanguageActivity() {
     private lateinit var binding: ActivityCameraBinding
-    private lateinit var outputDirectory: File
     private lateinit var displayManager: DisplayManager
     private lateinit var cameraExecutor: ExecutorService
 
+    private var outputDirectory: DocumentFile? = null
     private var imageCapture: ImageCapture? = null
     private var displayId = -1
     private var cameraProvider: ProcessCameraProvider? = null
@@ -55,7 +52,7 @@ class CameraActivity : BaseLanguageActivity() {
         setContentView(binding.root)
         Utils.transparentStatusBar(this, true, false)
         displayManager = getSystemService(DISPLAY_SERVICE) as DisplayManager
-        outputDirectory = DirectoryUtils.getOutputMediaDirectory(this, "Camera")
+        outputDirectory = DownloadUtils.getCameraDir()
         cameraExecutor = Executors.newSingleThreadExecutor()
         displayManager.registerDisplayListener(displayListener, null)
         binding.viewFinder.post {
@@ -176,33 +173,28 @@ class CameraActivity : BaseLanguageActivity() {
 
     private fun takePhoto() {
         if (imageCapture == null) return
-        val photoFile = File(outputDirectory, simpleDateFormat.format(System.currentTimeMillis()) + ".jpg")
-        val outputFileOptions = ImageCapture.OutputFileOptions.Builder(photoFile).build()
+        val fileName = simpleDateFormat.format(System.currentTimeMillis()) + ".jpg"
+        val mimeType = "image/jpg"
+        val photoFile = outputDirectory?.createFile(mimeType, fileName)?.let { it } ?: return
+        val outputStream = contentResolver.openOutputStream(photoFile.uri)?.let { it } ?: return
+        val outputFileOptions = ImageCapture.OutputFileOptions.Builder(outputStream).build()
         imageCapture?.takePicture(
             outputFileOptions,
             cameraExecutor,
             object : ImageCapture.OnImageSavedCallback {
                 @Suppress("UnstableApiUsage")
                 override fun onImageSaved(outputFileResults: ImageCapture.OutputFileResults) {
-                    val uri = Uri.fromFile(photoFile)
-                    val mimeType = MimeTypeMap.getSingleton()
-                        .getMimeTypeFromExtension(Files.getFileExtension(photoFile.name))
-                    MediaScannerConnection.scanFile(
-                        this@CameraActivity,
-                        arrayOf(photoFile.absolutePath),
-                        arrayOf(mimeType)
-                    ) { _: String?, uri1: Uri? ->
-                        Log.d(TAG, "onImageSaved: scan complete")
-                        val intent = Intent()
-                        intent.data = uri1
-                        setResult(RESULT_OK, intent)
-                        finish()
-                    }
-                    Log.d(TAG, "onImageSaved: $uri")
+                    try { outputStream.close() } catch (ignored: IOException) {}
+                    val intent = Intent()
+                    intent.data = photoFile.uri
+                    setResult(RESULT_OK, intent)
+                    finish()
+                    Log.d(TAG, "onImageSaved: " + photoFile.uri)
                 }
 
                 override fun onError(exception: ImageCaptureException) {
                     Log.e(TAG, "onError: ", exception)
+                    try { outputStream.close() } catch (ignored: IOException) {}
                 }
             }
         )

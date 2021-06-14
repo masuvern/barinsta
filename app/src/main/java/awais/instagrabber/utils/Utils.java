@@ -13,11 +13,12 @@ import android.graphics.Color;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
-import android.media.MediaScannerConnection;
-import android.media.MediaScannerConnection.OnScanCompletedListener;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Environment;
+import android.os.storage.StorageManager;
 import android.provider.Browser;
+import android.provider.DocumentsContract;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.Pair;
@@ -37,6 +38,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
+import androidx.documentfile.provider.DocumentFile;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MediatorLiveData;
 import androidx.vectordrawable.graphics.drawable.AnimatedVectorDrawableCompat;
@@ -46,12 +48,13 @@ import com.google.android.exoplayer2.upstream.cache.LeastRecentlyUsedCacheEvicto
 import com.google.android.exoplayer2.upstream.cache.SimpleCache;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Ordering;
-import com.google.common.io.Files;
 
 import org.json.JSONObject;
 
 import java.io.File;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -65,6 +68,8 @@ import awais.instagrabber.fragments.settings.PreferenceKeys;
 import awais.instagrabber.models.PostsLayoutPreferences;
 import awais.instagrabber.models.Tab;
 import awais.instagrabber.models.enums.FavoriteType;
+
+import static awais.instagrabber.fragments.settings.PreferenceKeys.PREF_BARINSTA_DIR_URI;
 
 public final class Utils {
     private static final String TAG = "Utils";
@@ -82,6 +87,7 @@ public final class Utils {
     public static String cacheDir;
     public static String tabOrderString;
     private static int defaultStatusBarColor;
+    private static Object[] volumes;
 
     public static int convertDpToPx(final float dp) {
         return Math.round((dp * displayMetrics.densityDpi) / DisplayMetrics.DENSITY_DEFAULT);
@@ -346,18 +352,18 @@ public final class Utils {
         window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
     }
 
-    public static void mediaScanFile(@NonNull final Context context,
-                                     @NonNull File file,
-                                     @NonNull final OnScanCompletedListener callback) {
-        //noinspection UnstableApiUsage
-        final String mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(Files.getFileExtension(file.getName()));
-        MediaScannerConnection.scanFile(
-                context,
-                new String[]{file.getAbsolutePath()},
-                new String[]{mimeType},
-                callback
-        );
-    }
+    // public static void mediaScanFile(@NonNull final Context context,
+    //                                  @NonNull File file,
+    //                                  @NonNull final OnScanCompletedListener callback) {
+    //     //noinspection UnstableApiUsage
+    //     final String mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(Files.getFileExtension(file.getName()));
+    //     MediaScannerConnection.scanFile(
+    //             context,
+    //             new String[]{file.getAbsolutePath()},
+    //             new String[]{mimeType},
+    //             callback
+    //     );
+    // }
 
     public static void showKeyboard(@NonNull final View view) {
         final Context context = view.getContext();
@@ -522,6 +528,73 @@ public final class Utils {
     public static boolean isNavRootInCurrentTabs(final String navRootString) {
         if (navRootString == null || tabOrderString == null) return false;
         return tabOrderString.contains(navRootString);
+    }
+
+    // public static void scanDocumentFile(@NonNull final Context context,
+    //                                     @NonNull final DocumentFile documentFile,
+    //                                     @NonNull final OnScanCompletedListener callback) {
+    //     if (!documentFile.isFile() || !documentFile.exists()) {
+    //         Log.d(TAG, "scanDocumentFile: " + documentFile);
+    //         callback.onScanCompleted(null, null);
+    //         return;
+    //     }
+    //     File file = null;
+    //     try {
+    //         file = getDocumentFileRealPath(context, documentFile);
+    //     } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
+    //         Log.e(TAG, "scanDocumentFile: ", e);
+    //     }
+    //     if (file == null) return;
+    //     MediaScannerConnection.scanFile(context,
+    //                                     new String[]{file.getAbsolutePath()},
+    //                                     new String[]{documentFile.getType()},
+    //                                     callback);
+    // }
+
+    public static File getDocumentFileRealPath(@NonNull final Context context,
+                                               @NonNull final DocumentFile documentFile)
+            throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+        final String docId = DocumentsContract.getDocumentId(documentFile.getUri());
+        final String[] split = docId.split(":");
+        final String type = split[0];
+
+        if (type.equalsIgnoreCase("primary")) {
+            return new File(Environment.getExternalStorageDirectory(), split[1]);
+        } else if (type.equalsIgnoreCase("raw")) {
+            return new File(split[1]);
+        } else {
+            if (volumes == null) {
+                final StorageManager sm = (StorageManager) context.getSystemService(Context.STORAGE_SERVICE);
+                if (sm == null) return null;
+                final Method getVolumeListMethod = sm.getClass().getMethod("getVolumeList");
+                volumes = (Object[]) getVolumeListMethod.invoke(sm);
+            }
+            if (volumes == null) return null;
+            for (Object volume : volumes) {
+                final Method getUuidMethod = volume.getClass().getMethod("getUuid");
+                final String uuid = (String) getUuidMethod.invoke(volume);
+
+                if (uuid != null && uuid.equalsIgnoreCase(type)) {
+                    final Method getPathMethod = volume.getClass().getMethod("getPath");
+                    final String path = (String) getPathMethod.invoke(volume);
+                    return new File(path, split[1]);
+                }
+            }
+        }
+
+        return null;
+    }
+
+    public static void setupSelectedDir(@NonNull final Context context,
+                                        @NonNull final Intent intent) throws DownloadUtils.ReselectDocumentTreeException {
+        final Uri dirUri = intent.getData();
+        Log.d(TAG, "onActivityResult: " + dirUri);
+        if (dirUri == null) return;
+        final int takeFlags = intent.getFlags() & (Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+        context.getContentResolver().takePersistableUriPermission(dirUri, takeFlags);
+        settingsHelper.putString(PREF_BARINSTA_DIR_URI, dirUri.toString());
+        // re-init DownloadUtils
+        DownloadUtils.init(context);
     }
 
     @NonNull

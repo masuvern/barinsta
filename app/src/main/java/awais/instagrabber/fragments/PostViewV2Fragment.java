@@ -105,7 +105,7 @@ import awais.instagrabber.utils.TextUtils;
 import awais.instagrabber.utils.Utils;
 import awais.instagrabber.viewmodels.PostViewV2ViewModel;
 
-import static androidx.core.content.PermissionChecker.checkSelfPermission;
+//import static androidx.core.content.PermissionChecker.checkSelfPermission;
 import static awais.instagrabber.fragments.HashTagFragment.ARG_HASHTAG;
 import static awais.instagrabber.fragments.settings.PreferenceKeys.PREF_SHOWN_COUNT_TOOLTIP;
 import static awais.instagrabber.utils.DownloadUtils.WRITE_PERMISSION;
@@ -119,6 +119,7 @@ public class PostViewV2Fragment extends Fragment implements EditTextDialogFragme
     private static final int STORAGE_PERM_REQUEST_CODE = 8020;
 
     private DialogPostViewBinding binding;
+    private Context context;
     private boolean detailsVisible = true;
     private boolean video;
     private VideoPlayerViewHelper videoPlayerViewHelper;
@@ -209,6 +210,12 @@ public class PostViewV2Fragment extends Fragment implements EditTextDialogFragme
     public void onViewCreated(@NonNull final View view, @Nullable final Bundle savedInstanceState) {
         // postponeEnterTransition();
         init();
+    }
+
+    @Override
+    public void onAttach(@NonNull final Context context) {
+        super.onAttach(context);
+        this.context = context;
     }
 
     @Override
@@ -454,13 +461,7 @@ public class PostViewV2Fragment extends Fragment implements EditTextDialogFragme
 
     private void setupDownload() {
         bottom.download.setOnClickListener(v -> {
-            final Context context = getContext();
-            if (context == null) return;
-            if (checkSelfPermission(context, WRITE_PERMISSION) == PermissionChecker.PERMISSION_GRANTED) {
-                DownloadUtils.showDownloadDialog(context, viewModel.getMedia(), sliderPosition);
-                return;
-            }
-            requestPermissions(DownloadUtils.PERMS, STORAGE_PERM_REQUEST_CODE);
+            DownloadUtils.showDownloadDialog(context, viewModel.getMedia(), sliderPosition);
         });
         TooltipCompat.setTooltipText(bottom.download, getString(R.string.action_download));
     }

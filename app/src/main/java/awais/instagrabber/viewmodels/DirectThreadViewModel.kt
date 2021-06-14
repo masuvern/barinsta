@@ -1,10 +1,10 @@
 package awais.instagrabber.viewmodels
 
+import android.R.attr
 import android.app.Application
 import android.content.ContentResolver
-import android.media.MediaScannerConnection
 import android.net.Uri
-import android.util.Log
+import androidx.documentfile.provider.DocumentFile
 import androidx.lifecycle.*
 import awais.instagrabber.customviews.emoji.Emoji
 import awais.instagrabber.managers.DirectMessagesManager
@@ -23,9 +23,8 @@ import awais.instagrabber.utils.MediaUtils.OnInfoLoadListener
 import awais.instagrabber.utils.MediaUtils.VideoInfo
 import awais.instagrabber.utils.VoiceRecorder.VoiceRecorderCallback
 import awais.instagrabber.utils.VoiceRecorder.VoiceRecordingResult
-import awais.instagrabber.utils.extensions.TAG
-import java.io.File
 import java.util.*
+
 
 class DirectThreadViewModel(
     application: Application,
@@ -37,7 +36,7 @@ class DirectThreadViewModel(
 
     // private static final String ERROR_INVALID_THREAD = "Invalid thread";
     private val contentResolver: ContentResolver = application.contentResolver
-    private val recordingsDir: File = DirectoryUtils.getOutputMediaDirectory(application, "Recordings")
+    private val recordingsDir: DocumentFile? = DownloadUtils.getRecordingsDir()
     private var voiceRecorder: VoiceRecorder? = null
     private lateinit var threadManager: ThreadManager
 
@@ -87,33 +86,24 @@ class DirectThreadViewModel(
 
     fun startRecording(): LiveData<Resource<Any?>> {
         val data = MutableLiveData<Resource<Any?>>()
-        voiceRecorder = VoiceRecorder(recordingsDir, object : VoiceRecorderCallback {
+        voiceRecorder = VoiceRecorder(recordingsDir!!, object : VoiceRecorderCallback {
             override fun onStart() {}
             override fun onComplete(result: VoiceRecordingResult) {
-                Log.d(TAG, "onComplete: recording complete. Scanning file...")
-                MediaScannerConnection.scanFile(
-                    getApplication(),
-                    arrayOf(result.file.absolutePath),
-                    arrayOf(result.mimeType)
-                ) { _: String?, uri: Uri? ->
-                    if (uri == null) {
-                        val msg = "Scan failed!"
-                        Log.e(TAG, msg)
-                        data.postValue(error(msg, null))
-                        return@scanFile
-                    }
-                    Log.d(TAG, "onComplete: scan complete")
-                    MediaUtils.getVoiceInfo(contentResolver, uri, object : OnInfoLoadListener<VideoInfo?> {
+                // Log.d(TAG, "onComplete: recording complete. Scanning file...");
+                MediaUtils.getVoiceInfo(
+                    contentResolver,
+                    result.file.uri,
+                    object : OnInfoLoadListener<VideoInfo?> {
                         override fun onLoad(videoInfo: VideoInfo?) {
                             if (videoInfo == null) return
                             threadManager.sendVoice(
                                 data,
-                                uri,
+                                result.file.uri,
                                 result.waveform,
                                 result.samplingFreq,
                                 videoInfo.duration,
-                                videoInfo.size,
-                                viewModelScope,
+                                result.file.length(),
+                                viewModelScope
                             )
                         }
 
@@ -121,12 +111,11 @@ class DirectThreadViewModel(
                             data.postValue(error(t.message, null))
                         }
                     })
-                }
             }
 
             override fun onCancel() {}
         })
-        voiceRecorder?.startRecording()
+        voiceRecorder?.startRecording(contentResolver)
         return data
     }
 

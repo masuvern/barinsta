@@ -1408,13 +1408,13 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
             Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
             return;
         }
-        if (ContextCompat.checkSelfPermission(context, DownloadUtils.PERMS[0]) == PackageManager.PERMISSION_GRANTED) {
-            DownloadUtils.download(context, media);
-            Toast.makeText(context, R.string.downloader_downloading_media, Toast.LENGTH_SHORT).show();
-            return;
-        }
-        tempMedia = media;
-        requestPermissions(DownloadUtils.PERMS, STORAGE_PERM_REQUEST_CODE);
+        // if (ContextCompat.checkSelfPermission(context, DownloadUtils.PERMS[0]) == PackageManager.PERMISSION_GRANTED) {
+        DownloadUtils.download(context, media);
+        Toast.makeText(context, R.string.downloader_downloading_media, Toast.LENGTH_SHORT).show();
+        // return;
+        // }
+        // tempMedia = media;
+        // requestPermissions(DownloadUtils.PERMS, STORAGE_PERM_REQUEST_CODE);
     }
 
     @Nullable

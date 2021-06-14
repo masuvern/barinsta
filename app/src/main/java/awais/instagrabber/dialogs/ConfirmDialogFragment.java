@@ -11,6 +11,7 @@ import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentActivity;
 
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
@@ -73,6 +74,7 @@ public class ConfirmDialogFragment extends DialogFragment {
         ConfirmDialogFragment fragment = new ConfirmDialogFragment();
         fragment.setArguments(args);
         return fragment;
+
     }
 
     public ConfirmDialogFragment() {}
@@ -80,11 +82,16 @@ public class ConfirmDialogFragment extends DialogFragment {
     @Override
     public void onAttach(@NonNull final Context context) {
         super.onAttach(context);
+        this.context = context;
         final Fragment parentFragment = getParentFragment();
         if (parentFragment instanceof ConfirmDialogFragmentCallback) {
             callback = (ConfirmDialogFragmentCallback) parentFragment;
+            return;
         }
-        this.context = context;
+        final FragmentActivity fragmentActivity = getActivity();
+        if (fragmentActivity instanceof ConfirmDialogFragmentCallback) {
+            callback = (ConfirmDialogFragmentCallback) fragmentActivity;
+        }
     }
 
     @NonNull

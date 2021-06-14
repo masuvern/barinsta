@@ -8,6 +8,7 @@ import android.content.ComponentName
 import android.content.Intent
 import android.content.ServiceConnection
 import android.os.*
+import android.provider.DocumentsContract.EXTRA_INITIAL_URI
 import android.text.Editable
 import android.util.Log
 import android.view.Menu
@@ -53,6 +54,7 @@ import awais.instagrabber.services.ActivityCheckerService
 import awais.instagrabber.services.DMSyncAlarmReceiver
 import awais.instagrabber.utils.*
 import awais.instagrabber.utils.AppExecutors.tasksThread
+import awais.instagrabber.utils.DownloadUtils.ReselectDocumentTreeException
 import awais.instagrabber.utils.TextUtils.isEmpty
 import awais.instagrabber.utils.TextUtils.shortcodeToId
 import awais.instagrabber.utils.emoji.EmojiParser
@@ -72,6 +74,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.*
 import java.util.stream.Collectors
+
 
 class MainActivity : BaseLanguageActivity(), FragmentManager.OnBackStackChangedListener {
     private lateinit var binding: ActivityMainBinding
@@ -107,6 +110,16 @@ class MainActivity : BaseLanguageActivity(), FragmentManager.OnBackStackChangedL
     private val graphQLRepository: GraphQLRepository by lazy { GraphQLRepository.getInstance() }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        try {
+            DownloadUtils.init(this)
+        } catch (e: ReselectDocumentTreeException) {
+            super.onCreate(savedInstanceState)
+            val intent = Intent(this, DirectorySelectActivity::class.java)
+            intent.putExtra(EXTRA_INITIAL_URI, e.initialUri)
+            startActivity(intent)
+            finish()
+            return
+        }
         super.onCreate(savedInstanceState)
         instance = this
         binding = ActivityMainBinding.inflate(layoutInflater)
