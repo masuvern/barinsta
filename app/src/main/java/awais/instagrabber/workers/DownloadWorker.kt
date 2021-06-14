@@ -40,8 +40,9 @@ import java.io.File
 import java.net.URL
 import java.util.*
 import java.util.concurrent.ExecutionException
+import java.util.stream.Collectors
+import kotlin.collections.Map
 import kotlin.math.abs
-
 
 class DownloadWorker(context: Context, workerParams: WorkerParameters) : CoroutineWorker(context, workerParams) {
     private val notificationManager: NotificationManagerCompat = NotificationManagerCompat.from(context)
@@ -88,15 +89,16 @@ class DownloadWorker(context: Context, workerParams: WorkerParameters) : Corouti
         return Result.success()
     }
 
-    private suspend fun download(urlToFilePathMap: Map<String, DocumentFile>) {
+    private suspend fun download(urlToFilePathMap: Map<String, String>) {
         val notificationId = notificationId
         val entries = urlToFilePathMap.entries
         var count = 1
         val total = urlToFilePathMap.size
-        for ((url, file) in entries) {
+        for ((url, uriString) in entries) {
             updateDownloadProgress(notificationId, count, total, 0f)
             withContext(Dispatchers.IO) {
-                download(notificationId, count, total, url, file)
+                val file = DocumentFile.fromSingleUri(applicationContext, Uri.parse(uriString))
+                download(notificationId, count, total, url, file!!)
             }
             count++
         }
@@ -219,9 +221,9 @@ class DownloadWorker(context: Context, workerParams: WorkerParameters) : Corouti
         return builder.build()
     }
 
-    private fun showSummary(urlToFilePathMap: Map<String, DocumentFile>?) {
+    private fun showSummary(urlToFilePathMap: Map<String, String>) {
         val context = applicationContext
-        val filePaths = urlToFilePathMap!!.values
+        val filePaths = urlToFilePathMap.mapNotNull { DocumentFile.fromSingleUri(context, Uri.parse(it.value)) }
         val notifications: MutableList<NotificationCompat.Builder> = LinkedList()
         val notificationIds: MutableList<Int> = LinkedList()
         var count = 1
@@ -382,17 +384,19 @@ class DownloadWorker(context: Context, workerParams: WorkerParameters) : Corouti
         return bitmap
     }
 
-    class DownloadRequest private constructor(val urlToFilePathMap: Map<String, DocumentFile>) {
+    class DownloadRequest private constructor(val urlToFilePathMap: Map<String, String>) {
 
         class Builder {
-            private var urlToFilePathMap: MutableMap<String, DocumentFile> = mutableMapOf()
+            private var urlToFilePathMap: MutableMap<String, String> = mutableMapOf()
             fun setUrlToFilePathMap(urlToFilePathMap: MutableMap<String, DocumentFile>): Builder {
                 this.urlToFilePathMap = urlToFilePathMap
+                    .mapValues { it.value.uri.toString() }
+                    .toMutableMap()
                 return this
             }
 
             fun addUrl(url: String, filePath: DocumentFile): Builder {
-                urlToFilePathMap[url] = filePath
+                urlToFilePathMap[url] = filePath.uri.toString()
                 return this
             }
 
