@@ -174,21 +174,22 @@ object DirectMessagesService {
         broadcastOptions: BroadcastOptions,
     ): DirectThreadBroadcastResponse {
         require(broadcastOptions.clientContext.isNotBlank()) { "Broadcast requires a valid client context value" }
-        val form = mutableMapOf<String, Any>(
+        val form = mutableMapOf<String, String>(
             "_csrftoken" to csrfToken,
-            "_uid" to userId,
+            "_uid" to userId.toString(10),
             "__uuid" to deviceUuid,
             "client_context" to broadcastOptions.clientContext,
             "mutation_token" to broadcastOptions.clientContext,
         )
         val threadIds = broadcastOptions.threadIds
+        val userIds = broadcastOptions.userIds
+        require(!userIds.isNullOrEmpty() || !threadIds.isNullOrEmpty()) {
+            "Either pass a list of thread ids or a list of lists of user ids"
+        }
         if (!threadIds.isNullOrEmpty()) {
             form["thread_ids"] = JSONArray(threadIds).toString()
-        } else {
-            val userIds = broadcastOptions.userIds
-            require(!userIds.isNullOrEmpty()) {
-                "Either provide a thread id or pass a list of user ids"
-            }
+        }
+        if (!userIds.isNullOrEmpty()) {
             form["recipient_users"] = JSONArray(userIds).toString()
         }
         val repliedToItemId = broadcastOptions.repliedToItemId
@@ -199,8 +200,8 @@ object DirectMessagesService {
         }
         form.putAll(broadcastOptions.formMap)
         form["action"] = "send_item"
-        val signedForm = Utils.sign(form)
-        return repository.broadcast(broadcastOptions.itemType.value, signedForm)
+//        val signedForm = Utils.sign(form)
+        return repository.broadcast(broadcastOptions.itemType.value, form)
     }
 
     suspend fun addUsers(
