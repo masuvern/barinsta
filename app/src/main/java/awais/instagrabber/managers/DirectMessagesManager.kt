@@ -8,7 +8,7 @@ import awais.instagrabber.models.Resource
 import awais.instagrabber.models.Resource.Companion.error
 import awais.instagrabber.models.Resource.Companion.loading
 import awais.instagrabber.models.Resource.Companion.success
-import awais.instagrabber.repositories.requests.directmessages.ThreadIdOrUserIds.Companion.of
+import awais.instagrabber.repositories.requests.directmessages.ThreadIdsOrUserIds
 import awais.instagrabber.repositories.responses.User
 import awais.instagrabber.repositories.responses.directmessages.DirectThread
 import awais.instagrabber.repositories.responses.directmessages.RankedRecipient
@@ -67,62 +67,26 @@ object DirectMessagesManager {
 
     suspend fun createThread(userPk: Long): DirectThread = DirectMessagesService.createThread(csrfToken, viewerId, deviceUuid, listOf(userPk), null)
 
-    fun sendMedia(recipients: Set<RankedRecipient>, mediaId: String, scope: CoroutineScope) {
-        val resultsCount = intArrayOf(0)
-        val callback: () -> Unit = {
-            resultsCount[0]++
-            if (resultsCount[0] == recipients.size) {
-                inboxManager.refresh(scope)
-            }
-        }
-        for (recipient in recipients) {
-            sendMedia(recipient, mediaId, false, callback, scope)
-        }
-    }
-
     fun sendMedia(recipient: RankedRecipient, mediaId: String, scope: CoroutineScope) {
-        sendMedia(recipient, mediaId, true, null, scope)
+        sendMedia(setOf(recipient), mediaId, scope)
     }
 
-    private fun sendMedia(
-        recipient: RankedRecipient,
+    fun sendMedia(
+        recipients: Set<RankedRecipient>,
         mediaId: String,
-        refreshInbox: Boolean,
-        callback: (() -> Unit)?,
         scope: CoroutineScope,
     ) {
-        if (recipient.thread == null && recipient.user != null) {
-            // create thread and forward
-            scope.launch(Dispatchers.IO) {
-                try {
-                    val (threadId) = createThread(recipient.user.pk)
-                    val threadIdTemp = threadId ?: return@launch
-                    sendMedia(threadIdTemp, mediaId, scope) {
-                        if (refreshInbox) {
-                            inboxManager.refresh(scope)
-                        }
-                        callback?.invoke()
-                    }
-                } catch (e: Exception) {
-                    Log.e(TAG, "sendMedia: ", e)
-                    callback?.invoke()
-                }
-            }
-        }
-        if (recipient.thread == null) return
-        // just forward
-        val thread = recipient.thread
-        val threadId = thread.threadId ?: return
-        sendMedia(threadId, mediaId, scope) {
-            if (refreshInbox) {
-                inboxManager.refresh(scope)
-            }
-            callback?.invoke()
+        val threadIds = recipients.mapNotNull{ it.thread?.threadId }
+        val userIdsTemp = recipients.mapNotNull{ it.user?.pk }
+        val userIds = userIdsTemp.map{ listOf(it.toString(10)) }
+        sendMedia(threadIds, userIds, mediaId, scope) {
+            inboxManager.refresh(scope)
         }
     }
 
     private fun sendMedia(
-        threadId: String,
+        threadIds: List<String>,
+        userIds: List<List<String>>,
         mediaId: String,
         scope: CoroutineScope,
         callback: (() -> Unit)?,
@@ -136,7 +100,7 @@ object DirectMessagesManager {
                     viewerId,
                     deviceUuid,
                     UUID.randomUUID().toString(),
-                    of(threadId),
+                    ThreadIdsOrUserIds(threadIds, userIds),
                     mediaId
                 )
                 data.postValue(success(Any()))
