@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import awais.instagrabber.R
 import awais.instagrabber.managers.DirectMessagesManager
+import awais.instagrabber.models.enums.BroadcastItemType
 import awais.instagrabber.models.Resource
 import awais.instagrabber.models.Resource.Companion.error
 import awais.instagrabber.models.Resource.Companion.loading
@@ -335,7 +336,7 @@ class PostViewV2ViewModel : ViewModel() {
             messageManager = DirectMessagesManager
         }
         val mediaId = media.id ?: return
-        messageManager?.sendMedia(result, mediaId, viewModelScope)
+        messageManager?.sendMedia(result, mediaId, BroadcastItemType.MEDIA_SHARE, viewModelScope)
     }
 
     fun shareDm(recipients: Set<RankedRecipient>) {
@@ -343,6 +344,6 @@ class PostViewV2ViewModel : ViewModel() {
             messageManager = DirectMessagesManager
         }
         val mediaId = media.id ?: return
-        messageManager?.sendMedia(recipients, mediaId, viewModelScope)
+        messageManager?.sendMedia(recipients, mediaId, BroadcastItemType.MEDIA_SHARE, viewModelScope)
     }
 }

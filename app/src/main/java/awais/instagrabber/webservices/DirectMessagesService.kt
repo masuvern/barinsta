@@ -167,6 +167,16 @@ object DirectMessagesService {
     ): DirectThreadBroadcastResponse =
         broadcast(csrfToken, userId, deviceUuid, MediaShareBroadcastOptions(clientContext, threadIdsOrUserIds, mediaId))
 
+    suspend fun broadcastProfile(
+        csrfToken: String,
+        userId: Long,
+        deviceUuid: String,
+        clientContext: String,
+        threadIdsOrUserIds: ThreadIdsOrUserIds,
+        profileId: String,
+    ): DirectThreadBroadcastResponse =
+        broadcast(csrfToken, userId, deviceUuid, ProfileBroadcastOptions(clientContext, threadIdsOrUserIds, profileId))
+
     private suspend fun broadcast(
         csrfToken: String,
         userId: Long,

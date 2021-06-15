@@ -5,8 +5,11 @@ import androidx.lifecycle.*
 import androidx.savedstate.SavedStateRegistryOwner
 import awais.instagrabber.db.repositories.AccountRepository
 import awais.instagrabber.db.repositories.FavoriteRepository
+import awais.instagrabber.managers.DirectMessagesManager
+import awais.instagrabber.models.enums.BroadcastItemType
 import awais.instagrabber.models.Resource
 import awais.instagrabber.repositories.responses.User
+import awais.instagrabber.repositories.responses.directmessages.RankedRecipient
 import awais.instagrabber.webservices.*
 
 class ProfileFragmentViewModel(
@@ -21,6 +24,7 @@ class ProfileFragmentViewModel(
 ) : ViewModel() {
     private val _profile = MutableLiveData<Resource<User?>>(Resource.loading(null))
     private val _isLoggedIn = MutableLiveData(false)
+    private var messageManager: DirectMessagesManager? = null
 
     val profile: LiveData<Resource<User?>> = _profile
 
@@ -57,6 +61,20 @@ class ProfileFragmentViewModel(
         if (usernameFromState.isNullOrBlank()) {
             _profile.postValue(Resource.success(null))
         }
+    }
+
+    fun shareDm(result: RankedRecipient) {
+        if (messageManager == null) {
+            messageManager = DirectMessagesManager
+        }
+//        messageManager?.sendMedia(result, mediaId, BroadcastItemType.PROFILE, viewModelScope)
+    }
+
+    fun shareDm(recipients: Set<RankedRecipient>) {
+        if (messageManager == null) {
+            messageManager = DirectMessagesManager
+        }
+//        messageManager?.sendMedia(recipients, mediaId, BroadcastItemType.PROFILE, viewModelScope)
     }
 }
 

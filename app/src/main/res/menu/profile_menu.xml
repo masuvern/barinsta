@@ -15,36 +15,43 @@
 
     <item
         android:id="@+id/block"
-        android:icon="@drawable/ic_block_24"
         android:title="@string/block"
         android:visible="false"
         app:showAsAction="never" />
 
     <item
         android:id="@+id/restrict"
-        android:icon="@drawable/ic_highlight_off_24"
         android:title="@string/restrict"
         android:visible="false"
         app:showAsAction="never" />
 
     <item
         android:id="@+id/remove_follower"
-        android:icon="@drawable/ic_block_24"
         android:title="@string/remove_follower"
         android:visible="false"
         app:showAsAction="never" />
 
     <item
         android:id="@+id/mute_stories"
-        android:icon="@drawable/ic_highlight_off_24"
         android:title="@string/mute_stories"
         android:visible="false"
         app:showAsAction="never" />
 
     <item
         android:id="@+id/mute_posts"
-        android:icon="@drawable/ic_highlight_off_24"
         android:title="@string/mute_posts"
+        android:visible="false"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/share_link"
+        android:title="@string/share_link"
+        android:visible="false"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/share_dm"
+        android:title="@string/share_via_dm"
         android:visible="false"
         app:showAsAction="never" />
 </menu>

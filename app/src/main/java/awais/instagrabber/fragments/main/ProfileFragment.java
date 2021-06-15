@@ -2,6 +2,7 @@ package awais.instagrabber.fragments.main;
 
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Typeface;
 import android.os.Bundle;
@@ -33,6 +34,8 @@ import androidx.core.content.PermissionChecker;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
+import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.NavDirections;
@@ -52,6 +55,7 @@ import java.util.Objects;
 import java.util.Set;
 
 import awais.instagrabber.R;
+import awais.instagrabber.UserSearchNavGraphDirections;
 import awais.instagrabber.activities.MainActivity;
 import awais.instagrabber.adapters.FeedAdapterV2;
 import awais.instagrabber.adapters.HighlightsAdapter;
@@ -66,6 +70,8 @@ import awais.instagrabber.db.repositories.FavoriteRepository;
 import awais.instagrabber.dialogs.PostsLayoutPreferencesDialogFragment;
 import awais.instagrabber.dialogs.ProfilePicDialogFragment;
 import awais.instagrabber.fragments.PostViewV2Fragment;
+import awais.instagrabber.fragments.UserSearchFragment;
+import awais.instagrabber.fragments.UserSearchFragmentDirections;
 import awais.instagrabber.managers.DirectMessagesManager;
 import awais.instagrabber.managers.InboxManager;
 import awais.instagrabber.models.HighlightModel;
@@ -78,6 +84,7 @@ import awais.instagrabber.repositories.responses.FriendshipStatus;
 import awais.instagrabber.repositories.responses.Media;
 import awais.instagrabber.repositories.responses.User;
 import awais.instagrabber.repositories.responses.UserProfileContextLink;
+import awais.instagrabber.repositories.responses.directmessages.RankedRecipient;
 import awais.instagrabber.utils.AppExecutors;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.CookieUtils;
@@ -128,6 +135,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
     private HighlightsViewModel highlightsViewModel;
     private MenuItem blockMenuItem, restrictMenuItem, chainingMenuItem;
     private MenuItem muteStoriesMenuItem, mutePostsMenuItem, removeFollowerMenuItem;
+    private MenuItem shareLinkMenuItem, shareDmMenuItem;
     private boolean accountIsUpdated = false;
     private boolean postsSetupDone = false;
     private Set<Media> selectedFeedModels;
@@ -143,6 +151,8 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
     private ProfileFragmentViewModel viewModel;
     private String csrfToken;
     private String deviceUuid;
+    private MutableLiveData<Object> backStackSavedStateCollectionLiveData;
+    private MutableLiveData<Object> backStackSavedStateResultLiveData;
 
     private final ServiceCallback<FriendshipChangeResponse> changeCb = new ServiceCallback<FriendshipChangeResponse>() {
         @Override
@@ -321,6 +331,32 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
             }
         }
     };
+    private final Observer<Object> backStackSavedStateObserver = result -> {
+        if (result == null) return;
+        if ((result instanceof RankedRecipient)) {
+            // Log.d(TAG, "result: " + result);
+            final Context context = getContext();
+            if (context != null) {
+                Toast.makeText(context, R.string.sending, Toast.LENGTH_SHORT).show();
+            }
+            viewModel.shareDm((RankedRecipient) result);
+        } else if ((result instanceof Set)) {
+            try {
+                // Log.d(TAG, "result: " + result);
+                final Context context = getContext();
+                if (context != null) {
+                    Toast.makeText(context, R.string.sending, Toast.LENGTH_SHORT).show();
+                }
+                //noinspection unchecked
+                viewModel.shareDm((Set<RankedRecipient>) result);
+            } catch (Exception e) {
+                Log.e(TAG, "share: ", e);
+            }
+        }
+        // clear result
+        backStackSavedStateCollectionLiveData.postValue(null);
+        backStackSavedStateResultLiveData.postValue(null);
+    };
 
     @Override
     public void onCreate(@Nullable final Bundle savedInstanceState) {
@@ -446,118 +482,152 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
         if (removeFollowerMenuItem != null) {
             removeFollowerMenuItem.setVisible(isNotMe && profileModel.getFriendshipStatus().getFollowedBy());
         }
+        shareLinkMenuItem = menu.findItem(R.id.share_link);
+        if (shareLinkMenuItem != null) {
+            shareLinkMenuItem.setVisible(profileModel != null && !TextUtils.isEmpty(profileModel.getUsername()));
+        }
+        shareDmMenuItem = menu.findItem(R.id.share_dm);
+        if (shareDmMenuItem != null) {
+            shareDmMenuItem.setVisible(profileModel != null && profileModel.getPk() != 0L);
+        }
     }
 
     @Override
     public boolean onOptionsItemSelected(@NonNull final MenuItem item) {
-        if (item.getItemId() == R.id.layout) {
-            showPostsLayoutPreferences();
-            return true;
+        switch (item.getItemId()) {
+            case R.id.layout: {
+                showPostsLayoutPreferences();
+                return true;
+            }
+            case R.id.restrict: {
+                if (!isLoggedIn) return false;
+                final String action = profileModel.getFriendshipStatus().isRestricted() ? "Unrestrict" : "Restrict";
+                friendshipRepository.toggleRestrict(
+                        csrfToken,
+                        deviceUuid,
+                        profileModel.getPk(),
+                        !profileModel.getFriendshipStatus().isRestricted(),
+                        CoroutineUtilsKt.getContinuation((response, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
+                            if (throwable != null) {
+                                Log.e(TAG, "Error while performing " + action, throwable);
+                                return;
+                            }
+                            // Log.d(TAG, action + " success: " + response);
+                            fetchProfileDetails();
+                        }), Dispatchers.getIO())
+                );
+                return true;
+            }
+            case R.id.block: {
+                if (!isLoggedIn) return false;
+                // changeCb
+                friendshipRepository.changeBlock(
+                        csrfToken,
+                        myId,
+                        deviceUuid,
+                        profileModel.getFriendshipStatus().getBlocking(),
+                        profileModel.getPk(),
+                        CoroutineUtilsKt.getContinuation((response, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
+                            if (throwable != null) {
+                                changeCb.onFailure(throwable);
+                                return;
+                            }
+                            changeCb.onSuccess(response);
+                        }), Dispatchers.getIO())
+                );
+                return true;
+            }
+            case R.id.chaining: {
+                if (!isLoggedIn) return false;
+                final Bundle bundle = new Bundle();
+                bundle.putString("type", "chaining");
+                bundle.putLong("targetId", profileModel.getPk());
+                NavHostFragment.findNavController(this).navigate(R.id.action_global_notificationsViewerFragment, bundle);
+                return true;
+            }
+            case R.id.mute_stories: {
+                if (!isLoggedIn) return false;
+                final String action = profileModel.getFriendshipStatus().isMutingReel() ? "Unmute stories" : "Mute stories";
+                friendshipRepository.changeMute(
+                        csrfToken,
+                        myId,
+                        deviceUuid,
+                        profileModel.getFriendshipStatus().isMutingReel(),
+                        profileModel.getPk(),
+                        true,
+                        CoroutineUtilsKt.getContinuation((response, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
+                            if (throwable != null) {
+                                changeCb.onFailure(throwable);
+                                return;
+                            }
+                            changeCb.onSuccess(response);
+                        }), Dispatchers.getIO())
+                );
+                return true;
+            }
+            case R.id.mute_posts: {
+                if (!isLoggedIn) return false;
+                final String action = profileModel.getFriendshipStatus().getMuting() ? "Unmute stories" : "Mute stories";
+                friendshipRepository.changeMute(
+                        csrfToken,
+                        myId,
+                        deviceUuid,
+                        profileModel.getFriendshipStatus().getMuting(),
+                        profileModel.getPk(),
+                        false,
+                        CoroutineUtilsKt.getContinuation((response, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
+                            if (throwable != null) {
+                                changeCb.onFailure(throwable);
+                                return;
+                            }
+                            changeCb.onSuccess(response);
+                        }), Dispatchers.getIO())
+                );
+                return true;
+            }
+            case R.id.remove_follower: {
+                if (!isLoggedIn) return false;
+                friendshipRepository.removeFollower(
+                        csrfToken,
+                        myId,
+                        deviceUuid,
+                        profileModel.getPk(),
+                        CoroutineUtilsKt.getContinuation((response, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
+                            if (throwable != null) {
+                                changeCb.onFailure(throwable);
+                                return;
+                            }
+                            changeCb.onSuccess(response);
+                        }), Dispatchers.getIO())
+                );
+                return true;
+            }
+            case R.id.share_link: {
+                final Intent sharingIntent = new Intent(android.content.Intent.ACTION_SEND);
+                sharingIntent.setType("text/plain");
+                sharingIntent.putExtra(android.content.Intent.EXTRA_TEXT, "https://instagram.com/" + profileModel.getUsername());
+                startActivity(sharingIntent);
+                return true;
+            }
+            case R.id.share_dm: {
+                final UserSearchNavGraphDirections.ActionGlobalUserSearch actionGlobalUserSearch = UserSearchFragmentDirections
+                        .actionGlobalUserSearch()
+                        .setTitle(getString(R.string.share))
+                        .setActionLabel(getString(R.string.send))
+                        .setShowGroups(true)
+                        .setMultiple(true)
+                        .setSearchMode(UserSearchFragment.SearchMode.RAVEN);
+                final NavController navController = NavHostFragment.findNavController(ProfileFragment.this);
+                try {
+                    navController.navigate(actionGlobalUserSearch);
+                } catch (Exception e) {
+                    Log.e(TAG, "setupShare: ", e);
+                }
+                return true;
+            }
+            default:
+                return super.onOptionsItemSelected(item);
         }
-        if (item.getItemId() == R.id.restrict) {
-            if (!isLoggedIn) return false;
-            final String action = profileModel.getFriendshipStatus().isRestricted() ? "Unrestrict" : "Restrict";
-            friendshipRepository.toggleRestrict(
-                    csrfToken,
-                    deviceUuid,
-                    profileModel.getPk(),
-                    !profileModel.getFriendshipStatus().isRestricted(),
-                    CoroutineUtilsKt.getContinuation((response, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
-                        if (throwable != null) {
-                            Log.e(TAG, "Error while performing " + action, throwable);
-                            return;
-                        }
-                        // Log.d(TAG, action + " success: " + response);
-                        fetchProfileDetails();
-                    }), Dispatchers.getIO())
-            );
-            return true;
-        }
-        if (item.getItemId() == R.id.block) {
-            if (!isLoggedIn) return false;
-            // changeCb
-            friendshipRepository.changeBlock(
-                    csrfToken,
-                    myId,
-                    deviceUuid,
-                    profileModel.getFriendshipStatus().getBlocking(),
-                    profileModel.getPk(),
-                    CoroutineUtilsKt.getContinuation((response, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
-                        if (throwable != null) {
-                            changeCb.onFailure(throwable);
-                            return;
-                        }
-                        changeCb.onSuccess(response);
-                    }), Dispatchers.getIO())
-            );
-            return true;
-        }
-        if (item.getItemId() == R.id.chaining) {
-            if (!isLoggedIn) return false;
-            final Bundle bundle = new Bundle();
-            bundle.putString("type", "chaining");
-            bundle.putLong("targetId", profileModel.getPk());
-            NavHostFragment.findNavController(this).navigate(R.id.action_global_notificationsViewerFragment, bundle);
-            return true;
-        }
-        if (item.getItemId() == R.id.mute_stories) {
-            if (!isLoggedIn) return false;
-            final String action = profileModel.getFriendshipStatus().isMutingReel() ? "Unmute stories" : "Mute stories";
-            friendshipRepository.changeMute(
-                    csrfToken,
-                    myId,
-                    deviceUuid,
-                    profileModel.getFriendshipStatus().isMutingReel(),
-                    profileModel.getPk(),
-                    true,
-                    CoroutineUtilsKt.getContinuation((response, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
-                        if (throwable != null) {
-                            changeCb.onFailure(throwable);
-                            return;
-                        }
-                        changeCb.onSuccess(response);
-                    }), Dispatchers.getIO())
-            );
-            return true;
-        }
-        if (item.getItemId() == R.id.mute_posts) {
-            if (!isLoggedIn) return false;
-            final String action = profileModel.getFriendshipStatus().getMuting() ? "Unmute stories" : "Mute stories";
-            friendshipRepository.changeMute(
-                    csrfToken,
-                    myId,
-                    deviceUuid,
-                    profileModel.getFriendshipStatus().getMuting(),
-                    profileModel.getPk(),
-                    false,
-                    CoroutineUtilsKt.getContinuation((response, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
-                        if (throwable != null) {
-                            changeCb.onFailure(throwable);
-                            return;
-                        }
-                        changeCb.onSuccess(response);
-                    }), Dispatchers.getIO())
-            );
-            return true;
-        }
-        if (item.getItemId() == R.id.remove_follower) {
-            if (!isLoggedIn) return false;
-            friendshipRepository.removeFollower(
-                    csrfToken,
-                    myId,
-                    deviceUuid,
-                    profileModel.getPk(),
-                    CoroutineUtilsKt.getContinuation((response, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
-                        if (throwable != null) {
-                            changeCb.onFailure(throwable);
-                            return;
-                        }
-                        changeCb.onSuccess(response);
-                    }), Dispatchers.getIO())
-            );
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
     }
 
     @Override
@@ -1028,6 +1098,12 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
             }
             if (removeFollowerMenuItem != null) {
                 removeFollowerMenuItem.setVisible(profileModel.getFriendshipStatus().getFollowedBy());
+            }
+            if (shareLinkMenuItem != null) {
+                shareLinkMenuItem.setVisible(!TextUtils.isEmpty(profileModel.getUsername()));
+            }
+            if (shareDmMenuItem != null) {
+                shareDmMenuItem.setVisible(profileModel.getPk() != 0L);
             }
         }
     }

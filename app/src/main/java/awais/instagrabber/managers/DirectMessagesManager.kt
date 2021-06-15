@@ -4,6 +4,7 @@ import android.content.ContentResolver
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import awais.instagrabber.models.enums.BroadcastItemType
 import awais.instagrabber.models.Resource
 import awais.instagrabber.models.Resource.Companion.error
 import awais.instagrabber.models.Resource.Companion.loading
@@ -67,19 +68,20 @@ object DirectMessagesManager {
 
     suspend fun createThread(userPk: Long): DirectThread = DirectMessagesService.createThread(csrfToken, viewerId, deviceUuid, listOf(userPk), null)
 
-    fun sendMedia(recipient: RankedRecipient, mediaId: String, scope: CoroutineScope) {
-        sendMedia(setOf(recipient), mediaId, scope)
+    fun sendMedia(recipient: RankedRecipient, mediaId: String, itemType: BroadcastItemType, scope: CoroutineScope) {
+        sendMedia(setOf(recipient), mediaId, itemType, scope)
     }
 
     fun sendMedia(
         recipients: Set<RankedRecipient>,
         mediaId: String,
+        itemType: BroadcastItemType,
         scope: CoroutineScope,
     ) {
         val threadIds = recipients.mapNotNull{ it.thread?.threadId }
         val userIdsTemp = recipients.mapNotNull{ it.user?.pk }
         val userIds = userIdsTemp.map{ listOf(it.toString(10)) }
-        sendMedia(threadIds, userIds, mediaId, scope) {
+        sendMedia(threadIds, userIds, mediaId, itemType, scope) {
             inboxManager.refresh(scope)
         }
     }
@@ -88,6 +90,7 @@ object DirectMessagesManager {
         threadIds: List<String>,
         userIds: List<List<String>>,
         mediaId: String,
+        itemType: BroadcastItemType,
         scope: CoroutineScope,
         callback: (() -> Unit)?,
     ): LiveData<Resource<Any?>> {
@@ -95,14 +98,24 @@ object DirectMessagesManager {
         data.postValue(loading(null))
         scope.launch(Dispatchers.IO) {
             try {
-                DirectMessagesService.broadcastMediaShare(
-                    csrfToken,
-                    viewerId,
-                    deviceUuid,
-                    UUID.randomUUID().toString(),
-                    ThreadIdsOrUserIds(threadIds, userIds),
-                    mediaId
-                )
+                if (itemType == BroadcastItemType.MEDIA_SHARE)
+                    DirectMessagesService.broadcastMediaShare(
+                        csrfToken,
+                        viewerId,
+                        deviceUuid,
+                        UUID.randomUUID().toString(),
+                        ThreadIdsOrUserIds(threadIds, userIds),
+                        mediaId
+                    )
+                if (itemType == BroadcastItemType.PROFILE)
+                    DirectMessagesService.broadcastProfile(
+                        csrfToken,
+                        viewerId,
+                        deviceUuid,
+                        UUID.randomUUID().toString(),
+                        ThreadIdsOrUserIds(threadIds, userIds),
+                        mediaId
+                    )
                 data.postValue(success(Any()))
                 callback?.invoke()
             } catch (e: Exception) {
