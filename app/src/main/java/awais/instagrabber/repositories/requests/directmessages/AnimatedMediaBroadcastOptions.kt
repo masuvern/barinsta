@@ -5,11 +5,11 @@ import awais.instagrabber.repositories.responses.giphy.GiphyGif
 
 class AnimatedMediaBroadcastOptions(
     clientContext: String,
-    threadIdOrUserIds: ThreadIdOrUserIds,
+    threadIdsOrUserIds: ThreadIdsOrUserIds,
     val giphyGif: GiphyGif
 ) : BroadcastOptions(
     clientContext,
-    threadIdOrUserIds,
+    threadIdsOrUserIds,
     BroadcastItemType.ANIMATED_MEDIA
 ) {
     override val formMap: Map<String, String>

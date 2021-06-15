@@ -4,11 +4,11 @@ import awais.instagrabber.models.enums.BroadcastItemType
 
 class StoryReplyBroadcastOptions(
     clientContext: String,
-    threadIdOrUserIds: ThreadIdOrUserIds,
+    threadIdsOrUserIds: ThreadIdsOrUserIds,
     val text: String,
     val mediaId: String,
     val reelId: String // or user id, usually same
-) : BroadcastOptions(clientContext, threadIdOrUserIds, BroadcastItemType.REELSHARE) {
+) : BroadcastOptions(clientContext, threadIdsOrUserIds, BroadcastItemType.REELSHARE) {
     override val formMap: Map<String, String>
         get() = mapOf(
             "text" to text,

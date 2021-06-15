@@ -54,16 +54,16 @@ object DirectMessagesService {
         userId: Long,
         deviceUuid: String,
         clientContext: String,
-        threadIdOrUserIds: ThreadIdOrUserIds,
+        threadIdsOrUserIds: ThreadIdsOrUserIds,
         text: String,
         repliedToItemId: String?,
         repliedToClientContext: String?,
     ): DirectThreadBroadcastResponse {
         val urls = extractUrls(text)
         if (urls.isNotEmpty()) {
-            return broadcastLink(csrfToken, userId, deviceUuid, clientContext, threadIdOrUserIds, text, urls, repliedToItemId, repliedToClientContext)
+            return broadcastLink(csrfToken, userId, deviceUuid, clientContext, threadIdsOrUserIds, text, urls, repliedToItemId, repliedToClientContext)
         }
-        val broadcastOptions = TextBroadcastOptions(clientContext, threadIdOrUserIds, text)
+        val broadcastOptions = TextBroadcastOptions(clientContext, threadIdsOrUserIds, text)
         if (!repliedToItemId.isNullOrBlank() && !repliedToClientContext.isNullOrBlank()) {
             broadcastOptions.repliedToItemId = repliedToItemId
             broadcastOptions.repliedToClientContext = repliedToClientContext
@@ -76,13 +76,13 @@ object DirectMessagesService {
         userId: Long,
         deviceUuid: String,
         clientContext: String,
-        threadIdOrUserIds: ThreadIdOrUserIds,
+        threadIdsOrUserIds: ThreadIdsOrUserIds,
         linkText: String,
         urls: List<String>,
         repliedToItemId: String?,
         repliedToClientContext: String?,
     ): DirectThreadBroadcastResponse {
-        val broadcastOptions = LinkBroadcastOptions(clientContext, threadIdOrUserIds, linkText, urls)
+        val broadcastOptions = LinkBroadcastOptions(clientContext, threadIdsOrUserIds, linkText, urls)
         if (!repliedToItemId.isNullOrBlank() && !repliedToClientContext.isNullOrBlank()) {
             broadcastOptions.repliedToItemId = repliedToItemId
             broadcastOptions.repliedToClientContext = repliedToClientContext
@@ -95,77 +95,77 @@ object DirectMessagesService {
         userId: Long,
         deviceUuid: String,
         clientContext: String,
-        threadIdOrUserIds: ThreadIdOrUserIds,
+        threadIdsOrUserIds: ThreadIdsOrUserIds,
         uploadId: String,
     ): DirectThreadBroadcastResponse =
-        broadcast(csrfToken, userId, deviceUuid, PhotoBroadcastOptions(clientContext, threadIdOrUserIds, true, uploadId))
+        broadcast(csrfToken, userId, deviceUuid, PhotoBroadcastOptions(clientContext, threadIdsOrUserIds, true, uploadId))
 
     suspend fun broadcastVideo(
         csrfToken: String,
         userId: Long,
         deviceUuid: String,
         clientContext: String,
-        threadIdOrUserIds: ThreadIdOrUserIds,
+        threadIdsOrUserIds: ThreadIdsOrUserIds,
         uploadId: String,
         videoResult: String,
         sampled: Boolean,
     ): DirectThreadBroadcastResponse =
-        broadcast(csrfToken, userId, deviceUuid, VideoBroadcastOptions(clientContext, threadIdOrUserIds, videoResult, uploadId, sampled))
+        broadcast(csrfToken, userId, deviceUuid, VideoBroadcastOptions(clientContext, threadIdsOrUserIds, videoResult, uploadId, sampled))
 
     suspend fun broadcastVoice(
         csrfToken: String,
         userId: Long,
         deviceUuid: String,
         clientContext: String,
-        threadIdOrUserIds: ThreadIdOrUserIds,
+        threadIdsOrUserIds: ThreadIdsOrUserIds,
         uploadId: String,
         waveform: List<Float>,
         samplingFreq: Int,
     ): DirectThreadBroadcastResponse =
-        broadcast(csrfToken, userId, deviceUuid, VoiceBroadcastOptions(clientContext, threadIdOrUserIds, uploadId, waveform, samplingFreq))
+        broadcast(csrfToken, userId, deviceUuid, VoiceBroadcastOptions(clientContext, threadIdsOrUserIds, uploadId, waveform, samplingFreq))
 
     suspend fun broadcastStoryReply(
         csrfToken: String,
         userId: Long,
         deviceUuid: String,
-        threadIdOrUserIds: ThreadIdOrUserIds,
+        threadIdsOrUserIds: ThreadIdsOrUserIds,
         text: String,
         mediaId: String,
         reelId: String,
     ): DirectThreadBroadcastResponse =
-        broadcast(csrfToken, userId, deviceUuid, StoryReplyBroadcastOptions(UUID.randomUUID().toString(), threadIdOrUserIds, text, mediaId, reelId))
+        broadcast(csrfToken, userId, deviceUuid, StoryReplyBroadcastOptions(UUID.randomUUID().toString(), threadIdsOrUserIds, text, mediaId, reelId))
 
     suspend fun broadcastReaction(
         csrfToken: String,
         userId: Long,
         deviceUuid: String,
         clientContext: String,
-        threadIdOrUserIds: ThreadIdOrUserIds,
+        threadIdsOrUserIds: ThreadIdsOrUserIds,
         itemId: String,
         emoji: String?,
         delete: Boolean,
     ): DirectThreadBroadcastResponse =
-        broadcast(csrfToken, userId, deviceUuid, ReactionBroadcastOptions(clientContext, threadIdOrUserIds, itemId, emoji, delete))
+        broadcast(csrfToken, userId, deviceUuid, ReactionBroadcastOptions(clientContext, threadIdsOrUserIds, itemId, emoji, delete))
 
     suspend fun broadcastAnimatedMedia(
         csrfToken: String,
         userId: Long,
         deviceUuid: String,
         clientContext: String,
-        threadIdOrUserIds: ThreadIdOrUserIds,
+        threadIdsOrUserIds: ThreadIdsOrUserIds,
         giphyGif: GiphyGif,
     ): DirectThreadBroadcastResponse =
-        broadcast(csrfToken, userId, deviceUuid, AnimatedMediaBroadcastOptions(clientContext, threadIdOrUserIds, giphyGif))
+        broadcast(csrfToken, userId, deviceUuid, AnimatedMediaBroadcastOptions(clientContext, threadIdsOrUserIds, giphyGif))
 
     suspend fun broadcastMediaShare(
         csrfToken: String,
         userId: Long,
         deviceUuid: String,
         clientContext: String,
-        threadIdOrUserIds: ThreadIdOrUserIds,
+        threadIdsOrUserIds: ThreadIdsOrUserIds,
         mediaId: String,
     ): DirectThreadBroadcastResponse =
-        broadcast(csrfToken, userId, deviceUuid, MediaShareBroadcastOptions(clientContext, threadIdOrUserIds, mediaId))
+        broadcast(csrfToken, userId, deviceUuid, MediaShareBroadcastOptions(clientContext, threadIdsOrUserIds, mediaId))
 
     private suspend fun broadcast(
         csrfToken: String,
@@ -181,9 +181,9 @@ object DirectMessagesService {
             "client_context" to broadcastOptions.clientContext,
             "mutation_token" to broadcastOptions.clientContext,
         )
-        val threadId = broadcastOptions.threadId
-        if (!threadId.isNullOrBlank()) {
-            form["thread_id"] = threadId
+        val threadIds = broadcastOptions.threadIds
+        if (!threadIds.isNullOrEmpty()) {
+            form["thread_ids"] = JSONArray(threadIds).toString()
         } else {
             val userIds = broadcastOptions.userIds
             require(!userIds.isNullOrEmpty()) {

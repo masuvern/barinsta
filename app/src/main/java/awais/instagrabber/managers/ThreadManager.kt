@@ -17,8 +17,8 @@ import awais.instagrabber.models.Resource.Companion.success
 import awais.instagrabber.models.enums.DirectItemType
 import awais.instagrabber.repositories.requests.UploadFinishOptions
 import awais.instagrabber.repositories.requests.VideoOptions
-import awais.instagrabber.repositories.requests.directmessages.ThreadIdOrUserIds
-import awais.instagrabber.repositories.requests.directmessages.ThreadIdOrUserIds.Companion.of
+import awais.instagrabber.repositories.requests.directmessages.ThreadIdsOrUserIds
+import awais.instagrabber.repositories.requests.directmessages.ThreadIdsOrUserIds.Companion.of
 import awais.instagrabber.repositories.responses.User
 import awais.instagrabber.repositories.responses.directmessages.*
 import awais.instagrabber.repositories.responses.giphy.GiphyGif
@@ -61,7 +61,7 @@ class ThreadManager(
     private val _pendingRequests = MutableLiveData<DirectThreadParticipantRequestsResponse?>(null)
     val pendingRequests: LiveData<DirectThreadParticipantRequestsResponse?> = _pendingRequests
     private val inboxManager: InboxManager = if (pending) DirectMessagesManager.pendingInboxManager else DirectMessagesManager.inboxManager
-    private val threadIdOrUserIds: ThreadIdOrUserIds = of(threadId)
+    private val threadIdsOrUserIds: ThreadIdsOrUserIds = of(threadId)
     private val friendshipRepository: FriendshipRepository by lazy { FriendshipRepository.getInstance() }
     private val mediaRepository: MediaRepository by lazy { MediaRepository.getInstance() }
 
@@ -353,7 +353,7 @@ class ThreadManager(
                     viewerId,
                     deviceUuid,
                     clientContext,
-                    threadIdOrUserIds,
+                    threadIdsOrUserIds,
                     text,
                     repliedToItemId,
                     repliedToClientContext
@@ -411,7 +411,7 @@ class ThreadManager(
                     userId,
                     deviceUuid,
                     clientContext,
-                    threadIdOrUserIds,
+                    threadIdsOrUserIds,
                     giphyGif
                 )
                 parseResponse(request, data, directItem)
@@ -460,7 +460,7 @@ class ThreadManager(
                     viewerId,
                     deviceUuid,
                     clientContext,
-                    threadIdOrUserIds,
+                    threadIdsOrUserIds,
                     uploadDmVoiceOptions.uploadId,
                     waveform,
                     samplingFreq
@@ -504,7 +504,7 @@ class ThreadManager(
                     userId,
                     deviceUuid,
                     clientContext,
-                    threadIdOrUserIds,
+                    threadIdsOrUserIds,
                     itemId,
                     emojiUnicode,
                     false
@@ -544,7 +544,7 @@ class ThreadManager(
                     viewerId,
                     deviceUuid,
                     clientContext,
-                    threadIdOrUserIds,
+                    threadIdsOrUserIds,
                     itemId1,
                     null,
                     true
@@ -732,7 +732,7 @@ class ThreadManager(
                 if (handleInvalidResponse(data, response)) return@launch
                 val response1 = response.response ?: return@launch
                 val uploadId = response1.optString("upload_id")
-                val response2 = DirectMessagesService.broadcastPhoto(csrfToken, viewerId, deviceUuid, clientContext, threadIdOrUserIds, uploadId)
+                val response2 = DirectMessagesService.broadcastPhoto(csrfToken, viewerId, deviceUuid, clientContext, threadIdsOrUserIds, uploadId)
                 parseResponse(response2, data, directItem)
             } catch (e: Exception) {
                 data.postValue(error(e.message, null))
@@ -798,7 +798,7 @@ class ThreadManager(
                     viewerId,
                     deviceUuid,
                     clientContext,
-                    threadIdOrUserIds,
+                    threadIdsOrUserIds,
                     uploadDmVideoOptions.uploadId,
                     "",
                     true

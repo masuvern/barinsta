@@ -4,11 +4,11 @@ import awais.instagrabber.models.enums.BroadcastItemType
 
 class TextBroadcastOptions(
     clientContext: String,
-    threadIdOrUserIds: ThreadIdOrUserIds,
+    threadIdsOrUserIds: ThreadIdsOrUserIds,
     val text: String
 ) : BroadcastOptions(
     clientContext,
-    threadIdOrUserIds,
+    threadIdsOrUserIds,
     BroadcastItemType.TEXT
 ) {
     override val formMap: Map<String, String>

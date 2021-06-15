@@ -4,12 +4,12 @@ import awais.instagrabber.models.enums.BroadcastItemType
 
 class PhotoBroadcastOptions(
     clientContext: String,
-    threadIdOrUserIds: ThreadIdOrUserIds,
+    threadIdsOrUserIds: ThreadIdsOrUserIds,
     val allowFullAspectRatio: Boolean,
     val uploadId: String
 ) : BroadcastOptions(
     clientContext,
-    threadIdOrUserIds,
+    threadIdsOrUserIds,
     BroadcastItemType.IMAGE
 ) {
     override val formMap: Map<String, String>

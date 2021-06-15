@@ -4,11 +4,11 @@ import awais.instagrabber.models.enums.BroadcastItemType
 
 class ReactionBroadcastOptions(
     clientContext: String,
-    threadIdOrUserIds: ThreadIdOrUserIds,
+    threadIdsOrUserIds: ThreadIdsOrUserIds,
     val itemId: String,
     val emoji: String?,
     val delete: Boolean
-) : BroadcastOptions(clientContext, threadIdOrUserIds, BroadcastItemType.REACTION) {
+) : BroadcastOptions(clientContext, threadIdsOrUserIds, BroadcastItemType.REACTION) {
     override val formMap: Map<String, String>
         get() = listOfNotNull(
             "item_id" to itemId,

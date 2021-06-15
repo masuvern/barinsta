@@ -5,12 +5,12 @@ import org.json.JSONArray
 
 class LinkBroadcastOptions(
     clientContext: String,
-    threadIdOrUserIds: ThreadIdOrUserIds,
+    threadIdsOrUserIds: ThreadIdsOrUserIds,
     val linkText: String,
     val urls: List<String>
 ) : BroadcastOptions(
     clientContext,
-    threadIdOrUserIds,
+    threadIdsOrUserIds,
     BroadcastItemType.LINK
 ) {
     override val formMap: Map<String, String>

@@ -4,13 +4,13 @@ import awais.instagrabber.models.enums.BroadcastItemType
 
 class VideoBroadcastOptions(
     clientContext: String,
-    threadIdOrUserIds: ThreadIdOrUserIds,
+    threadIdsOrUserIds: ThreadIdsOrUserIds,
     val videoResult: String,
     val uploadId: String,
     val sampled: Boolean
 ) : BroadcastOptions(
     clientContext,
-    threadIdOrUserIds,
+    threadIdsOrUserIds,
     BroadcastItemType.VIDEO
 ) {
     override val formMap: Map<String, String>

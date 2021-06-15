@@ -5,11 +5,11 @@ import org.json.JSONArray
 
 class VoiceBroadcastOptions(
     clientContext: String,
-    threadIdOrUserIds: ThreadIdOrUserIds,
+    threadIdsOrUserIds: ThreadIdsOrUserIds,
     val uploadId: String,
     val waveform: List<Float>,
     val waveformSamplingFrequencyHz: Int
-) : BroadcastOptions(clientContext, threadIdOrUserIds, BroadcastItemType.VOICE) {
+) : BroadcastOptions(clientContext, threadIdsOrUserIds, BroadcastItemType.VOICE) {
     override val formMap: Map<String, String>
         get() = mapOf(
             "waveform" to JSONArray(waveform).toString(),

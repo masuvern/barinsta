@@ -4,11 +4,11 @@ import awais.instagrabber.models.enums.BroadcastItemType
 
 class MediaShareBroadcastOptions(
     clientContext: String,
-    threadIdOrUserIds: ThreadIdOrUserIds,
+    threadIdsOrUserIds: ThreadIdsOrUserIds,
     val mediaId: String
 ) : BroadcastOptions(
     clientContext,
-    threadIdOrUserIds,
+    threadIdsOrUserIds,
     BroadcastItemType.MEDIA_SHARE
 ) {
     override val formMap: Map<String, String>
