@@ -10,4 +10,6 @@ enum class BroadcastItemType(val value: String) {
     VOICE("share_voice"),
     ANIMATED_MEDIA("animated_media"),
     MEDIA_SHARE("media_share"),
+    PROFILE("profile"),
+    STORY("story_share"), // not reply
 }
