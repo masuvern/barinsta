@@ -86,7 +86,7 @@ import awais.instagrabber.models.stickers.SliderModel;
 import awais.instagrabber.models.stickers.SwipeUpModel;
 import awais.instagrabber.repositories.requests.StoryViewerOptions;
 import awais.instagrabber.repositories.requests.StoryViewerOptions.Type;
-import awais.instagrabber.repositories.requests.directmessages.ThreadIdOrUserIds;
+import awais.instagrabber.repositories.requests.directmessages.ThreadIdsOrUserIds;
 import awais.instagrabber.utils.AppExecutors;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.CookieUtils;
@@ -221,23 +221,11 @@ public class StoryViewerFragment extends Fragment {
             final AlertDialog ad = new AlertDialog.Builder(context)
                     .setTitle(R.string.reply_story)
                     .setView(input)
-                    .setPositiveButton(R.string.confirm, (d, w) -> directMessagesService.createThread(
-                            csrfToken,
-                            userId,
-                            deviceId,
-                            Collections.singletonList(currentStory.getUserId()),
-                            null,
-                            CoroutineUtilsKt.getContinuation((thread, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
-                                if (throwable != null) {
-                                    Log.e(TAG, "onOptionsItemSelected: ", throwable);
-                                    Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
-                                    return;
-                                }
-                                directMessagesService.broadcastStoryReply(
+                    .setPositiveButton(R.string.confirm, (d, w) -> directMessagesService.broadcastStoryReply(
                                         csrfToken,
                                         userId,
                                         deviceId,
-                                        ThreadIdOrUserIds.of(thread.getThreadId()),
+                                        ThreadIdsOrUserIds.Companion.ofOneUser(String.valueOf(currentStory.getUserId())),
                                         input.getText().toString(),
                                         currentStory.getStoryMediaId(),
                                         String.valueOf(currentStory.getUserId()),
@@ -251,9 +239,6 @@ public class StoryViewerFragment extends Fragment {
                                                     Toast.makeText(context, R.string.answered_story, Toast.LENGTH_SHORT).show();
                                                 }), Dispatchers.getIO()
                                         )
-
-                                );
-                            }), Dispatchers.getIO())
                     ))
                     .setNegativeButton(R.string.cancel, null)
                     .show();
