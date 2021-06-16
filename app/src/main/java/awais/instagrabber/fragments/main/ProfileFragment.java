@@ -494,140 +494,130 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
 
     @Override
     public boolean onOptionsItemSelected(@NonNull final MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.layout: {
-                showPostsLayoutPreferences();
-                return true;
+        int itemId = item.getItemId();
+        if (itemId == R.id.layout) {
+            showPostsLayoutPreferences();
+            return true;
+        } else if (itemId == R.id.restrict) {
+            if (!isLoggedIn) return false;
+            final String action = profileModel.getFriendshipStatus().isRestricted() ? "Unrestrict" : "Restrict";
+            friendshipRepository.toggleRestrict(
+                    csrfToken,
+                    deviceUuid,
+                    profileModel.getPk(),
+                    !profileModel.getFriendshipStatus().isRestricted(),
+                    CoroutineUtilsKt.getContinuation((response, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
+                        if (throwable != null) {
+                            Log.e(TAG, "Error while performing " + action, throwable);
+                            return;
+                        }
+                        // Log.d(TAG, action + " success: " + response);
+                        fetchProfileDetails();
+                    }), Dispatchers.getIO())
+            );
+            return true;
+        } else if (itemId == R.id.block) {
+            if (!isLoggedIn) return false;
+            // changeCb
+            friendshipRepository.changeBlock(
+                    csrfToken,
+                    myId,
+                    deviceUuid,
+                    profileModel.getFriendshipStatus().getBlocking(),
+                    profileModel.getPk(),
+                    CoroutineUtilsKt.getContinuation((response, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
+                        if (throwable != null) {
+                            changeCb.onFailure(throwable);
+                            return;
+                        }
+                        changeCb.onSuccess(response);
+                    }), Dispatchers.getIO())
+            );
+            return true;
+        } else if (itemId == R.id.chaining) {
+            if (!isLoggedIn) return false;
+            final Bundle bundle = new Bundle();
+            bundle.putString("type", "chaining");
+            bundle.putLong("targetId", profileModel.getPk());
+            NavHostFragment.findNavController(this).navigate(R.id.action_global_notificationsViewerFragment, bundle);
+            return true;
+        } else if (itemId == R.id.mute_stories) {
+            if (!isLoggedIn) return false;
+            final String action = profileModel.getFriendshipStatus().isMutingReel() ? "Unmute stories" : "Mute stories";
+            friendshipRepository.changeMute(
+                    csrfToken,
+                    myId,
+                    deviceUuid,
+                    profileModel.getFriendshipStatus().isMutingReel(),
+                    profileModel.getPk(),
+                    true,
+                    CoroutineUtilsKt.getContinuation((response, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
+                        if (throwable != null) {
+                            changeCb.onFailure(throwable);
+                            return;
+                        }
+                        changeCb.onSuccess(response);
+                    }), Dispatchers.getIO())
+            );
+            return true;
+        } else if (itemId == R.id.mute_posts) {
+            if (!isLoggedIn) return false;
+            final String action = profileModel.getFriendshipStatus().getMuting() ? "Unmute stories" : "Mute stories";
+            friendshipRepository.changeMute(
+                    csrfToken,
+                    myId,
+                    deviceUuid,
+                    profileModel.getFriendshipStatus().getMuting(),
+                    profileModel.getPk(),
+                    false,
+                    CoroutineUtilsKt.getContinuation((response, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
+                        if (throwable != null) {
+                            changeCb.onFailure(throwable);
+                            return;
+                        }
+                        changeCb.onSuccess(response);
+                    }), Dispatchers.getIO())
+            );
+            return true;
+        } else if (itemId == R.id.remove_follower) {
+            if (!isLoggedIn) return false;
+            friendshipRepository.removeFollower(
+                    csrfToken,
+                    myId,
+                    deviceUuid,
+                    profileModel.getPk(),
+                    CoroutineUtilsKt.getContinuation((response, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
+                        if (throwable != null) {
+                            changeCb.onFailure(throwable);
+                            return;
+                        }
+                        changeCb.onSuccess(response);
+                    }), Dispatchers.getIO())
+            );
+            return true;
+        } else if (itemId == R.id.share_link) {
+            final Intent sharingIntent = new Intent(Intent.ACTION_SEND);
+            sharingIntent.setType("text/plain");
+            sharingIntent.putExtra(Intent.EXTRA_TEXT, "https://instagram.com/" + profileModel.getUsername());
+            startActivity(sharingIntent);
+            return true;
+        } else if (itemId == R.id.share_dm) {
+            final UserSearchNavGraphDirections.ActionGlobalUserSearch actionGlobalUserSearch = UserSearchFragmentDirections
+                    .actionGlobalUserSearch()
+                    .setTitle(getString(R.string.share))
+                    .setActionLabel(getString(R.string.send))
+                    .setShowGroups(true)
+                    .setMultiple(true)
+                    .setSearchMode(UserSearchFragment.SearchMode.RAVEN);
+            final NavController navController = NavHostFragment.findNavController(ProfileFragment.this);
+            try {
+                navController.navigate(actionGlobalUserSearch);
+            } catch (Exception e) {
+                Log.e(TAG, "setupShare: ", e);
             }
-            case R.id.restrict: {
-                if (!isLoggedIn) return false;
-                final String action = profileModel.getFriendshipStatus().isRestricted() ? "Unrestrict" : "Restrict";
-                friendshipRepository.toggleRestrict(
-                        csrfToken,
-                        deviceUuid,
-                        profileModel.getPk(),
-                        !profileModel.getFriendshipStatus().isRestricted(),
-                        CoroutineUtilsKt.getContinuation((response, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
-                            if (throwable != null) {
-                                Log.e(TAG, "Error while performing " + action, throwable);
-                                return;
-                            }
-                            // Log.d(TAG, action + " success: " + response);
-                            fetchProfileDetails();
-                        }), Dispatchers.getIO())
-                );
-                return true;
-            }
-            case R.id.block: {
-                if (!isLoggedIn) return false;
-                // changeCb
-                friendshipRepository.changeBlock(
-                        csrfToken,
-                        myId,
-                        deviceUuid,
-                        profileModel.getFriendshipStatus().getBlocking(),
-                        profileModel.getPk(),
-                        CoroutineUtilsKt.getContinuation((response, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
-                            if (throwable != null) {
-                                changeCb.onFailure(throwable);
-                                return;
-                            }
-                            changeCb.onSuccess(response);
-                        }), Dispatchers.getIO())
-                );
-                return true;
-            }
-            case R.id.chaining: {
-                if (!isLoggedIn) return false;
-                final Bundle bundle = new Bundle();
-                bundle.putString("type", "chaining");
-                bundle.putLong("targetId", profileModel.getPk());
-                NavHostFragment.findNavController(this).navigate(R.id.action_global_notificationsViewerFragment, bundle);
-                return true;
-            }
-            case R.id.mute_stories: {
-                if (!isLoggedIn) return false;
-                final String action = profileModel.getFriendshipStatus().isMutingReel() ? "Unmute stories" : "Mute stories";
-                friendshipRepository.changeMute(
-                        csrfToken,
-                        myId,
-                        deviceUuid,
-                        profileModel.getFriendshipStatus().isMutingReel(),
-                        profileModel.getPk(),
-                        true,
-                        CoroutineUtilsKt.getContinuation((response, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
-                            if (throwable != null) {
-                                changeCb.onFailure(throwable);
-                                return;
-                            }
-                            changeCb.onSuccess(response);
-                        }), Dispatchers.getIO())
-                );
-                return true;
-            }
-            case R.id.mute_posts: {
-                if (!isLoggedIn) return false;
-                final String action = profileModel.getFriendshipStatus().getMuting() ? "Unmute stories" : "Mute stories";
-                friendshipRepository.changeMute(
-                        csrfToken,
-                        myId,
-                        deviceUuid,
-                        profileModel.getFriendshipStatus().getMuting(),
-                        profileModel.getPk(),
-                        false,
-                        CoroutineUtilsKt.getContinuation((response, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
-                            if (throwable != null) {
-                                changeCb.onFailure(throwable);
-                                return;
-                            }
-                            changeCb.onSuccess(response);
-                        }), Dispatchers.getIO())
-                );
-                return true;
-            }
-            case R.id.remove_follower: {
-                if (!isLoggedIn) return false;
-                friendshipRepository.removeFollower(
-                        csrfToken,
-                        myId,
-                        deviceUuid,
-                        profileModel.getPk(),
-                        CoroutineUtilsKt.getContinuation((response, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
-                            if (throwable != null) {
-                                changeCb.onFailure(throwable);
-                                return;
-                            }
-                            changeCb.onSuccess(response);
-                        }), Dispatchers.getIO())
-                );
-                return true;
-            }
-            case R.id.share_link: {
-                final Intent sharingIntent = new Intent(android.content.Intent.ACTION_SEND);
-                sharingIntent.setType("text/plain");
-                sharingIntent.putExtra(android.content.Intent.EXTRA_TEXT, "https://instagram.com/" + profileModel.getUsername());
-                startActivity(sharingIntent);
-                return true;
-            }
-            case R.id.share_dm: {
-                final UserSearchNavGraphDirections.ActionGlobalUserSearch actionGlobalUserSearch = UserSearchFragmentDirections
-                        .actionGlobalUserSearch()
-                        .setTitle(getString(R.string.share))
-                        .setActionLabel(getString(R.string.send))
-                        .setShowGroups(true)
-                        .setMultiple(true)
-                        .setSearchMode(UserSearchFragment.SearchMode.RAVEN);
-                final NavController navController = NavHostFragment.findNavController(ProfileFragment.this);
-                try {
-                    navController.navigate(actionGlobalUserSearch);
-                } catch (Exception e) {
-                    Log.e(TAG, "setupShare: ", e);
-                }
-                return true;
-            }
-            default:
-                return super.onOptionsItemSelected(item);
+            return true;
         }
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
