@@ -21,7 +21,7 @@
     <string name="title_comments">Коментари</string>
     <string name="title_notifications">Активности</string>
     <string name="update_check">Провери за ажурирање</string>
-    <string name="flag_secure">Block screenshots &amp; app preview</string>
+    <string name="flag_secure">Блокирај слики од екранот &amp; преглед на апликацијата</string>
     <string name="download_user_folder">Превземи објави во папката со кориснички имиња</string>
     <string name="download_prepend_username">Prepend Username to Filename</string>
     <string name="mark_as_seen_setting">Означи ги приказните како видени</string>
@@ -123,7 +123,7 @@
     <string name="mute_posts">Игнорирај Објави</string>
     <string name="unmute_stories">Одигнорирај приказни</string>
     <string name="unmute_posts">Одигнорирај Објави</string>
-    <string name="remove_follower">Remove follower</string>
+    <string name="remove_follower">Отстрани следбеник</string>
     <string name="bio_copy">Копирај био</string>
     <string name="bio_translate">Преведи био</string>
     <string name="status_mutual">Блиски</string>
@@ -212,7 +212,7 @@
     <string name="comment_viewer_like_comment">Лајкни коментар</string>
     <string name="comment_viewer_unlike_comment">Одлајкни коментар</string>
     <string name="comment_viewer_translate_comment">Преведи коментар</string>
-    <string name="comment_viewer_delete_comment">Delete comment</string>
+    <string name="comment_viewer_delete_comment">Избриши коментар</string>
     <string name="comment_send_empty_comment">Не смее празни коментари!</string>
     <string name="comment_view_mention_user_search">Дали сакате да го пребарате ова корисничко име?</string>
     <string name="comment_view_mention_hash_search">Дали сакате да го пребарате овај хаштаг?</string>
@@ -370,8 +370,8 @@
         <item quantity="other">%d лајкови</item>
     </plurals>
     <plurals name="replies_count">
-        <item quantity="one">%d reply</item>
-        <item quantity="other">%d replies</item>
+        <item quantity="one">%d одговор</item>
+        <item quantity="other">%d одговори</item>
     </plurals>
     <plurals name="comments_count">
         <item quantity="one">%d коментар</item>
@@ -462,7 +462,7 @@
     <string name="generic_null_response">Одбоворот е null!</string>
     <string name="generic_not_ok_response">Одговорот на статусот не е ок!</string>
     <string name="generic_failed_request">Барањето неуспешно!</string>
-    <string name="hint_keyword">Keyword</string>
+    <string name="hint_keyword">Клучен збор</string>
     <string name="toggle_keyword_filter">Enable keyword filter</string>
     <string name="edit_keyword_filter">Edit keyword filters</string>
     <string name="added_keywords">Added keyword: %s to filter list</string>
@@ -470,28 +470,41 @@
     <string name="marked_as_seen">Marked as seen</string>
     <string name="delete_unsuccessful">Delete unsuccessful</string>
     <string name="throttle_error">Throttled by Instagram because of too many API requests. Wait for some time before retrying.</string>
-    <string name="error">Error</string>
-    <string name="account_logged_out">This account has been logged out.</string>
-    <string name="login_required">Login required!</string>
+    <string name="error">Грешка</string>
+    <string name="account_logged_out">Оваа сметка е одјавена.</string>
+    <string name="login_required">Потребна е најава!</string>
     <string name="sentry_block">Sentry block.</string>
-    <string name="inactive_user">User is inactive!</string>
+    <string name="inactive_user">Корисникот е неактивен!</string>
     <string name="crash_report_subject">Barinsta Crash Report</string>
     <string name="crash_report_title">Select an email app to send crash logs</string>
     <string name="not_found">Not found!</string>
-    <string name="rate_limit">Your IP has been rate limited by Instagram. Wait for an hour and try again.</string>
-    <string name="skip_update">Skip this update</string>
+    <string name="rate_limit">Your IP has been rate limited by Instagram. Wait for an hour and try again. &lt;a href=\"https://redd.it/msxlko\"&gt;Learn more.&lt;/a&gt;</string>
+    <string name="skip_update">Прескокни го ова ажурирање</string>
     <string name="on_latest_version">You\'re already on the latest version</string>
     <string name="tab_order">Screen order</string>
     <string name="other_tabs">Other tabs</string>
     <string name="tab_order_start_next_launch">The tab order will be reflected on next launch</string>
     <string name="dm_remove_warning">If saved, all DM related features will be disabled on next launch</string>
-    <string name="copy_caption">Copy caption</string>
-    <string name="copy_reply">Copy reply</string>
+    <string name="copy_caption">Копирај наслов</string>
+    <string name="copy_reply">Копирај одговор</string>
+    <string name="restore">Restore</string>
+    <string name="backup">Backup</string>
+    <string name="dir_select_default_message">Select a folder where Barinsta can store downloads and temporary files.\n\nYou can change this later in More &gt; Settings &gt; Downloads.</string>
+    <string name="dir_select_reselect_message">Android has changed the way apps can access files and directories on storage. Currently Barinsta does not have permission to access the following folder:</string>
+    <string name="dir_select_permission_revoked_message">Permissions for the previously selected folder were revoked by the system:</string>
+    <string name="dir_select_folder_not_exist">The previously selected folder does not exist now:</string>
+    <string name="dir_select_message2">Re-select the directory or select a new directory by clicking the button below.</string>
+    <string name="select_a_folder">No folder selected!</string>
+    <string name="dir_select_success_message">Success! Please wait. Starting app…</string>
+    <string name="barinsta_folder">Barinsta folder</string>
     <string name="top">Top</string>
-    <string name="recent">Recent</string>
-    <string name="clear">Clear</string>
+    <string name="recent">Најнови</string>
+    <string name="clear">Исчисти</string>
     <string name="no_external_map_app">No Map app found!</string>
     <string name="click_to_show_full">Click to show full like count</string>
     <string name="no_profile_pic_found">No profile pic found!</string>
     <string name="swipe_up_confirmation">Are you sure you want to open this link?</string>
+    <string name="sending">Се испраќа...</string>
+    <string name="share_via_dm">Сподели преку ДП</string>
+    <string name="share_link">Сподели линк…</string>
 </resources>

@@ -478,7 +478,7 @@
     <string name="crash_report_subject">Informe de fallos de Barinsta</string>
     <string name="crash_report_title">Seleccione una aplicación de correo electrónico para enviar registros de errores</string>
     <string name="not_found">¡No encontrado!</string>
-    <string name="rate_limit">Tu IP ha sido limitada por Instagram. Espera una hora e inténtalo de nuevo.</string>
+    <string name="rate_limit">Tu IP ha sido limitada por Instagram. Espera una hora e inténtalo de nuevo. &lt;a href=\"https://redd.it/msxlko\"&gt;Más información.&lt;/a&gt;</string>
     <string name="skip_update">Omitir esta actualización</string>
     <string name="on_latest_version">Ya tienes la última versión</string>
     <string name="tab_order">Orden de pantalla</string>
@@ -487,6 +487,16 @@
     <string name="dm_remove_warning">Si se guarda, todas las funcionalidades relacionadas con MDs se desactivarán en el próximo lanzamiento</string>
     <string name="copy_caption">Copiar título</string>
     <string name="copy_reply">Copiar respuesta</string>
+    <string name="restore">Restaurar</string>
+    <string name="backup">Respaldar</string>
+    <string name="dir_select_default_message">Seleccione una carpeta donde Barinsta pueda almacenar descargas y archivos temporales.\n\nPuede cambiar esto más tarde en Más &gt; Ajustes &gt; Descargas.</string>
+    <string name="dir_select_reselect_message">Android ha cambiado la forma en que las aplicaciones pueden acceder a archivos y directorios en el almacenamiento. Actualmente Barinsta no tiene permiso para acceder a la siguiente carpeta:</string>
+    <string name="dir_select_permission_revoked_message">Los permisos para la carpeta seleccionada anteriormente fueron revocados por el sistema:</string>
+    <string name="dir_select_folder_not_exist">La carpeta seleccionada anteriormente no existe ahora:</string>
+    <string name="dir_select_message2">Vuelva a seleccionar el directorio o seleccione un nuevo directorio haciendo clic en el botón de abajo.</string>
+    <string name="select_a_folder">¡Ninguna carpeta seleccionada!</string>
+    <string name="dir_select_success_message">¡Éxito! Por favor espere. Iniciando aplicación…</string>
+    <string name="barinsta_folder">Carpeta Barinsta</string>
     <string name="top">Arriba</string>
     <string name="recent">Reciente</string>
     <string name="clear">Eliminar</string>
@@ -494,4 +504,7 @@
     <string name="click_to_show_full">Clic para ver el recuento completo de me gustas</string>
     <string name="no_profile_pic_found">¡No se encontró foto de perfil!</string>
     <string name="swipe_up_confirmation">¿Está seguro de querer abrir este enlace?</string>
+    <string name="sending">Enviando...</string>
+    <string name="share_via_dm">Compartir por MD</string>
+    <string name="share_link">Compartir enlace…</string>
 </resources>

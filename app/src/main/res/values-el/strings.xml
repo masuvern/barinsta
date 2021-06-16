@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="action_about">Σχετικά με</string>
-    <string name="action_dms">Μηνύματα</string>
+    <string name="action_dms">Απευθείας Μηνύματα</string>
     <string name="action_settings">Ρυθμίσεις</string>
     <string name="action_download">Λήψη</string>
     <string name="action_search">Αναζήτηση ονόματος χρήστη…</string>
@@ -478,7 +478,7 @@
     <string name="crash_report_subject">Αναφορά Κατάρρευσης Barinsta</string>
     <string name="crash_report_title">Επιλέξτε μια εφαρμογή ηλ. ταχυδρομείου για αποστολή αρχείων καταγραφής κατάρρευσης</string>
     <string name="not_found">Δε βρέθηκε!</string>
-    <string name="rate_limit">Η διεύθυνση IP σας έχει περιοριστεί από το Instagram. Περιμένετε για μία ώρα και μετά προσπαθήστε ξανά.</string>
+    <string name="rate_limit">Η διεύθυνση IP σας έχει περιοριστεί από το Instagram. Περιμένετε για μια ώρα και προσπαθήστε ξανά. &lt;a href=\"https://redd.it/msxlko\"&gt;Μάθετε περισσότερα.&lt;/a&gt;</string>
     <string name="skip_update">Παράλειψη της ενημέρωσης</string>
     <string name="on_latest_version">Η εφαρμογή είναι ήδη στην τελευταία έκδοση</string>
     <string name="tab_order">Σειρά της οθόνης</string>
@@ -487,6 +487,16 @@
     <string name="dm_remove_warning">Εάν αποθηκευτεί, όλες οι λειτουργίες που είναι σχετικές με τα Μηνύματα, θα είναι απενεργοποιημένες στην επόμενη εκκίνηση</string>
     <string name="copy_caption">Αντιγραφή λεζάντας</string>
     <string name="copy_reply">Αντιγραφή απάντησης</string>
+    <string name="restore">Ανάκτηση</string>
+    <string name="backup">Αντίγραφο ασφαλείας</string>
+    <string name="dir_select_default_message">Select a folder where Barinsta can store downloads and temporary files.\n\nYou can change this later in More &gt; Settings &gt; Downloads.</string>
+    <string name="dir_select_reselect_message">Το Android έχει αλλάξει τον τρόπο με τον οποίο οι εφαρμογές μπορούν να έχουν πρόσβαση σε αρχεία και καταλόγους στον αποθηκευτικό χώρο. Αυτή τη στιγμή η Barinsta δεν έχει άδεια πρόσβασης στον ακόλουθο φάκελο:</string>
+    <string name="dir_select_permission_revoked_message">Permissions for the previously selected folder were revoked by the system:</string>
+    <string name="dir_select_folder_not_exist">The previously selected folder does not exist now:</string>
+    <string name="dir_select_message2">Re-select the directory or select a new directory by clicking the button below.</string>
+    <string name="select_a_folder">Δεν επιλέχθηκε φάκελος!</string>
+    <string name="dir_select_success_message">Επιτυχία! Παρακαλώ περιμένετε. Εκκίνηση εφαρμογής…</string>
+    <string name="barinsta_folder">Φάκελος Barinsta</string>
     <string name="top">Κορυφή</string>
     <string name="recent">Πρόσφατα</string>
     <string name="clear">Εκκαθάριση</string>
@@ -494,4 +504,7 @@
     <string name="click_to_show_full">Σε πόσους ακριβώς αρέσει</string>
     <string name="no_profile_pic_found">Δε βρέθηκε εικόνα προφίλ!</string>
     <string name="swipe_up_confirmation">Είστε βέβαιος για το άνοιγμα αυτού του συνδέσμου;</string>
+    <string name="sending">Γίνεται αποστολή...</string>
+    <string name="share_via_dm">Κοινοποίηση μέσω</string>
+    <string name="share_link">Κοινοποίηση συνδέσμου…</string>
 </resources>

@@ -132,8 +132,8 @@
     <string name="unmute_stories">Zrušit ztlumení příběhů</string>
     <string name="unmute_posts">Zrušit ztlumení příspěvků</string>
     <string name="remove_follower">Odebrat sledujícího</string>
-    <string name="bio_copy">Kopírovat životopis</string>
-    <string name="bio_translate">Přeložit životopis</string>
+    <string name="bio_copy">Kopírovat bio</string>
+    <string name="bio_translate">Přeložit bio</string>
     <string name="status_mutual">Vzájemní</string>
     <string name="status_following">Sleduje</string>
     <string name="status_follower">Sledující</string>
@@ -226,7 +226,7 @@
     <string name="comment_view_mention_hash_search">Chcete vyhledat hashtag?</string>
     <string name="followers_type_followers">Sledující</string>
     <string name="followers_type_following">Sleduje</string>
-    <string name="followers_compare">Porovnávaní sledovaných a sledujících</string>
+    <string name="followers_compare">Porovnání sledujících a sledovaných</string>
     <string name="followers_both_following">Oba(ě) se navzájem sledují</string>
     <string name="followers_not_following">nesleduje %s</string>
     <string name="followers_not_follower">%s nesleduje</string>
@@ -496,7 +496,7 @@
     <string name="crash_report_subject">Hlášení o pádu Barinsta</string>
     <string name="crash_report_title">Vyberte aplikaci e-mailu pro odeslání protokolů o selhání</string>
     <string name="not_found">Nenalezeno!</string>
-    <string name="rate_limit">Vaše IP adresa byla omezena Instagramem. Počkejte hodinu a zkuste to znovu.</string>
+    <string name="rate_limit">Vaše IP adresa byla omezena Instagramem. Počkejte hodinu a zkuste to znovu. &lt;a href=\"https://redd.it/msxlko\"&gt;Zjistit více.&lt;/a&gt;</string>
     <string name="skip_update">Přeskočit tuto aktualizaci</string>
     <string name="on_latest_version">Již máte nejnovější verzi</string>
     <string name="tab_order">Pořadí obrazovek</string>
@@ -505,11 +505,24 @@
     <string name="dm_remove_warning">Po uložení budou při příštím spuštění vypnuty všechny funkce související s posíláním zpráv</string>
     <string name="copy_caption">Kopírovat popisek</string>
     <string name="copy_reply">Kopírovat odpověď</string>
+    <string name="restore">Obnovit</string>
+    <string name="backup">Zálohovat</string>
+    <string name="dir_select_default_message">Vyberte složku, kam může Barinsta ukládat stažené a dočasné soubory.\n\nMůžete to později změnit ve Více &gt; Nastavení &gt; Stažené.</string>
+    <string name="dir_select_reselect_message">Android změnil způsob, jakým mohou aplikace přistupovat k souborům a adresářům v úložišti. V současné době nemá Barinsta oprávnění k přístupu k následující složce:</string>
+    <string name="dir_select_permission_revoked_message">Oprávnění pro dříve vybranou složku byla systémem zrušena:</string>
+    <string name="dir_select_folder_not_exist">Dříve vybraná složka už neexistuje:</string>
+    <string name="dir_select_message2">Znovu vyberte adresář nebo vyberte nový adresář kliknutím na tlačítko níže.</string>
+    <string name="select_a_folder">Není vybrána žádná složka!</string>
+    <string name="dir_select_success_message">Úspěch! Počkejte prosím. Spouštění aplikace…</string>
+    <string name="barinsta_folder">Složka Barinsta</string>
     <string name="top">Populární</string>
     <string name="recent">Nedávné</string>
     <string name="clear">Vymazat</string>
     <string name="no_external_map_app">Nemáte žádnou aplikaci pro mapy!</string>
     <string name="click_to_show_full">Klepnutím zobrazíte přesný počet \"to se mi líbí\"</string>
     <string name="no_profile_pic_found">Nebyl nalezen žádný obrázek profilu!</string>
-    <string name="swipe_up_confirmation">Are you sure you want to open this link?</string>
+    <string name="swipe_up_confirmation">Opravdu chcete otevřít tento odkaz?</string>
+    <string name="sending">Odesílání...</string>
+    <string name="share_via_dm">Sdílet do zprávy</string>
+    <string name="share_link">Sdílet odkaz…</string>
 </resources>

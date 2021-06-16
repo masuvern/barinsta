@@ -31,7 +31,7 @@
     <string name="dm_mark_as_seen_setting_summary">其他成员会知道你看过了</string>
     <string name="activity_setting">启用活动通知</string>
     <string name="story_sort_setting">快拍动态排序</string>
-    <string name="error_loading_profile">加载用户资料时出错！用户名是否有效？如果是的话，访问Instagram可能暂时受限。</string>
+    <string name="error_loading_profile">加载用户资料时出错！用户名是否有效？如果是的话，您的 IP 可能已被 Instagram 所限制。</string>
     <string name="error_loading_profile_loggedin">加载用户资料时出错！用户名是否有效？ta是否屏蔽了您？</string>
     <string name="error_loading_hashtag">加载话题标签出错！名称是否有效？</string>
     <string name="error_loading_location">加载位置时出错！URL是否有效？</string>
@@ -469,7 +469,7 @@
     <string name="crash_report_subject">Barinsta 崩溃报告</string>
     <string name="crash_report_title">选择一个电子邮件应用来发送崩溃日志</string>
     <string name="not_found">未找到所要的内容！</string>
-    <string name="rate_limit">您的IP地址已被 Instagram 设限。请等待一个小时后重试。</string>
+    <string name="rate_limit">您的 IP 已被 Instagram 所限制。请等待一个小时后重试。 &lt;a href=\"https://redd.it/msxlko\"&gt;了解更多&lt;/a&gt;</string>
     <string name="skip_update">跳过本次更新</string>
     <string name="on_latest_version">您现在安装的是最新版本</string>
     <string name="tab_order">页面顺序</string>
@@ -478,6 +478,16 @@
     <string name="dm_remove_warning">若您如此保存，所有私信功能将会在下次启动时被禁用</string>
     <string name="copy_caption">复制说明</string>
     <string name="copy_reply">复制回复</string>
+    <string name="restore">恢复</string>
+    <string name="backup">备份</string>
+    <string name="dir_select_default_message">请选择一个 Barinsta 可以存储媒体及临时文件的目录。\n\n您可以稍后在更多 &gt; 设置 &gt; 下载中更改此文件夹。</string>
+    <string name="dir_select_reselect_message">Android 已经更改应用访问设备中文件和目录的方式。目前 Barinsta 没有权限访问以下文件夹：</string>
+    <string name="dir_select_permission_revoked_message">之前选择的文件夹的访问权限已被系统撤销：</string>
+    <string name="dir_select_folder_not_exist">之前选择的文件夹已不存在：</string>
+    <string name="dir_select_message2">请点击下面的按钮，来重新选择该目录或选择一个新目录。</string>
+    <string name="select_a_folder">未选择文件夹！</string>
+    <string name="dir_select_success_message">设置成功！请稍候。应用程序启动中…</string>
+    <string name="barinsta_folder">Barinsta 文件夹</string>
     <string name="top">热门</string>
     <string name="recent">近期搜索</string>
     <string name="clear">清空</string>
@@ -485,4 +495,7 @@
     <string name="click_to_show_full">点击显示完整点赞计数</string>
     <string name="no_profile_pic_found">未找到用户头像！</string>
     <string name="swipe_up_confirmation">您确定要打开此链接吗？</string>
+    <string name="sending">发送中...</string>
+    <string name="share_via_dm">分享至私信</string>
+    <string name="share_link">分享链接…</string>
 </resources>

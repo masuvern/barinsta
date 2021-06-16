@@ -44,20 +44,20 @@
     <string name="select_language">Język</string>
     <plurals name="main_posts_count">
         <item quantity="one">%s\npost</item>
-        <item quantity="few">%s\nPosts</item>
-        <item quantity="many">%s\nPosts</item>
+        <item quantity="few">%s\npostów</item>
+        <item quantity="many">%s\npostów</item>
         <item quantity="other">%s\npostów</item>
     </plurals>
     <plurals name="main_posts_count_inline">
         <item quantity="one">%s post</item>
-        <item quantity="few">%s Posts</item>
-        <item quantity="many">%s Posts</item>
+        <item quantity="few">%s postów</item>
+        <item quantity="many">%s postów</item>
         <item quantity="other">%s postów</item>
     </plurals>
     <plurals name="main_posts_followers">
         <item quantity="one">%s\nobserwujący</item>
-        <item quantity="few">%s\nFollowers</item>
-        <item quantity="many">%s\nFollowers</item>
+        <item quantity="few">%s\nobserwujących</item>
+        <item quantity="many">%s\nobserwujących</item>
         <item quantity="other">%s\nobserwujących</item>
     </plurals>
     <string name="main_posts_following">%s\nobserwowanych</string>
@@ -112,8 +112,8 @@
     <string name="delete_collection_note">Wszystkie media pozostaną w innych kolekcjach.</string>
     <string name="add_to_collection">Dodaj do kolekcji...</string>
     <string name="remove_from_collection">Usuń z kolekcji</string>
-    <string name="liked">Polubiono</string>
-    <string name="saved">Zapisano</string>
+    <string name="liked">Polubione</string>
+    <string name="saved">Zapisane</string>
     <string name="tagged">Oznaczono</string>
     <string name="dm_person">Message</string>
     <string name="like_without_count">Polub</string>
@@ -131,7 +131,7 @@
     <string name="mute_posts">Wycisz posty</string>
     <string name="unmute_stories">Wyłącz wyciszenie relacji</string>
     <string name="unmute_posts">Wyłącz wyciszenie postów</string>
-    <string name="remove_follower">Remove follower</string>
+    <string name="remove_follower">Usuń obserwującego</string>
     <string name="bio_copy">Skopiuj bio</string>
     <string name="bio_translate">Przetłumacz bio</string>
     <string name="status_mutual">Wspólne</string>
@@ -259,7 +259,7 @@
     <string name="activity_count_commentlikes">%d polubionych komentarzy</string>
     <string name="activity_count_usertags">%d tagów użytkowników</string>
     <string name="activity_count_likes">%d polubień</string>
-    <string name="activity_count_poy">%d photos of you</string>
+    <string name="activity_count_poy">%d zdjęć z Tobą</string>
     <string name="activity_count_requests">%d próśb o o obserwowanie</string>
     <string name="activity_notloggedin">Wylogowałeś się przed kliknięciem tego powiadomienia?!</string>
     <string name="feed">Aktualności</string>
@@ -273,11 +273,11 @@
     <string name="skip_update_checkbox">Nie pokazuj ponownie do następnej aktualizacji</string>
     <string name="version">Wersja</string>
     <string name="pref_start_screen">Ekran startowy</string>
-    <string name="pref_search_focus_keyboard" comment="basically bring up the keyboard immediately when someone does search">Show keyboard on search</string>
+    <string name="pref_search_focus_keyboard" comment="basically bring up the keyboard immediately when someone does search">Pokaż klawiaturę przy wyszukiwaniu</string>
     <string name="pref_category_general">Ogólne</string>
     <string name="pref_category_theme">Motyw</string>
     <string name="pref_category_downloads">Pobieranie</string>
-    <string name="pref_category_locale">Lokalne</string>
+    <string name="pref_category_locale">Język</string>
     <string name="account">Konto</string>
     <string name="account_hint">Bieżące logowanie nie działa? Po prostu dodaj konto ponownie.</string>
     <string name="add_account">Dodaj konto</string>
@@ -380,10 +380,10 @@
         <item quantity="other">%d polubień</item>
     </plurals>
     <plurals name="replies_count">
-        <item quantity="one">%d reply</item>
+        <item quantity="one">%d odpowiedź</item>
         <item quantity="few">%d replies</item>
         <item quantity="many">%d replies</item>
-        <item quantity="other">%d replies</item>
+        <item quantity="other">%d odpowiedzi</item>
     </plurals>
     <plurals name="comments_count">
         <item quantity="one">%d komentarz</item>
@@ -450,7 +450,7 @@
     <string name="photo">Zdjęcie</string>
     <string name="video">Film</string>
     <string name="voice_message">Wiadomość głosowa</string>
-    <string name="post">Post</string>
+    <string name="post">Publikuj</string>
     <string name="approval_required_for_new_members">Zatwierdź prośbę o dołączenie</string>
     <string name="requests">Zapytania</string>
     <string name="admins_only">Tylko administratorzy</string>
@@ -487,7 +487,7 @@
     <string name="removed_keywords">Usunięto słowo kluczowe: %s z listy filtrów</string>
     <string name="marked_as_seen">Oznacz jako przeczytane</string>
     <string name="delete_unsuccessful">Usuwanie nie powiodło się</string>
-    <string name="throttle_error">Throttled by Instagram because of too many API requests. Wait for some time before retrying.</string>
+    <string name="throttle_error">Tłumacz został ograniczony z powodu zbyt wielu żądań API. Poczekaj chwilę i spróbuj ponownie.</string>
     <string name="error">Błąd</string>
     <string name="account_logged_out">To konto zostało wylogowane.</string>
     <string name="login_required">Wymagane logowanie!</string>
@@ -496,7 +496,7 @@
     <string name="crash_report_subject">Raport awarii Barinsta</string>
     <string name="crash_report_title">Wybierz aplikację e-mail do wysyłania dzienników awarii</string>
     <string name="not_found">Nie znaleziono!</string>
-    <string name="rate_limit">Twój adres IP został ograniczony przez Instagram. Poczekaj godzinę i spróbuj ponownie.</string>
+    <string name="rate_limit">Twój adres IP został ograniczony przez Instagrama. Poczekaj godzinę i spróbuj ponownie. &lt;a href=\"https://redd.it/msxlko\"&gt;Dowiedz się więcej.&lt;/a&gt;</string>
     <string name="skip_update">Pomiń tę aktualizację</string>
     <string name="on_latest_version">Posiadasz aktualną wersję</string>
     <string name="tab_order">Kolejność na ekranie</string>
@@ -505,11 +505,24 @@
     <string name="dm_remove_warning">Po zapisaniu wszystkie funkcje związane z PW zostaną wyłączone przy następnym uruchomieniu</string>
     <string name="copy_caption">Kopiuj podpis</string>
     <string name="copy_reply">Kopiuj odpowiedź</string>
-    <string name="top">Top</string>
+    <string name="restore">Przywróć</string>
+    <string name="backup">Kopia zapasowa</string>
+    <string name="dir_select_default_message">Wybierz folder, w którym Barinsta może przechowywać pobrane pliki i pliki tymczasowe.\n\nMożesz to później zmienić w Więcej &gt; Ustawienia &gt; Pobieranie.</string>
+    <string name="dir_select_reselect_message">Android zmienił sposób, w jaki aplikacje mogą uzyskać dostęp do plików i katalogów w pamięci urządzenia. Obecnie Barinsta nie ma uprawnień do dostępu do następującego folderu:</string>
+    <string name="dir_select_permission_revoked_message">Uprawnienia dla poprzednio wybranego folderu zostały cofnięte przez system:</string>
+    <string name="dir_select_folder_not_exist">Poprzednio wybrany folder nie istnieje:</string>
+    <string name="dir_select_message2">Wybierz ponownie folder lub wybierz now klikając przycisk poniżej.</string>
+    <string name="select_a_folder">Nie wybrano folderu!</string>
+    <string name="dir_select_success_message">Sukces! Proszę czekać. Uruchamianie aplikacji…</string>
+    <string name="barinsta_folder">Folder Barinsta</string>
+    <string name="top">Najlepsze</string>
     <string name="recent">Najnowsze</string>
     <string name="clear">Wyczyść</string>
-    <string name="no_external_map_app">No Map app found!</string>
-    <string name="click_to_show_full">Click to show full like count</string>
+    <string name="no_external_map_app">Nie znaleziono aplikacji do obsługi mapy!</string>
+    <string name="click_to_show_full">Kliknij, aby wyświetlić pełną liczbę polubień</string>
     <string name="no_profile_pic_found">Nie znaleziono zdjęcia profilowego!</string>
     <string name="swipe_up_confirmation">Czy na pewno chcesz otworzyć ten link?</string>
+    <string name="sending">Wysyłanie...</string>
+    <string name="share_via_dm">Udostępnij przez PW</string>
+    <string name="share_link">Udostępnij link…</string>
 </resources>
