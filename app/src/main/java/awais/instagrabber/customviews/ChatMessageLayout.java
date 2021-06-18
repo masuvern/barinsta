@@ -9,6 +9,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.constraintlayout.widget.ConstraintLayout;
 
 import awais.instagrabber.R;
 
@@ -74,7 +75,6 @@ public class ChatMessageLayout extends FrameLayout {
         if (firstChild == null) return;
 
         final int firstChildId = firstChild.getId();
-        if (firstChildId == R.id.reel_share_container) return;
 
         int availableWidth = widthSize - getPaddingLeft() - getPaddingRight();
         // int availableHeight = heightSize - getPaddingTop() - getPaddingBottom();
@@ -100,13 +100,24 @@ public class ChatMessageLayout extends FrameLayout {
         } else {
             int viewPartMainLineCount = 1;
             float viewPartMainLastLineWidth = 0;
+            final TextView textMessage;
             if (firstChild instanceof TextView) {
-                viewPartMainLineCount = ((TextView) firstChild).getLineCount();
+                textMessage = (TextView) firstChild;
+            }
+            else if (firstChildId == R.id.reel_share_container) {
+                textMessage = (TextView) ((ConstraintLayout) firstChild).getChildAt(5);
+            }
+            else if (firstChildId == R.id.story_container) {
+                textMessage = (TextView) ((ConstraintLayout) firstChild).getChildAt(2);
+            }
+            else textMessage = null;
+            if (textMessage != null) {
+                viewPartMainLineCount = textMessage.getLineCount();
                 viewPartMainLastLineWidth = viewPartMainLineCount > 0
-                                            ? ((TextView) firstChild).getLayout().getLineWidth(viewPartMainLineCount - 1)
+                                            ? textMessage.getLayout().getLineWidth(viewPartMainLineCount - 1)
                                             : 0;
                 // also include start left padding
-                viewPartMainLastLineWidth += firstChild.getPaddingLeft();
+                viewPartMainLastLineWidth += textMessage.getPaddingLeft();
             }
 
             final float lastLineWithInfoWidth = viewPartMainLastLineWidth + viewPartInfoWidth;

@@ -133,16 +133,20 @@ public abstract class DirectItemViewHolder extends RecyclerView.ViewHolder imple
         setGroupUserDetails(item, messageDirection);
         setBackground(messageDirection);
         setMessageInfo(item, messageDirection);
-        if (itemType == DirectItemType.REEL_SHARE) {
-            containerLayoutParams.setMarginStart(0);
-            containerLayoutParams.setMarginEnd(0);
-        }
-        if (itemType == DirectItemType.TEXT || itemType == DirectItemType.LINK || itemType == DirectItemType.UNKNOWN) {
-            binding.messageInfo.setPadding(0, 0, dmRadius, dmRadiusSmall);
-        } else {
-            if (showMessageInfo()) {
-                binding.messageInfo.setPadding(0, 0, messageInfoPaddingSmall, dmRadiusSmall);
-            }
+        switch (itemType) {
+            case REEL_SHARE:
+            case STORY_SHARE: // i think they could have texts?
+//                containerLayoutParams.setMarginStart(0);
+//                containerLayoutParams.setMarginEnd(0);
+            case TEXT:
+            case LINK:
+            case UNKNOWN:
+                binding.messageInfo.setPadding(0, 0, dmRadius, dmRadiusSmall);
+                break;
+            default:
+                if (showMessageInfo()) {
+                    binding.messageInfo.setPadding(0, 0, messageInfoPaddingSmall, dmRadiusSmall);
+                }
         }
         setupReply(item, messageDirection);
         setReactions(item, position);
