@@ -77,6 +77,7 @@ object LocaleUtils {
             22 -> return "eu"
             23 -> return "sv"
             24 -> return "ko"
+            25 -> return "ar"
         }
         return null
     }
