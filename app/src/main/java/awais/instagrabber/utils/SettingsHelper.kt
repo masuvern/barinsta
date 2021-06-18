@@ -1,178 +1,158 @@
-package awais.instagrabber.utils;
+package awais.instagrabber.utils
 
-import android.content.Context;
-import android.content.SharedPreferences;
-import android.os.Build;
+import android.content.Context
+import android.content.SharedPreferences
+import android.os.Build
+import androidx.annotation.StringDef
+import androidx.appcompat.app.AppCompatDelegate
+import java.util.*
 
-import androidx.annotation.NonNull;
-import androidx.annotation.StringDef;
-import androidx.appcompat.app.AppCompatDelegate;
+import awais.instagrabber.utils.Constants
+import awais.instagrabber.fragments.settings.PreferenceKeys
 
-import java.util.HashSet;
-import java.util.Set;
-
-import static awais.instagrabber.fragments.settings.PreferenceKeys.PREF_BARINSTA_DIR_URI;
-import static awais.instagrabber.fragments.settings.PreferenceKeys.PREF_ENABLE_DM_AUTO_REFRESH;
-import static awais.instagrabber.fragments.settings.PreferenceKeys.PREF_ENABLE_DM_AUTO_REFRESH_FREQ_NUMBER;
-import static awais.instagrabber.fragments.settings.PreferenceKeys.PREF_ENABLE_DM_AUTO_REFRESH_FREQ_UNIT;
-import static awais.instagrabber.fragments.settings.PreferenceKeys.PREF_ENABLE_DM_NOTIFICATIONS;
-import static awais.instagrabber.fragments.settings.PreferenceKeys.PREF_ENABLE_SENTRY;
-import static awais.instagrabber.fragments.settings.PreferenceKeys.PREF_SHOWN_COUNT_TOOLTIP;
-import static awais.instagrabber.fragments.settings.PreferenceKeys.PREF_TAB_ORDER;
-import static awais.instagrabber.fragments.settings.PreferenceKeys.APP_LANGUAGE;
-import static awais.instagrabber.fragments.settings.PreferenceKeys.APP_THEME;
-import static awais.instagrabber.utils.Constants.APP_UA;
-import static awais.instagrabber.utils.Constants.APP_UA_CODE;
-import static awais.instagrabber.fragments.settings.PreferenceKeys.AUTOPLAY_VIDEOS;
-import static awais.instagrabber.utils.Constants.BROWSER_UA;
-import static awais.instagrabber.utils.Constants.BROWSER_UA_CODE;
-import static awais.instagrabber.fragments.settings.PreferenceKeys.CHECK_ACTIVITY;
-import static awais.instagrabber.fragments.settings.PreferenceKeys.CHECK_UPDATES;
-import static awais.instagrabber.utils.Constants.COOKIE;
-import static awais.instagrabber.fragments.settings.PreferenceKeys.CUSTOM_DATE_TIME_FORMAT;
-import static awais.instagrabber.fragments.settings.PreferenceKeys.CUSTOM_DATE_TIME_FORMAT_ENABLED;
-import static awais.instagrabber.fragments.settings.PreferenceKeys.DATE_TIME_FORMAT;
-import static awais.instagrabber.fragments.settings.PreferenceKeys.DATE_TIME_SELECTION;
-import static awais.instagrabber.utils.Constants.DEFAULT_TAB;
-import static awais.instagrabber.utils.Constants.DEVICE_UUID;
-import static awais.instagrabber.fragments.settings.PreferenceKeys.DM_MARK_AS_SEEN;
-import static awais.instagrabber.fragments.settings.PreferenceKeys.DOWNLOAD_PREPEND_USER_NAME;
-import static awais.instagrabber.fragments.settings.PreferenceKeys.DOWNLOAD_USER_FOLDER;
-import static awais.instagrabber.fragments.settings.PreferenceKeys.FLAG_SECURE;
-import static awais.instagrabber.fragments.settings.PreferenceKeys.FOLDER_PATH;
-import static awais.instagrabber.fragments.settings.PreferenceKeys.FOLDER_SAVE_TO;
-import static awais.instagrabber.fragments.settings.PreferenceKeys.HIDE_MUTED_REELS;
-import static awais.instagrabber.fragments.settings.PreferenceKeys.KEYWORD_FILTERS;
-import static awais.instagrabber.fragments.settings.PreferenceKeys.MARK_AS_SEEN;
-import static awais.instagrabber.fragments.settings.PreferenceKeys.MUTED_VIDEOS;
-import static awais.instagrabber.fragments.settings.PreferenceKeys.PLAY_IN_BACKGROUND;
-import static awais.instagrabber.utils.Constants.PREF_DARK_THEME;
-import static awais.instagrabber.utils.Constants.PREF_EMOJI_VARIANTS;
-import static awais.instagrabber.utils.Constants.PREF_HASHTAG_POSTS_LAYOUT;
-import static awais.instagrabber.utils.Constants.PREF_LIGHT_THEME;
-import static awais.instagrabber.utils.Constants.PREF_LIKED_POSTS_LAYOUT;
-import static awais.instagrabber.utils.Constants.PREF_LOCATION_POSTS_LAYOUT;
-import static awais.instagrabber.utils.Constants.PREF_POSTS_LAYOUT;
-import static awais.instagrabber.utils.Constants.PREF_PROFILE_POSTS_LAYOUT;
-import static awais.instagrabber.utils.Constants.PREF_REACTIONS;
-import static awais.instagrabber.utils.Constants.PREF_SAVED_POSTS_LAYOUT;
-import static awais.instagrabber.utils.Constants.PREF_TAGGED_POSTS_LAYOUT;
-import static awais.instagrabber.utils.Constants.PREF_TOPIC_POSTS_LAYOUT;
-import static awais.instagrabber.utils.Constants.PREV_INSTALL_VERSION;
-import static awais.instagrabber.fragments.settings.PreferenceKeys.PREF_SEARCH_FOCUS_KEYBOARD;
-import static awais.instagrabber.fragments.settings.PreferenceKeys.SHOW_CAPTIONS;
-import static awais.instagrabber.utils.Constants.SKIPPED_VERSION;
-import static awais.instagrabber.fragments.settings.PreferenceKeys.STORY_SORT;
-import static awais.instagrabber.fragments.settings.PreferenceKeys.SWAP_DATE_TIME_FORMAT_ENABLED;
-import static awais.instagrabber.fragments.settings.PreferenceKeys.TOGGLE_KEYWORD_FILTER;
-
-public final class SettingsHelper {
-    private final SharedPreferences sharedPreferences;
-
-    public SettingsHelper(@NonNull final Context context) {
-        this.sharedPreferences = context.getSharedPreferences(Constants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
+class SettingsHelper(context: Context) {
+    private val sharedPreferences: SharedPreferences?
+    fun getString(@StringSettings key: String): String {
+        val stringDefault = getStringDefault(key)
+        return if (sharedPreferences != null) sharedPreferences.getString(
+            key,
+            stringDefault
+        )!! else stringDefault
     }
 
-    @NonNull
-    public String getString(@StringSettings final String key) {
-        final String stringDefault = getStringDefault(key);
-        if (sharedPreferences != null) return sharedPreferences.getString(key, stringDefault);
-        return stringDefault;
+    fun getStringSet(@StringSetSettings key: String?): Set<String>? {
+        val stringSetDefault: Set<String> = HashSet()
+        return if (sharedPreferences != null) sharedPreferences.getStringSet(
+            key,
+            stringSetDefault
+        ) else stringSetDefault
     }
 
-    public Set<String> getStringSet(@StringSetSettings final String key) {
-        final Set<String> stringSetDefault = new HashSet<>();
-        if (sharedPreferences != null) return sharedPreferences.getStringSet(key, stringSetDefault);
-        return stringSetDefault;
+    fun getInteger(@IntegerSettings key: String): Int {
+        val integerDefault = getIntegerDefault(key)
+        return sharedPreferences?.getInt(key, integerDefault) ?: integerDefault
     }
 
-    public int getInteger(@IntegerSettings final String key) {
-        final int integerDefault = getIntegerDefault(key);
-        if (sharedPreferences != null) return sharedPreferences.getInt(key, integerDefault);
-        return integerDefault;
+    fun getBoolean(@BooleanSettings key: String?): Boolean {
+        return sharedPreferences?.getBoolean(key, false) ?: false
     }
 
-    public boolean getBoolean(@BooleanSettings final String key) {
-        if (sharedPreferences != null) return sharedPreferences.getBoolean(key, false);
-        return false;
+    private fun getStringDefault(@StringSettings key: String): String {
+        if (DATE_TIME_FORMAT == key) return "hh:mm:ss a 'on' dd-MM-yyyy"
+        return if (DATE_TIME_SELECTION == key) "0;3;0" else ""
     }
 
-    @NonNull
-    private String getStringDefault(@StringSettings final String key) {
-        if (DATE_TIME_FORMAT.equals(key))
-            return "hh:mm:ss a 'on' dd-MM-yyyy";
-        if (DATE_TIME_SELECTION.equals(key))
-            return "0;3;0";
-        return "";
+    private fun getIntegerDefault(@IntegerSettings key: String): Int {
+        if (APP_THEME == key) return getThemeCode(true)
+        return if (PREV_INSTALL_VERSION == key || APP_UA_CODE == key || BROWSER_UA_CODE == key) -1 else 0
     }
 
-    private int getIntegerDefault(@IntegerSettings final String key) {
-        if (APP_THEME.equals(key)) return getThemeCode(true);
-        if (PREV_INSTALL_VERSION.equals(key) || APP_UA_CODE.equals(key) || BROWSER_UA_CODE.equals(key)) return -1;
-        return 0;
-    }
-
-    public int getThemeCode(final boolean fromHelper) {
-        int themeCode = AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM;
-
+    fun getThemeCode(fromHelper: Boolean): Int {
+        var themeCode = AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
         if (!fromHelper && sharedPreferences != null) {
-            themeCode = Integer.parseInt(sharedPreferences.getString(APP_THEME, String.valueOf(themeCode)));
-            switch (themeCode) {
-                case 1:
-                    themeCode = AppCompatDelegate.MODE_NIGHT_AUTO_BATTERY;
-                    break;
-                case 3:
-                    themeCode = AppCompatDelegate.MODE_NIGHT_NO;
-                    break;
-                case 0:
-                    themeCode = AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM;
-                    break;
+            themeCode = sharedPreferences.getString(APP_THEME, themeCode.toString())!!.toInt()
+            when (themeCode) {
+                1 -> themeCode = AppCompatDelegate.MODE_NIGHT_AUTO_BATTERY
+                3 -> themeCode = AppCompatDelegate.MODE_NIGHT_NO
+                0 -> themeCode = AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
             }
         }
-
-        if (themeCode == AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM && Build.VERSION.SDK_INT < 29)
-            themeCode = AppCompatDelegate.MODE_NIGHT_AUTO_BATTERY;
-
-        return themeCode;
+        if (themeCode == AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM && Build.VERSION.SDK_INT < 29) themeCode =
+            AppCompatDelegate.MODE_NIGHT_AUTO_BATTERY
+        return themeCode
     }
 
-    public void putString(@StringSettings final String key, final String val) {
-        if (sharedPreferences != null) sharedPreferences.edit().putString(key, val).apply();
+    fun putString(@StringSettings key: String?, `val`: String?) {
+        sharedPreferences?.edit()?.putString(key, `val`)?.apply()
     }
 
-    public void putStringSet(@StringSetSettings final String key, final Set<String> val) {
-        if (sharedPreferences != null) sharedPreferences.edit().putStringSet(key, val).apply();
+    fun putStringSet(@StringSetSettings key: String?, `val`: Set<String?>?) {
+        sharedPreferences?.edit()?.putStringSet(key, `val`)?.apply()
     }
 
-    public void putInteger(@IntegerSettings final String key, final int val) {
-        if (sharedPreferences != null) sharedPreferences.edit().putInt(key, val).apply();
+    fun putInteger(@IntegerSettings key: String?, `val`: Int) {
+        sharedPreferences?.edit()?.putInt(key, `val`)?.apply()
     }
 
-    public void putBoolean(@BooleanSettings final String key, final boolean val) {
-        if (sharedPreferences != null) sharedPreferences.edit().putBoolean(key, val).apply();
+    fun putBoolean(@BooleanSettings key: String?, `val`: Boolean) {
+        sharedPreferences?.edit()?.putBoolean(key, `val`)?.apply()
     }
 
-    public boolean hasPreference(final String key) {
-        return sharedPreferences != null && sharedPreferences.contains(key);
+    fun hasPreference(key: String?): Boolean {
+        return sharedPreferences != null && sharedPreferences.contains(key)
     }
 
-    @StringDef({APP_LANGUAGE, APP_THEME, APP_UA, BROWSER_UA, COOKIE, FOLDER_PATH, DATE_TIME_FORMAT, DATE_TIME_SELECTION,
-                    CUSTOM_DATE_TIME_FORMAT, DEVICE_UUID, SKIPPED_VERSION, DEFAULT_TAB, PREF_DARK_THEME, PREF_LIGHT_THEME,
-                    PREF_POSTS_LAYOUT, PREF_PROFILE_POSTS_LAYOUT, PREF_TOPIC_POSTS_LAYOUT, PREF_HASHTAG_POSTS_LAYOUT,
-                    PREF_LOCATION_POSTS_LAYOUT, PREF_LIKED_POSTS_LAYOUT, PREF_TAGGED_POSTS_LAYOUT, PREF_SAVED_POSTS_LAYOUT,
-                    STORY_SORT, PREF_EMOJI_VARIANTS, PREF_REACTIONS, PREF_ENABLE_DM_AUTO_REFRESH_FREQ_UNIT, PREF_TAB_ORDER, PREF_BARINSTA_DIR_URI})
-    public @interface StringSettings {}
+    @StringDef(
+        PreferenceKeys.APP_LANGUAGE,
+        PreferenceKeys.APP_THEME,
+        Constants.APP_UA,
+        Constants.BROWSER_UA,
+        Constants.COOKIE,
+        PreferenceKeys.FOLDER_PATH,
+        PreferenceKeys.DATE_TIME_FORMAT,
+        PreferenceKeys.DATE_TIME_SELECTION,
+        PreferenceKeys.CUSTOM_DATE_TIME_FORMAT,
+        Constants.DEVICE_UUID,
+        Constants.SKIPPED_VERSION,
+        Constants.DEFAULT_TAB,
+        Constants.PREF_DARK_THEME,
+        Constants.PREF_LIGHT_THEME,
+        Constants.PREF_POSTS_LAYOUT,
+        Constants.PREF_PROFILE_POSTS_LAYOUT,
+        Constants.PREF_TOPIC_POSTS_LAYOUT,
+        Constants.PREF_HASHTAG_POSTS_LAYOUT,
+        Constants.PREF_LOCATION_POSTS_LAYOUT,
+        Constants.PREF_LIKED_POSTS_LAYOUT,
+        Constants.PREF_TAGGED_POSTS_LAYOUT,
+        Constants.PREF_SAVED_POSTS_LAYOUT,
+        PreferenceKeys.STORY_SORT,
+        Constants.PREF_EMOJI_VARIANTS,
+        Constants.PREF_REACTIONS,
+        PreferenceKeys.PREF_ENABLE_DM_AUTO_REFRESH_FREQ_UNIT,
+        PreferenceKeys.PREF_TAB_ORDER,
+        PreferenceKeys.PREF_BARINSTA_DIR_URI
+    )
+    annotation class StringSettings
 
-    @StringDef({DOWNLOAD_USER_FOLDER, DOWNLOAD_PREPEND_USER_NAME, FOLDER_SAVE_TO, AUTOPLAY_VIDEOS, MUTED_VIDEOS,
-                       SHOW_CAPTIONS, CUSTOM_DATE_TIME_FORMAT_ENABLED, MARK_AS_SEEN, DM_MARK_AS_SEEN, CHECK_ACTIVITY,
-                       CHECK_UPDATES, SWAP_DATE_TIME_FORMAT_ENABLED, PREF_ENABLE_DM_NOTIFICATIONS, PREF_ENABLE_DM_AUTO_REFRESH,
-                       FLAG_SECURE, TOGGLE_KEYWORD_FILTER, PREF_ENABLE_SENTRY, HIDE_MUTED_REELS, PLAY_IN_BACKGROUND,
-                       PREF_SHOWN_COUNT_TOOLTIP, PREF_SEARCH_FOCUS_KEYBOARD})
-    public @interface BooleanSettings {}
+    @StringDef(
+        PreferenceKeys.DOWNLOAD_USER_FOLDER,
+        PreferenceKeys.DOWNLOAD_PREPEND_USER_NAME,
+        PreferenceKeys.FOLDER_SAVE_TO,
+        PreferenceKeys.AUTOPLAY_VIDEOS,
+        PreferenceKeys.MUTED_VIDEOS,
+        PreferenceKeys.SHOW_CAPTIONS,
+        PreferenceKeys.CUSTOM_DATE_TIME_FORMAT_ENABLED,
+        PreferenceKeys.MARK_AS_SEEN,
+        PreferenceKeys.DM_MARK_AS_SEEN,
+        PreferenceKeys.CHECK_ACTIVITY,
+        PreferenceKeys.CHECK_UPDATES,
+        PreferenceKeys.SWAP_DATE_TIME_FORMAT_ENABLED,
+        PreferenceKeys.PREF_ENABLE_DM_NOTIFICATIONS,
+        PreferenceKeys.PREF_ENABLE_DM_AUTO_REFRESH,
+        PreferenceKeys.FLAG_SECURE,
+        PreferenceKeys.TOGGLE_KEYWORD_FILTER,
+        PreferenceKeys.PREF_ENABLE_SENTRY,
+        PreferenceKeys.HIDE_MUTED_REELS,
+        PreferenceKeys.PLAY_IN_BACKGROUND,
+        PreferenceKeys.PREF_SHOWN_COUNT_TOOLTIP,
+        PreferenceKeys.PREF_SEARCH_FOCUS_KEYBOARD,
+        PreferenceKeys.PREF_AUTO_BACKUP_DISABLED
+    )
+    annotation class BooleanSettings
 
-    @StringDef({PREV_INSTALL_VERSION, BROWSER_UA_CODE, APP_UA_CODE, PREF_ENABLE_DM_AUTO_REFRESH_FREQ_NUMBER})
-    public @interface IntegerSettings {}
+    @StringDef(
+        Constants.PREV_INSTALL_VERSION,
+        Constants.BROWSER_UA_CODE,
+        Constants.APP_UA_CODE,
+        PreferenceKeys.PREF_ENABLE_DM_AUTO_REFRESH_FREQ_NUMBER
+    )
+    annotation class IntegerSettings
 
-    @StringDef({KEYWORD_FILTERS})
-    public @interface StringSetSettings {}
+    @StringDef(PreferenceKeys.KEYWORD_FILTERS)
+    annotation class StringSetSettings
+
+    init {
+        sharedPreferences =
+            context.getSharedPreferences(Constants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE)
+    }
 }
