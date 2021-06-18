@@ -106,7 +106,7 @@ public class IgErrorsInterceptor implements Interceptor {
             final String errorType = jsonObject.optString("error_type");
             if (TextUtils.isEmpty(errorType)) return;
             if (errorType.equals("sentry_block")) {
-                showErrorDialog(R.string.sentry_block);
+                showErrorDialog("\"sentry_block\". Please contact developers.");
                 return;
             }
             if (errorType.equals("inactive user")) {
