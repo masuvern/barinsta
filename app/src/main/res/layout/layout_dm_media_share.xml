@@ -50,6 +50,7 @@
         android:ellipsize="end"
         android:maxLines="1"
         android:textAppearance="@style/TextAppearance.MaterialComponents.Body2"
+        android:textColor="@color/white"
         app:layout_constraintBottom_toBottomOf="@id/profile_pic"
         app:layout_constraintEnd_toStartOf="@id/type_icon"
         app:layout_constraintStart_toEndOf="@id/profile_pic"
