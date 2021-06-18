@@ -18,8 +18,8 @@ val browsers = arrayOf(
 )
 
 // use APKpure, assume arm64-v8a
-private const val igVersion = "188.0.0.35.124"
-private const val igVersionCode = "292080186"
+private const val igVersion = "192.0.0.35.123"
+private const val igVersionCode = "298419744"
 
 // you can pick *any* device as long as you LEAVE OUT the resolution for maximum download quality
 // https://github.com/dilame/instagram-private-api/blob/master/src/samples/devices.json
