@@ -38,19 +38,19 @@ class SettingsHelper(context: Context) {
     }
 
     private fun getStringDefault(@StringSettings key: String): String {
-        if (DATE_TIME_FORMAT == key) return "hh:mm:ss a 'on' dd-MM-yyyy"
-        return if (DATE_TIME_SELECTION == key) "0;3;0" else ""
+        if (PreferenceKeys.DATE_TIME_FORMAT == key) return "hh:mm:ss a 'on' dd-MM-yyyy"
+        return if (PreferenceKeys.DATE_TIME_SELECTION == key) "0;3;0" else ""
     }
 
     private fun getIntegerDefault(@IntegerSettings key: String): Int {
-        if (APP_THEME == key) return getThemeCode(true)
-        return if (PREV_INSTALL_VERSION == key || APP_UA_CODE == key || BROWSER_UA_CODE == key) -1 else 0
+        if (PreferenceKeys.APP_THEME == key) return getThemeCode(true)
+        return if (Constants.PREV_INSTALL_VERSION == key || Constants.APP_UA_CODE == key || Constants.BROWSER_UA_CODE == key) -1 else 0
     }
 
     fun getThemeCode(fromHelper: Boolean): Int {
         var themeCode = AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
         if (!fromHelper && sharedPreferences != null) {
-            themeCode = sharedPreferences.getString(APP_THEME, themeCode.toString())!!.toInt()
+            themeCode = sharedPreferences.getString(PreferenceKeys.APP_THEME, themeCode.toString())!!.toInt()
             when (themeCode) {
                 1 -> themeCode = AppCompatDelegate.MODE_NIGHT_AUTO_BATTERY
                 3 -> themeCode = AppCompatDelegate.MODE_NIGHT_NO
@@ -136,7 +136,7 @@ class SettingsHelper(context: Context) {
         PreferenceKeys.PLAY_IN_BACKGROUND,
         PreferenceKeys.PREF_SHOWN_COUNT_TOOLTIP,
         PreferenceKeys.PREF_SEARCH_FOCUS_KEYBOARD,
-        PreferenceKeys.PREF_AUTO_BACKUP_DISABLED
+        PreferenceKeys.PREF_AUTO_BACKUP_ENABLED
     )
     annotation class BooleanSettings
 

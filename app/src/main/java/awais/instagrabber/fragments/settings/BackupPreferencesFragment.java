@@ -1,6 +1,7 @@
 package awais.instagrabber.fragments.settings;
 
 import android.content.Context;
+import android.os.Build;
 import android.view.View;
 import android.widget.Toast;
 
@@ -9,7 +10,9 @@ import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.preference.Preference;
+import androidx.preference.PreferenceCategory;
 import androidx.preference.PreferenceScreen;
+import androidx.preference.SwitchPreferenceCompat;
 
 import com.google.android.material.snackbar.BaseTransientBottomBar;
 import com.google.android.material.snackbar.Snackbar;
@@ -26,27 +29,48 @@ public class BackupPreferencesFragment extends BasePreferencesFragment {
         if (context == null) {
             return;
         }
-        screen.addPreference(getAboutPreference(context));
-        screen.addPreference(getWarningPreference(context));
-        screen.addPreference(getCreatePreference(context));
-        screen.addPreference(getRestorePreference(context));
+        if (Build.VERSION.SDK_INT >= 23) {
+            final PreferenceCategory autoCategory = new PreferenceCategory(context);
+            screen.addPreference(autoCategory);
+            autoCategory.setTitle(R.string.auto_backup);
+            autoCategory.addPreference(getAboutPreference(context, true));
+            autoCategory.addPreference(getWarningPreference(context, true));
+            autoCategory.addPreference(getAutoBackupPreference(context));
+        }
+        final PreferenceCategory manualCategory = new PreferenceCategory(context);
+        screen.addPreference(manualCategory);
+        manualCategory.setTitle(R.string.manual_backup);
+        manualCategory.addPreference(getAboutPreference(context, false));
+        manualCategory.addPreference(getWarningPreference(context, false));
+        manualCategory.addPreference(getCreatePreference(context));
+        manualCategory.addPreference(getRestorePreference(context));
     }
 
-    private Preference getAboutPreference(@NonNull final Context context) {
+    private Preference getAboutPreference(@NonNull final Context context,
+                                          @NonNull final boolean auto) {
         final Preference preference = new Preference(context);
-        preference.setSummary(R.string.backup_summary);
+        preference.setSummary(auto ? R.string.auto_backup_summary : R.string.backup_summary);
         preference.setEnabled(false);
         preference.setIcon(R.drawable.ic_outline_info_24);
         preference.setIconSpaceReserved(true);
         return preference;
     }
 
-    private Preference getWarningPreference(@NonNull final Context context) {
+    private Preference getWarningPreference(@NonNull final Context context,
+                                            @NonNull final boolean auto) {
         final Preference preference = new Preference(context);
-        preference.setSummary(R.string.backup_warning);
+        preference.setSummary(auto ? R.string.auto_backup_warning : R.string.backup_warning);
         preference.setEnabled(false);
         preference.setIcon(R.drawable.ic_warning);
         preference.setIconSpaceReserved(true);
+        return preference;
+    }
+
+    private Preference getAutoBackupPreference(@NonNull final Context context) {
+        final SwitchPreferenceCompat preference = new SwitchPreferenceCompat(context);
+        preference.setKey(PreferenceKeys.PREF_AUTO_BACKUP_ENABLED);
+        preference.setTitle(R.string.auto_backup_setting);
+        preference.setIconSpaceReserved(false);
         return preference;
     }
 

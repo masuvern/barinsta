@@ -17,7 +17,9 @@
     <application
         android:name=".InstaGrabberApplication"
         android:allowBackup="true"
+        android:backupAgent=".backup.BarinstaBackupAgent"
         android:fullBackupContent="@xml/backup_descriptor"
+        android:fullBackupOnly="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
