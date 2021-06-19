@@ -1029,7 +1029,7 @@ public class StoryViewerFragment extends Fragment {
         if (context == null) return;
         player = new SimpleExoPlayer.Builder(context).build();
         binding.playerView.setPlayer(player);
-        player.setPlayWhenReady(settingsHelper.getBoolean(PreferenceKeys.AUTOPLAY_VIDEOS));
+        player.setPlayWhenReady(settingsHelper.getBoolean(PreferenceKeys.AUTOPLAY_VIDEOS_STORIES));
 
         final Uri uri = Uri.parse(url);
         final MediaItem mediaItem = MediaItem.fromUri(uri);
@@ -1130,7 +1130,7 @@ public class StoryViewerFragment extends Fragment {
         if (context == null) return;
         player = new SimpleExoPlayer.Builder(context).build();
         binding.playerView.setPlayer(player);
-        player.setPlayWhenReady(settingsHelper.getBoolean(PreferenceKeys.AUTOPLAY_VIDEOS));
+        player.setPlayWhenReady(settingsHelper.getBoolean(PreferenceKeys.AUTOPLAY_VIDEOS_STORIES));
 
         final Uri uri = Uri.parse(url);
         final MediaItem mediaItem = MediaItem.fromUri(uri);

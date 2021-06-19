@@ -7,7 +7,6 @@ import androidx.annotation.StringDef
 import androidx.appcompat.app.AppCompatDelegate
 import java.util.*
 
-import awais.instagrabber.utils.Constants
 import awais.instagrabber.fragments.settings.PreferenceKeys
 
 class SettingsHelper(context: Context) {
@@ -117,8 +116,7 @@ class SettingsHelper(context: Context) {
     @StringDef(
         PreferenceKeys.DOWNLOAD_USER_FOLDER,
         PreferenceKeys.DOWNLOAD_PREPEND_USER_NAME,
-        PreferenceKeys.FOLDER_SAVE_TO,
-        PreferenceKeys.AUTOPLAY_VIDEOS,
+        PreferenceKeys.AUTOPLAY_VIDEOS_STORIES,
         PreferenceKeys.MUTED_VIDEOS,
         PreferenceKeys.SHOW_CAPTIONS,
         PreferenceKeys.CUSTOM_DATE_TIME_FORMAT_ENABLED,
