@@ -1,49 +1,37 @@
-package awais.instagrabber.utils;
+package awais.instagrabber.utils
 
-import java.util.ArrayList;
-import java.util.List;
+import awais.instagrabber.repositories.responses.Media
+import java.util.*
 
-import awais.instagrabber.repositories.responses.Caption;
-import awais.instagrabber.repositories.responses.Media;
+class KeywordsFilterUtils(private val keywords: ArrayList<String>) {
+//    fun filter(caption: String?): Boolean {
+//        if (caption == null) return false
+//        if (keywords.isEmpty()) return false
+//        val temp = caption.toLowerCase()
+//        for (s in keywords) {
+//            if (temp.contains(s)) return true
+//        }
+//        return false
+//    }
 
-public final class KeywordsFilterUtils {
-
-    private final ArrayList<String> keywords;
-
-    public KeywordsFilterUtils(final ArrayList<String> keywords){
-        this.keywords = keywords;
+    fun filter(media: Media?): Boolean {
+        if (media == null) return false
+        val (_, text) = media.caption ?: return false
+        if (keywords.isEmpty()) return false
+        val temp = text!!.lowercase(Locale.getDefault())
+        for (s in keywords) {
+            if (temp.contains(s)) return true
+        }
+        return false
     }
 
-    public boolean filter(final String caption){
-        if(caption == null) return false;
-        if(keywords.isEmpty()) return false;
-        final String temp = caption.toLowerCase();
-        for(final String s:keywords){
-            if(temp.contains(s)) return true;
+    fun filter(media: List<Media>?): List<Media>? {
+        if (keywords.isEmpty()) return media
+        if (media == null) return ArrayList()
+        val result: MutableList<Media> = ArrayList()
+        for (m in media) {
+            if (!filter(m)) result.add(m)
         }
-        return false;
-    }
-
-    public boolean filter(final Media media){
-        if(media == null) return false;
-        final Caption c = media.getCaption();
-        if(c == null) return false;
-        if(keywords.isEmpty()) return false;
-        final String temp = c.getText().toLowerCase();
-        for(final String s:keywords){
-            if(temp.contains(s)) return true;
-        }
-        return false;
-    }
-
-    public List<Media> filter(final List<Media> media){
-        if(keywords.isEmpty()) return media;
-        if(media == null) return new ArrayList<>();
-
-        final List<Media> result= new ArrayList<>();
-        for(final Media m:media){
-            if(!filter(m)) result.add(m);
-        }
-        return result;
+        return result
     }
 }

@@ -1,45 +1,38 @@
-package awais.instagrabber.utils;
+package awais.instagrabber.utils
 
-import java.util.Arrays;
+import java.util.*
 
-public class CubicInterpolation {
-
-    private final float[] array;
-    private final int tangentFactor;
-    private final int length;
-
-    public CubicInterpolation(final float[] array, final int cubicTension) {
-        this.array = Arrays.copyOf(array, array.length);
-        this.length = array.length;
-        tangentFactor = 1 - Math.max(0, Math.min(1, cubicTension));
+class CubicInterpolation @JvmOverloads constructor(array: FloatArray, cubicTension: Int = 0) {
+    private val array: FloatArray
+    private val tangentFactor: Int
+    private val length: Int
+    private fun getTangent(k: Int): Float {
+        return tangentFactor * (getClippedInput(k + 1) - getClippedInput(k - 1)) / 2
     }
 
-    public CubicInterpolation(final float[] array) {
-        this(array, 0);
+    fun interpolate(t: Float): Float {
+        val k = Math.floor(t.toDouble()).toInt()
+        val m = floatArrayOf(getTangent(k), getTangent(k + 1))
+        val p = floatArrayOf(getClippedInput(k), getClippedInput(k + 1))
+        val t1 = t - k
+        val t2 = t1 * t1
+        val t3 = t1 * t2
+        return (2 * t3 - 3 * t2 + 1) * p[0] + (t3 - 2 * t2 + t1) * m[0] + (-2 * t3 + 3 * t2) * p[1] + (t3 - t2) * m[1]
     }
 
-    private float getTangent(int k) {
-        return tangentFactor * (getClippedInput(k + 1) - getClippedInput(k - 1)) / 2;
+    private fun getClippedInput(i: Int): Float {
+        return if (i >= 0 && i < length) {
+            array[i]
+        } else array[clipClamp(i, length)]
     }
 
-    public float interpolate(final float t) {
-        int k = (int) Math.floor(t);
-        float[] m = new float[]{getTangent(k), getTangent(k + 1)};
-        float[] p = new float[]{getClippedInput(k), getClippedInput(k + 1)};
-        final float t1 = t - k;
-        final float t2 = t1 * t1;
-        final float t3 = t1 * t2;
-        return (2 * t3 - 3 * t2 + 1) * p[0] + (t3 - 2 * t2 + t1) * m[0] + (-2 * t3 + 3 * t2) * p[1] + (t3 - t2) * m[1];
+    private fun clipClamp(i: Int, n: Int): Int {
+        return Math.max(0, Math.min(i, n - 1))
     }
 
-    private float getClippedInput(int i) {
-        if (i >= 0 && i < length) {
-            return array[i];
-        }
-        return array[clipClamp(i, length)];
-    }
-
-    private int clipClamp(int i, int n) {
-        return Math.max(0, Math.min(i, n - 1));
+    init {
+        this.array = Arrays.copyOf(array, array.size)
+        length = array.size
+        tangentFactor = 1 - Math.max(0, Math.min(1, cubicTension))
     }
 }

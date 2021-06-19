@@ -1,61 +1,46 @@
-package awais.instagrabber.utils;
+package awais.instagrabber.utils
 
-import android.net.Uri;
-import android.text.TextUtils;
+import android.net.Uri
+import android.text.TextUtils
+import awais.instagrabber.models.IntentModel
+import awais.instagrabber.models.enums.IntentModelType
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-
-import java.util.List;
-
-import awais.instagrabber.models.IntentModel;
-import awais.instagrabber.models.enums.IntentModelType;
-
-public final class IntentUtils {
-
-    @Nullable
-    public static IntentModel parseUrl(@NonNull final String url) {
-        final Uri parsedUrl = Uri.parse(url).normalizeScheme();
+object IntentUtils {
+    @JvmStatic
+    fun parseUrl(url: String): IntentModel? {
+        val parsedUrl = Uri.parse(url).normalizeScheme()
 
         // final String domain = parsedUrl.getHost().replaceFirst("^www\\.", "");
         // final boolean isHttpsUri = "https".equals(parsedUrl.getScheme());
-
-        final List<String> paths = parsedUrl.getPathSegments();
-
+        val paths = parsedUrl.pathSegments
         if (paths.isEmpty()) {
-            return null;
+            return null
         }
-
-        String path = paths.get(0);
-        String text = null;
-        IntentModelType type = IntentModelType.UNKNOWN;
-        if (1 == paths.size()) {
-            text = path;
-            type = IntentModelType.USERNAME;
-        } else if ("_u".equals(path)) {
-            text = paths.get(1);
-            type = IntentModelType.USERNAME;
-        } else if ("p".equals(path) || "reel".equals(path) || "tv".equals(path)) {
-            text = paths.get(1);
-            type = IntentModelType.POST;
-        } else if (2 < paths.size() && "explore".equals(path)) {
-            path = paths.get(1);
-
-            if ("locations".equals(path)) {
-                text = paths.get(2);
-                type = IntentModelType.LOCATION;
+        var path = paths[0]
+        var text: String? = null
+        var type = IntentModelType.UNKNOWN
+        if (1 == paths.size) {
+            text = path
+            type = IntentModelType.USERNAME
+        } else if ("_u" == path) {
+            text = paths[1]
+            type = IntentModelType.USERNAME
+        } else if ("p" == path || "reel" == path || "tv" == path) {
+            text = paths[1]
+            type = IntentModelType.POST
+        } else if (2 < paths.size && "explore" == path) {
+            path = paths[1]
+            if ("locations" == path) {
+                text = paths[2]
+                type = IntentModelType.LOCATION
             }
-
-            if ("tags".equals(path)) {
-                text = paths.get(2);
-                type = IntentModelType.HASHTAG;
+            if ("tags" == path) {
+                text = paths[2]
+                type = IntentModelType.HASHTAG
             }
         }
-
-        if (TextUtils.isEmpty(text)) {
-            return null;
-        }
-
-        return new IntentModel(type, text);
+        return if (TextUtils.isEmpty(text)) {
+            null
+        } else IntentModel(type, text!!)
     }
 }
