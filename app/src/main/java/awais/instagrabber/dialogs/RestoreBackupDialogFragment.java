@@ -40,7 +40,6 @@ public class RestoreBackupDialogFragment extends DialogFragment {
     private OnResultListener onResultListener;
 
     private DialogRestoreBackupBinding binding;
-    // private File file;
     private boolean isEncrypted;
     private Uri uri;
 
@@ -87,9 +86,6 @@ public class RestoreBackupDialogFragment extends DialogFragment {
     @Override
     public void onRequestPermissionsResult(final int requestCode, @NonNull final String[] permissions, @NonNull final int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        // if (requestCode == STORAGE_PERM_REQUEST_CODE && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-        //     showChooser();
-        // }
     }
 
     @Override
@@ -185,55 +181,11 @@ public class RestoreBackupDialogFragment extends DialogFragment {
             @Override
             public void afterTextChanged(final Editable s) {}
         });
-        // if (ContextCompat.checkSelfPermission(context, PERMS[0]) == PackageManager.PERMISSION_GRANTED) {
-        //     showChooser();
-        //     return;
-        // }
-        // requestPermissions(PERMS, STORAGE_PERM_REQUEST_CODE);
         final Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
-        // intent.addCategory(Intent.CATEGORY_OPENABLE);
         intent.setType("*/*");
-        // intent.putExtra(Intent.EXTRA_MIME_TYPES, new String[]{
-        //         "application/pdf", // .pdf
-        //         "application/vnd.oasis.opendocument.text", // .odt
-        //         "text/plain" // .txt
-        // });
         startActivityForResult(intent, OPEN_FILE_REQUEST_CODE);
 
     }
-
-    // private void showChooser() {
-    //     final String folderPath = Utils.settingsHelper.getString(FOLDER_PATH);
-    //     final Context context = getContext();
-    //     if (context == null) return;
-    //     final DirectoryChooser directoryChooser = new DirectoryChooser()
-    //             .setInitialDirectory(folderPath)
-    //             .setShowBackupFiles(true)
-    //             .setInteractionListener(file -> {
-    //                 isEncrypted = ExportImportUtils.isEncrypted(file);
-    //                 if (isEncrypted) {
-    //                     binding.passwordGroup.setVisibility(View.VISIBLE);
-    //                     binding.passwordGroup.post(() -> {
-    //                         binding.etPassword.requestFocus();
-    //                         binding.etPassword.post(() -> {
-    //                             final InputMethodManager imm = (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
-    //                             if (imm == null) return;
-    //                             imm.showSoftInput(binding.etPassword, InputMethodManager.SHOW_IMPLICIT);
-    //                         });
-    //                         binding.btnRestore.setEnabled(!TextUtils.isEmpty(binding.etPassword.getText()));
-    //                     });
-    //                 } else {
-    //                     binding.passwordGroup.setVisibility(View.GONE);
-    //                     binding.btnRestore.setEnabled(true);
-    //                 }
-    //                 this.file = file;
-    //                 binding.filePath.setText(file.getAbsolutePath());
-    //             });
-    //     directoryChooser.setEnterTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
-    //     directoryChooser.setExitTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
-    //     directoryChooser.setOnCancelListener(this::dismiss);
-    //     directoryChooser.show(getChildFragmentManager(), "directory_chooser");
-    // }
 
     public interface OnResultListener {
         void onResult(boolean result);

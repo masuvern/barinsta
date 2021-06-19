@@ -34,7 +34,6 @@ import static awais.instagrabber.utils.Utils.settingsHelper;
 
 public class DownloadsPreferencesFragment extends BasePreferencesFragment {
     private static final String TAG = DownloadsPreferencesFragment.class.getSimpleName();
-    // private SaveToCustomFolderPreference.ResultCallback resultCallback;
 
     @Override
     void setupPreferenceScreen(final PreferenceScreen screen) {
@@ -74,28 +73,6 @@ public class DownloadsPreferencesFragment extends BasePreferencesFragment {
             return true;
         });
         return preference;
-        // return new SaveToCustomFolderPreference(context, checked -> {
-        //     try {
-        //         DownloadUtils.init(context);
-        //     } catch (DownloadUtils.ReselectDocumentTreeException e) {
-        //         if (!checked) return;
-        //         startDocumentSelector(e.getInitialUri());
-        //     } catch (Exception e) {
-        //         Log.e(TAG, "getSaveToCustomFolderPreference: ", e);
-        //     }
-        // }, (resultCallback) -> {
-        //     // Choose a directory using the system's file picker.
-        //     startDocumentSelector(null);
-        //     this.resultCallback = resultCallback;
-        //
-        //     // new DirectoryChooser()
-        //     //         .setInitialDirectory(settingsHelper.getString(FOLDER_PATH))
-        //     //         .setInteractionListener(file -> {
-        //     //             settingsHelper.putString(FOLDER_PATH, file.getAbsolutePath());
-        //     //             resultCallback.onResult(file.getAbsolutePath());
-        //     //         })
-        //     //         .show(getParentFragmentManager(), null);
-        // });
     }
 
     private void openDirectoryChooser(final Uri initialUri) {
@@ -145,75 +122,4 @@ public class DownloadsPreferencesFragment extends BasePreferencesFragment {
         preference.setIconSpaceReserved(false);
         return preference;
     }
-
-    // public static class SaveToCustomFolderPreference extends Preference {
-    //     private AppCompatTextView customPathTextView;
-    //     private final OnSaveToChangeListener onSaveToChangeListener;
-    //     private final OnSelectFolderButtonClickListener onSelectFolderButtonClickListener;
-    //     private final String key;
-    //
-    //     public SaveToCustomFolderPreference(final Context context,
-    //                                         final OnSaveToChangeListener onSaveToChangeListener,
-    //                                         final OnSelectFolderButtonClickListener onSelectFolderButtonClickListener) {
-    //         super(context);
-    //         this.onSaveToChangeListener = onSaveToChangeListener;
-    //         this.onSelectFolderButtonClickListener = onSelectFolderButtonClickListener;
-    //         key = FOLDER_SAVE_TO;
-    //         setLayoutResource(R.layout.pref_custom_folder);
-    //         setKey(key);
-    //         setTitle(R.string.save_to_folder);
-    //         setIconSpaceReserved(false);
-    //     }
-    //
-    //     @Override
-    //     public void onBindViewHolder(final PreferenceViewHolder holder) {
-    //         super.onBindViewHolder(holder);
-    //         final SwitchMaterial cbSaveTo = (SwitchMaterial) holder.findViewById(R.id.cbSaveTo);
-    //         final View buttonContainer = holder.findViewById(R.id.button_container);
-    //         customPathTextView = (AppCompatTextView) holder.findViewById(R.id.custom_path);
-    //         cbSaveTo.setOnCheckedChangeListener((buttonView, isChecked) -> {
-    //             settingsHelper.putBoolean(FOLDER_SAVE_TO, isChecked);
-    //             buttonContainer.setVisibility(isChecked ? View.VISIBLE : View.GONE);
-    //             final Context context = getContext();
-    //             String customPath = settingsHelper.getString(FOLDER_PATH);
-    //             if (!TextUtils.isEmpty(customPath) && customPath.startsWith("content") && context != null) {
-    //                 final Uri uri = Uri.parse(customPath);
-    //                 final DocumentFile documentFile = DocumentFile.fromSingleUri(context, uri);
-    //                 try {
-    //                     customPath = Utils.getDocumentFileRealPath(context, documentFile).getAbsolutePath();
-    //                 } catch (Exception e) {
-    //                     Log.e(TAG, "onBindViewHolder: ", e);
-    //                 }
-    //             }
-    //             customPathTextView.setText(customPath);
-    //             if (onSaveToChangeListener != null) {
-    //                 onSaveToChangeListener.onChange(isChecked);
-    //             }
-    //         });
-    //         final boolean savedToEnabled = settingsHelper.getBoolean(key);
-    //         holder.itemView.setOnClickListener(v -> cbSaveTo.toggle());
-    //         cbSaveTo.setChecked(savedToEnabled);
-    //         buttonContainer.setVisibility(savedToEnabled ? View.VISIBLE : View.GONE);
-    //         final AppCompatButton btnSaveTo = (AppCompatButton) holder.findViewById(R.id.btnSaveTo);
-    //         btnSaveTo.setOnClickListener(v -> {
-    //             if (onSelectFolderButtonClickListener == null) return;
-    //             onSelectFolderButtonClickListener.onClick(result -> {
-    //                 if (TextUtils.isEmpty(result)) return;
-    //                 customPathTextView.setText(result);
-    //             });
-    //         });
-    //     }
-    //
-    //     public interface ResultCallback {
-    //         void onResult(String result);
-    //     }
-    //
-    //     public interface OnSelectFolderButtonClickListener {
-    //         void onClick(ResultCallback resultCallback);
-    //     }
-    //
-    //     public interface OnSaveToChangeListener {
-    //         void onChange(boolean checked);
-    //     }
-    // }
 }
