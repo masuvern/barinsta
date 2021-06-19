@@ -51,7 +51,7 @@ public class AppStateViewModel extends AndroidViewModel {
         return currentUser;
     }
 
-    private void fetchProfileDetails() {
+    public void fetchProfileDetails() {
         currentUser.postValue(Resource.loading(null));
         final long uid = CookieUtils.getUserIdFromCookie(cookie);
         if (userRepository == null) {
@@ -61,7 +61,10 @@ public class AppStateViewModel extends AndroidViewModel {
         userRepository.getUserInfo(uid, CoroutineUtilsKt.getContinuation((user, throwable) -> {
             if (throwable != null) {
                 Log.e(TAG, "onFailure: ", throwable);
-                currentUser.postValue(Resource.error(throwable.getMessage(), null));
+                final User backup = currentUser.getValue().data != null ?
+                                        currentUser.getValue().data :
+                                        new User(uid);
+                currentUser.postValue(Resource.error(throwable.getMessage(), backup));
                 return;
             }
             currentUser.postValue(Resource.success(user));

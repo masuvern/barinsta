@@ -692,6 +692,11 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                 if (userResource == null) return;
                 final User user = userResource.data;
                 if (user == null) return;
+                username = user.getUsername();
+                if (TextUtils.isEmpty(username)) {
+                    appStateViewModel.fetchProfileDetails();
+                    return;
+                }
                 profileModel = user;
                 username = profileModel.getUsername();
                 setUsernameDelayed();
@@ -1099,7 +1104,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
     }
 
     private void updateAccountInfo() {
-        if (profileModel == null) return;
+        if (profileModel == null || TextUtils.isEmpty(profileModel.getUsername())) return;
         accountRepository.insertOrUpdateAccount(
                 profileModel.getPk(),
                 profileModel.getUsername(),
