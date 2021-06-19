@@ -68,7 +68,7 @@ public class SearchItemViewHolder extends RecyclerView.ViewHolder {
             binding.delete.setOnClickListener(v -> {
                 if (onSearchItemClickListener != null) {
                     binding.delete.setEnabled(false);
-                    onSearchItemClickListener.onSearchItemDelete(searchItem);
+                    onSearchItemClickListener.onSearchItemDelete(searchItem, type);
                 }
             });
         }

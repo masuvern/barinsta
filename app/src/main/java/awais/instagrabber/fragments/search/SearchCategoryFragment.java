@@ -192,6 +192,6 @@ public class SearchCategoryFragment extends Fragment {
     public interface OnSearchItemClickListener {
         void onSearchItemClick(SearchItem searchItem);
 
-        void onSearchItemDelete(SearchItem searchItem);
+        void onSearchItemDelete(SearchItem searchItem, FavoriteType type);
     }
 }

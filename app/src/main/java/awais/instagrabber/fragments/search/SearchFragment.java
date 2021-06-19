@@ -229,7 +229,7 @@ public class SearchFragment extends Fragment implements SearchCategoryFragment.O
     }
 
     @Override
-    public void onSearchItemDelete(final SearchItem searchItem) {
+    public void onSearchItemDelete(final SearchItem searchItem, final FavoriteType type) {
         final LiveData<Resource<Object>> liveData = viewModel.deleteRecentSearch(searchItem);
         if (liveData == null) return;
         liveData.observe(getViewLifecycleOwner(), new Observer<Resource<Object>>() {
@@ -238,7 +238,7 @@ public class SearchFragment extends Fragment implements SearchCategoryFragment.O
                 if (resource == null) return;
                 switch (resource.status) {
                     case SUCCESS:
-                        viewModel.search("", FavoriteType.TOP);
+                        viewModel.search("", type);
                         liveData.removeObserver(this);
                         break;
                     case ERROR:

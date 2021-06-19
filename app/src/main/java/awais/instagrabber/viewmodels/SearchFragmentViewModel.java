@@ -126,11 +126,7 @@ public class SearchFragmentViewModel extends AppStateViewModel {
         final MutableLiveData<Resource<List<SearchItem>>> liveData = getLiveDataByType(type);
         if (liveData == null) return;
         if (TextUtils.isEmpty(query)) {
-            if (type != FavoriteType.TOP) {
-                liveData.postValue(Resource.success(Collections.emptyList()));
-                return;
-            }
-            showRecentSearchesAndFavorites();
+            showRecentSearchesAndFavorites(type, liveData);
             return;
         }
         if (query.equals("@") || query.equals("#")) return;
@@ -177,7 +173,8 @@ public class SearchFragmentViewModel extends AppStateViewModel {
         });
     }
 
-    private void showRecentSearchesAndFavorites() {
+    private void showRecentSearchesAndFavorites(@NonNull final FavoriteType type,
+                                                @NonNull final MutableLiveData<Resource<List<SearchItem>>> liveData) {
         final SettableFuture<List<RecentSearch>> recentResultsFuture = SettableFuture.create();
         final SettableFuture<List<Favorite>> favoritesFuture = SettableFuture.create();
         recentSearchRepository.getAllRecentSearches(
@@ -185,6 +182,14 @@ public class SearchFragmentViewModel extends AppStateViewModel {
                     if (throwable != null) {
                         Log.e(TAG, "showRecentSearchesAndFavorites: ", throwable);
                         recentResultsFuture.set(Collections.emptyList());
+                        return;
+                    }
+                    if (type != FavoriteType.TOP) {
+                        recentResultsFuture.set((List<RecentSearch>) recentSearches
+                                .stream()
+                                .filter(rs -> rs.getType() == type)
+                                .collect(Collectors.toList())
+                        );
                         return;
                     }
                     //noinspection unchecked
@@ -198,6 +203,14 @@ public class SearchFragmentViewModel extends AppStateViewModel {
                         Log.e(TAG, "showRecentSearchesAndFavorites: ", throwable);
                         return;
                     }
+                    if (type != FavoriteType.TOP) {
+                        favoritesFuture.set((List<Favorite>) favorites
+                                .stream()
+                                .filter(f -> f.getType() == type)
+                                .collect(Collectors.toList())
+                        );
+                        return;
+                    }
                     //noinspection unchecked
                     favoritesFuture.set((List<Favorite>) favorites);
                 }), Dispatchers.getIO())
@@ -209,12 +222,12 @@ public class SearchFragmentViewModel extends AppStateViewModel {
             public void onSuccess(@Nullable final List<List<?>> result) {
                 if (!TextUtils.isEmpty(tempQuery)) return; // Make sure user has not entered anything before updating results
                 if (result == null) {
-                    topResults.postValue(Resource.success(Collections.emptyList()));
+                    liveData.postValue(Resource.success(Collections.emptyList()));
                     return;
                 }
                 try {
                     //noinspection unchecked
-                    topResults.postValue(Resource.success(
+                    liveData.postValue(Resource.success(
                             ImmutableList.<SearchItem>builder()
                                     .addAll(SearchItem.fromRecentSearch((List<RecentSearch>) result.get(0)))
                                     .addAll(SearchItem.fromFavorite((List<Favorite>) result.get(1)))
@@ -222,7 +235,7 @@ public class SearchFragmentViewModel extends AppStateViewModel {
                     ));
                 } catch (Exception e) {
                     Log.e(TAG, "onSuccess: ", e);
-                    topResults.postValue(Resource.success(Collections.emptyList()));
+                    liveData.postValue(Resource.success(Collections.emptyList()));
                 }
             }
 
