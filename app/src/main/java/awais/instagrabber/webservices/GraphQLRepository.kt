@@ -1,15 +1,16 @@
 package awais.instagrabber.webservices
 
 import android.util.Log
-import awais.instagrabber.models.enums.FollowingType
 import awais.instagrabber.repositories.GraphQLService
 import awais.instagrabber.repositories.responses.*
 import awais.instagrabber.utils.Constants
 import awais.instagrabber.utils.ResponseBodyUtils
 import awais.instagrabber.utils.extensions.TAG
+import com.google.gson.Gson
 import org.json.JSONException
 import org.json.JSONObject
 import java.util.*
+
 
 class GraphQLRepository(private val service: GraphQLService) {
 
@@ -179,8 +180,16 @@ class GraphQLRepository(private val service: GraphQLService) {
         username: String,
     ): User {
         val response = service.getUser(username)
-        val body = JSONObject(response)
-        val userJson = body.getJSONObject("graphql").getJSONObject(Constants.EXTRAS_USER)
+        val body = JSONObject(response
+            .split("<script type=\"text/javascript\">window._sharedData = ", false, 2).get(1)
+            .split("</script>", false, 2).get(0)
+            .trim().replace(Regex("};$"), "}"))
+        val userJson = body
+            .getJSONObject("entry_data")
+            .getJSONArray("ProfilePage")
+            .getJSONObject(0)
+            .getJSONObject("graphql")
+            .getJSONObject(Constants.EXTRAS_USER)
         val isPrivate = userJson.getBoolean("is_private")
         val id = userJson.optLong(Constants.EXTRAS_ID, 0)
         val timelineMedia = userJson.getJSONObject("edge_owner_to_timeline_media")
@@ -231,7 +240,13 @@ class GraphQLRepository(private val service: GraphQLService) {
         tag: String,
     ): Hashtag {
         val response = service.getTag(tag)
-        val body = JSONObject(response)
+        val body = JSONObject(response
+            .split("<script type=\"text/javascript\">window._sharedData = ", false, 2).get(1)
+            .split("</script>", false, 2).get(0)
+            .trim().replace(Regex("};$"), "}"))
+            .getJSONObject("entry_data")
+            .getJSONArray("TagPage")
+            .getJSONObject(0)
             .getJSONObject("graphql")
             .getJSONObject(Constants.EXTRAS_HASHTAG)
         val timelineMedia = body.getJSONObject("edge_hashtag_to_media")
@@ -249,7 +264,13 @@ class GraphQLRepository(private val service: GraphQLService) {
         locationId: Long,
     ): Location {
         val response = service.getLocation(locationId)
-        val body = JSONObject(response)
+        val body = JSONObject(response
+            .split("<script type=\"text/javascript\">window._sharedData = ", false, 2).get(1)
+            .split("</script>", false, 2).get(0)
+            .trim().replace(Regex("};$"), "}"))
+            .getJSONObject("entry_data")
+            .getJSONArray("LocationsPage")
+            .getJSONObject(0)
             .getJSONObject("graphql")
             .getJSONObject(Constants.EXTRAS_LOCATION)
         // val timelineMedia = body.getJSONObject("edge_location_to_media")
