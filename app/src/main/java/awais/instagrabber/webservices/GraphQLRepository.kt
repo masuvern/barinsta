@@ -1,12 +1,12 @@
 package awais.instagrabber.webservices
 
 import android.util.Log
+import awais.instagrabber.models.enums.FollowingType
 import awais.instagrabber.repositories.GraphQLService
 import awais.instagrabber.repositories.responses.*
 import awais.instagrabber.utils.Constants
 import awais.instagrabber.utils.ResponseBodyUtils
 import awais.instagrabber.utils.extensions.TAG
-import com.google.gson.Gson
 import org.json.JSONException
 import org.json.JSONObject
 import java.util.*
@@ -181,9 +181,9 @@ class GraphQLRepository(private val service: GraphQLService) {
     ): User {
         val response = service.getUser(username)
         val body = JSONObject(response
-            .split("<script type=\"text/javascript\">window._sharedData = ", false, 2).get(1)
-            .split("</script>", false, 2).get(0)
-            .trim().replace(Regex("};$"), "}"))
+            .split("<script type=\"text/javascript\">window._sharedData = ").get(1)
+            .split("</script>").get(0)
+            .trim().replace(Regex("\\};$"), "}"))
         val userJson = body
             .getJSONObject("entry_data")
             .getJSONArray("ProfilePage")
@@ -241,9 +241,9 @@ class GraphQLRepository(private val service: GraphQLService) {
     ): Hashtag {
         val response = service.getTag(tag)
         val body = JSONObject(response
-            .split("<script type=\"text/javascript\">window._sharedData = ", false, 2).get(1)
-            .split("</script>", false, 2).get(0)
-            .trim().replace(Regex("};$"), "}"))
+            .split("<script type=\"text/javascript\">window._sharedData = ").get(1)
+            .split("</script>").get(0)
+            .trim().replace(Regex("\\};$"), "}"))
             .getJSONObject("entry_data")
             .getJSONArray("TagPage")
             .getJSONObject(0)
@@ -265,8 +265,7 @@ class GraphQLRepository(private val service: GraphQLService) {
     ): Location {
         val response = service.getLocation(locationId)
         val body = JSONObject(response
-            .split("<script type=\"text/javascript\">window._sharedData = ", false, 2).get(1)
-            .split("</script>", false, 2).get(0)
+            .split("<script type=\"text/javascript\">window._sharedData = ", "</script>").get(1)
             .trim().replace(Regex("};$"), "}"))
             .getJSONObject("entry_data")
             .getJSONArray("LocationsPage")
