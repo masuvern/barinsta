@@ -24,7 +24,6 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.constraintlayout.motion.widget.MotionLayout;
 import androidx.constraintlayout.motion.widget.MotionScene;
-import androidx.core.content.PermissionChecker;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.NavController;
 import androidx.navigation.NavDirections;
@@ -68,14 +67,10 @@ import awais.instagrabber.webservices.ServiceCallback;
 import awais.instagrabber.webservices.StoriesRepository;
 import kotlinx.coroutines.Dispatchers;
 
-import static androidx.core.content.PermissionChecker.checkSelfPermission;
-import static awais.instagrabber.utils.DownloadUtils.WRITE_PERMISSION;
 import static awais.instagrabber.utils.Utils.settingsHelper;
 
 public class LocationFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener {
     private static final String TAG = "LocationFragment";
-    private static final int STORAGE_PERM_REQUEST_CODE = 8020;
-    private static final int STORAGE_PERM_REQUEST_CODE_FOR_SELECTION = 8030;
 
     private MainActivity fragmentActivity;
     private FragmentLocationBinding binding;
@@ -92,8 +87,6 @@ public class LocationFragment extends Fragment implements SwipeRefreshLayout.OnR
     private boolean isLoggedIn;
     private boolean storiesFetching;
     private Set<Media> selectedFeedModels;
-    private Media downloadFeedModel;
-    private int downloadChildPosition = -1;
     private PostsLayoutPreferences layoutPreferences = Utils.getPostsLayoutPreferences(Constants.PREF_LOCATION_POSTS_LAYOUT);
     private LayoutLocationDetailsBinding locationDetailsBinding;
 
@@ -117,12 +110,9 @@ public class LocationFragment extends Fragment implements SwipeRefreshLayout.OnR
                 if (LocationFragment.this.selectedFeedModels == null) return false;
                 final Context context = getContext();
                 if (context == null) return false;
-                if (checkSelfPermission(context, WRITE_PERMISSION) == PermissionChecker.PERMISSION_GRANTED) {
-                    DownloadUtils.download(context, ImmutableList.copyOf(LocationFragment.this.selectedFeedModels));
-                    binding.posts.endSelection();
-                    return true;
-                }
-                requestPermissions(DownloadUtils.PERMS, STORAGE_PERM_REQUEST_CODE_FOR_SELECTION);
+                DownloadUtils.download(context, ImmutableList.copyOf(LocationFragment.this.selectedFeedModels));
+                binding.posts.endSelection();
+                return true;
             }
             return false;
         }
@@ -152,13 +142,7 @@ public class LocationFragment extends Fragment implements SwipeRefreshLayout.OnR
         public void onDownloadClick(final Media feedModel, final int childPosition) {
             final Context context = getContext();
             if (context == null) return;
-            if (checkSelfPermission(context, WRITE_PERMISSION) == PermissionChecker.PERMISSION_GRANTED) {
-                DownloadUtils.showDownloadDialog(context, feedModel, childPosition);
-                return;
-            }
-            downloadFeedModel = feedModel;
-            downloadChildPosition = childPosition;
-            requestPermissions(DownloadUtils.PERMS, STORAGE_PERM_REQUEST_CODE);
+            DownloadUtils.showDownloadDialog(context, feedModel, childPosition);
         }
 
         @Override
@@ -342,25 +326,6 @@ public class LocationFragment extends Fragment implements SwipeRefreshLayout.OnR
             return true;
         }
         return super.onOptionsItemSelected(item);
-    }
-
-    @Override
-    public void onRequestPermissionsResult(final int requestCode, @NonNull final String[] permissions, @NonNull final int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        final boolean granted = grantResults[0] == PackageManager.PERMISSION_GRANTED;
-        final Context context = getContext();
-        if (context == null) return;
-        if (requestCode == STORAGE_PERM_REQUEST_CODE && granted) {
-            if (downloadFeedModel == null) return;
-            DownloadUtils.showDownloadDialog(context, downloadFeedModel, downloadChildPosition);
-            downloadFeedModel = null;
-            downloadChildPosition = -1;
-            return;
-        }
-        if (requestCode == STORAGE_PERM_REQUEST_CODE_FOR_SELECTION && granted) {
-            DownloadUtils.download(context, ImmutableList.copyOf(selectedFeedModels));
-            binding.posts.endSelection();
-        }
     }
 
     private void init() {

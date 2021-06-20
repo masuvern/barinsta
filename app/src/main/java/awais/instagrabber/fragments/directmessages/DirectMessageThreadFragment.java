@@ -128,7 +128,6 @@ import awais.instagrabber.viewmodels.factories.DirectThreadViewModelFactory;
 public class DirectMessageThreadFragment extends Fragment implements DirectReactionsAdapter.OnReactionClickListener,
         EmojiPicker.OnEmojiClickListener {
     private static final String TAG = DirectMessageThreadFragment.class.getSimpleName();
-    private static final int STORAGE_PERM_REQUEST_CODE = 8020;
     private static final int AUDIO_RECORD_PERM_REQUEST_CODE = 1000;
     private static final int CAMERA_REQUEST_CODE = 200;
     private static final String TRANSLATION_Y = "translationY";
@@ -490,17 +489,12 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         final Context context = getContext();
         if (context == null) return;
-        if (requestCode == STORAGE_PERM_REQUEST_CODE && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            if (tempMedia == null) return;
-            downloadItem(context, tempMedia);
-            return;
-        }
         if (requestCode == AUDIO_RECORD_PERM_REQUEST_CODE) {
             if (PermissionUtils.hasAudioRecordPerms(context)) {
                 Toast.makeText(context, "You can send voice messages now!", Toast.LENGTH_LONG).show();
                 return;
             }
-            Toast.makeText(context, "Require RECORD_AUDIO and WRITE_EXTERNAL_STORAGE permissions", Toast.LENGTH_LONG).show();
+            Toast.makeText(context, "Require RECORD_AUDIO permission", Toast.LENGTH_LONG).show();
         }
     }
 
@@ -1408,13 +1402,8 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
             Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
             return;
         }
-        // if (ContextCompat.checkSelfPermission(context, DownloadUtils.PERMS[0]) == PackageManager.PERMISSION_GRANTED) {
         DownloadUtils.download(context, media);
         Toast.makeText(context, R.string.downloader_downloading_media, Toast.LENGTH_SHORT).show();
-        // return;
-        // }
-        // tempMedia = media;
-        // requestPermissions(DownloadUtils.PERMS, STORAGE_PERM_REQUEST_CODE);
     }
 
     @Nullable

@@ -209,10 +209,7 @@ public class StoryViewerFragment extends Fragment {
         if (context == null) return false;
         int itemId = item.getItemId();
         if (itemId == R.id.action_download) {
-            if (ContextCompat.checkSelfPermission(context, DownloadUtils.PERMS[0]) == PackageManager.PERMISSION_GRANTED)
-                downloadStory();
-            else
-                ActivityCompat.requestPermissions(requireActivity(), DownloadUtils.PERMS, 8020);
+            downloadStory();
             return true;
         }
         if (itemId == R.id.action_dms) {
@@ -261,13 +258,6 @@ public class StoryViewerFragment extends Fragment {
             openProfile("@" + currentStory.getUsername());
         }
         return false;
-    }
-
-    @Override
-    public void onRequestPermissionsResult(final int requestCode, @NonNull final String[] permissions, @NonNull final int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == 8020 && grantResults[0] == PackageManager.PERMISSION_GRANTED)
-            downloadStory();
     }
 
     @Override

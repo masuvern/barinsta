@@ -30,7 +30,6 @@ import androidx.appcompat.widget.PopupMenu;
 import androidx.appcompat.widget.Toolbar;
 import androidx.appcompat.widget.TooltipCompat;
 import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.core.content.PermissionChecker;
 import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
@@ -105,10 +104,8 @@ import awais.instagrabber.utils.TextUtils;
 import awais.instagrabber.utils.Utils;
 import awais.instagrabber.viewmodels.PostViewV2ViewModel;
 
-//import static androidx.core.content.PermissionChecker.checkSelfPermission;
 import static awais.instagrabber.fragments.HashTagFragment.ARG_HASHTAG;
 import static awais.instagrabber.fragments.settings.PreferenceKeys.PREF_SHOWN_COUNT_TOOLTIP;
-import static awais.instagrabber.utils.DownloadUtils.WRITE_PERMISSION;
 import static awais.instagrabber.utils.Utils.settingsHelper;
 
 public class PostViewV2Fragment extends Fragment implements EditTextDialogFragment.EditTextDialogFragmentCallback {
@@ -116,7 +113,6 @@ public class PostViewV2Fragment extends Fragment implements EditTextDialogFragme
     // private static final int DETAILS_HIDE_DELAY_MILLIS = 2000;
     public static final String ARG_MEDIA = "media";
     public static final String ARG_SLIDER_POSITION = "position";
-    private static final int STORAGE_PERM_REQUEST_CODE = 8020;
 
     private DialogPostViewBinding binding;
     private Context context;
@@ -278,16 +274,6 @@ public class PostViewV2Fragment extends Fragment implements EditTextDialogFragme
         final Media media = viewModel.getMedia();
         if (media.getMediaType() == MediaItemType.MEDIA_TYPE_SLIDER) {
             outState.putInt(ARG_SLIDER_POSITION, sliderPosition);
-        }
-    }
-
-    @Override
-    public void onRequestPermissionsResult(final int requestCode, @NonNull final String[] permissions, @NonNull final int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == STORAGE_PERM_REQUEST_CODE && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            final Context context = getContext();
-            if (context == null) return;
-            DownloadUtils.showDownloadDialog(context, viewModel.getMedia(), sliderPosition);
         }
     }
 

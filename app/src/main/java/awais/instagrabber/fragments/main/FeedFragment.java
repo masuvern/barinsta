@@ -20,7 +20,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.constraintlayout.motion.widget.MotionLayout;
 import androidx.constraintlayout.motion.widget.MotionScene;
-import androidx.core.content.PermissionChecker;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
@@ -57,13 +56,8 @@ import awais.instagrabber.viewmodels.FeedStoriesViewModel;
 import awais.instagrabber.webservices.StoriesRepository;
 import kotlinx.coroutines.Dispatchers;
 
-import static androidx.core.content.PermissionChecker.checkSelfPermission;
-import static awais.instagrabber.utils.DownloadUtils.WRITE_PERMISSION;
-
 public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener {
     private static final String TAG = "FeedFragment";
-    private static final int STORAGE_PERM_REQUEST_CODE = 8020;
-    private static final int STORAGE_PERM_REQUEST_CODE_FOR_SELECTION = 8030;
 
     private MainActivity fragmentActivity;
     private MotionLayout root;
@@ -75,8 +69,6 @@ public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefre
     private boolean storiesFetching;
     private ActionMode actionMode;
     private Set<Media> selectedFeedModels;
-    private Media downloadFeedModel;
-    private int downloadChildPosition = -1;
     private PostsLayoutPreferences layoutPreferences = Utils.getPostsLayoutPreferences(Constants.PREF_POSTS_LAYOUT);
     private RecyclerView storiesRecyclerView;
     private MenuItem storyListMenu;
@@ -129,13 +121,7 @@ public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         public void onDownloadClick(final Media feedModel, final int childPosition) {
             final Context context = getContext();
             if (context == null) return;
-            if (checkSelfPermission(context, WRITE_PERMISSION) == PermissionChecker.PERMISSION_GRANTED) {
-                DownloadUtils.showDownloadDialog(context, feedModel, childPosition);
-                return;
-            }
-            downloadFeedModel = feedModel;
-            downloadChildPosition = childPosition;
-            requestPermissions(DownloadUtils.PERMS, STORAGE_PERM_REQUEST_CODE);
+            DownloadUtils.showDownloadDialog(context, feedModel, childPosition);
         }
 
         @Override
@@ -218,12 +204,8 @@ public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefre
                         if (FeedFragment.this.selectedFeedModels == null) return false;
                         final Context context = getContext();
                         if (context == null) return false;
-                        if (checkSelfPermission(context, WRITE_PERMISSION) == PermissionChecker.PERMISSION_GRANTED) {
-                            DownloadUtils.download(context, ImmutableList.copyOf(FeedFragment.this.selectedFeedModels));
-                            binding.feedRecyclerView.endSelection();
-                            return true;
-                        }
-                        requestPermissions(DownloadUtils.PERMS, STORAGE_PERM_REQUEST_CODE_FOR_SELECTION);
+                        DownloadUtils.download(context, ImmutableList.copyOf(FeedFragment.this.selectedFeedModels));
+                        binding.feedRecyclerView.endSelection();
                         return true;
                     }
                     return false;
@@ -356,29 +338,6 @@ public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         super.onDestroyView();
         if (storiesRecyclerView != null) {
             fragmentActivity.removeCollapsingView(storiesRecyclerView);
-        }
-    }
-
-    @Override
-    public void onRequestPermissionsResult(final int requestCode, @NonNull final String[] permissions, @NonNull final int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        final boolean granted = grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED;
-        final Context context = getContext();
-        if (context == null) return;
-        if (!granted) {
-            Toast.makeText(context, R.string.download_permission, Toast.LENGTH_SHORT).show();
-            return;
-        }
-        if (requestCode == STORAGE_PERM_REQUEST_CODE && granted) {
-            if (downloadFeedModel == null) return;
-            DownloadUtils.showDownloadDialog(context, downloadFeedModel, downloadChildPosition);
-            downloadFeedModel = null;
-            downloadChildPosition = -1;
-            return;
-        }
-        if (requestCode == STORAGE_PERM_REQUEST_CODE_FOR_SELECTION && granted) {
-            DownloadUtils.download(context, ImmutableList.copyOf(selectedFeedModels));
-            binding.feedRecyclerView.endSelection();
         }
     }
 

@@ -61,8 +61,6 @@ import awais.instagrabber.webservices.DiscoverService;
 
 public class TopicPostsFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener {
     private static final String TAG = TopicPostsFragment.class.getSimpleName();
-    private static final int STORAGE_PERM_REQUEST_CODE = 8020;
-    private static final int STORAGE_PERM_REQUEST_CODE_FOR_SELECTION = 8030;
 
     private MainActivity fragmentActivity;
     private FragmentTopicPostsBinding binding;
@@ -71,8 +69,6 @@ public class TopicPostsFragment extends Fragment implements SwipeRefreshLayout.O
     private TopicCluster topicCluster;
     private ActionMode actionMode;
     private Set<Media> selectedFeedModels;
-    private Media downloadFeedModel;
-    private int downloadChildPosition = -1;
     private PostsLayoutPreferences layoutPreferences = Utils.getPostsLayoutPreferences(Constants.PREF_TOPIC_POSTS_LAYOUT);
 
     private final OnBackPressedCallback onBackPressedCallback = new OnBackPressedCallback(false) {
@@ -95,12 +91,9 @@ public class TopicPostsFragment extends Fragment implements SwipeRefreshLayout.O
                 if (TopicPostsFragment.this.selectedFeedModels == null) return false;
                 final Context context = getContext();
                 if (context == null) return false;
-                // if (checkSelfPermission(context, WRITE_PERMISSION) == PermissionChecker.PERMISSION_GRANTED) {
                 DownloadUtils.download(context, ImmutableList.copyOf(TopicPostsFragment.this.selectedFeedModels));
                 binding.posts.endSelection();
                 return true;
-                // }
-                // requestPermissions(DownloadUtils.PERMS, STORAGE_PERM_REQUEST_CODE_FOR_SELECTION);
             }
             return false;
         }
@@ -130,13 +123,7 @@ public class TopicPostsFragment extends Fragment implements SwipeRefreshLayout.O
         public void onDownloadClick(final Media feedModel, final int childPosition) {
             final Context context = getContext();
             if (context == null) return;
-            // if (checkSelfPermission(context, WRITE_PERMISSION) == PermissionChecker.PERMISSION_GRANTED) {
             DownloadUtils.showDownloadDialog(context, feedModel, childPosition);
-            // return;
-            // }
-            // downloadFeedModel = feedModel;
-            // downloadChildPosition = -1;
-            // requestPermissions(DownloadUtils.PERMS, STORAGE_PERM_REQUEST_CODE);
         }
 
         @Override
@@ -297,25 +284,6 @@ public class TopicPostsFragment extends Fragment implements SwipeRefreshLayout.O
     public void onDestroyView() {
         super.onDestroyView();
         resetToolbar();
-    }
-
-    @Override
-    public void onRequestPermissionsResult(final int requestCode, @NonNull final String[] permissions, @NonNull final int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        final boolean granted = grantResults[0] == PackageManager.PERMISSION_GRANTED;
-        final Context context = getContext();
-        if (context == null) return;
-        if (requestCode == STORAGE_PERM_REQUEST_CODE && granted) {
-            if (downloadFeedModel == null) return;
-            DownloadUtils.showDownloadDialog(context, downloadFeedModel, downloadChildPosition);
-            downloadFeedModel = null;
-            downloadChildPosition = -1;
-            return;
-        }
-        if (requestCode == STORAGE_PERM_REQUEST_CODE_FOR_SELECTION && granted) {
-            DownloadUtils.download(context, ImmutableList.copyOf(selectedFeedModels));
-            binding.posts.endSelection();
-        }
     }
 
     private void resetToolbar() {
