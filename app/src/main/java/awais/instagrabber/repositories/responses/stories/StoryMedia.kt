@@ -4,7 +4,7 @@ import awais.instagrabber.models.enums.MediaItemType
 import awais.instagrabber.utils.TextUtils
 import awais.instagrabber.repositories.responses.ImageVersions2
 import awais.instagrabber.repositories.responses.User
-import awais.instagrabber.repositories.responses.VideoVersion
+import awais.instagrabber.repositories.responses.MediaCandidate
 import java.io.Serializable
 import java.util.*
 
@@ -20,7 +20,7 @@ data class StoryMedia(
         val originalHeight: Int = 0,
         val mediaType: MediaItemType? = null,
         val isReelMedia: Boolean = false,
-        val videoVersions: List<VideoVersion>? = null,
+        val videoVersions: List<MediaCandidate>? = null,
         val hasAudio: Boolean = false,
         val videoDuration: Double = 0.0,
         val viewCount: Long = 0,

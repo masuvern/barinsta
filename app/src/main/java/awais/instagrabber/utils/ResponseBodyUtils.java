@@ -28,7 +28,7 @@ import awais.instagrabber.repositories.responses.Location;
 import awais.instagrabber.repositories.responses.Media;
 import awais.instagrabber.repositories.responses.MediaCandidate;
 import awais.instagrabber.repositories.responses.User;
-import awais.instagrabber.repositories.responses.VideoVersion;
+import awais.instagrabber.repositories.responses.MediaCandidate;
 
 public final class ResponseBodyUtils {
     private static final String TAG = "ResponseBodyUtils";
@@ -188,11 +188,9 @@ public final class ResponseBodyUtils {
                     owner.optBoolean("is_verified"));
         }
         final String id = feedItem.getString(Constants.EXTRAS_ID);
-        VideoVersion videoVersion = null;
+        MediaCandidate videoVersion = null;
         if (isVideo) {
-            videoVersion = new VideoVersion(
-                    null,
-                    null,
+            videoVersion = new MediaCandidate(
                     width,
                     height,
                     resourceUrl
@@ -439,6 +437,37 @@ public final class ResponseBodyUtils {
         return candidate.getUrl();
     }
 
+    public static String getThumbVideoUrl(final Media media) {
+        return getVideoCandidate(media, CandidateType.VIDEO_THUMBNAIL);
+    }
+
+    public static String getVideoUrl(final Media media) {
+        return getVideoCandidate(media, CandidateType.DOWNLOAD);
+    }
+
+    // TODO: merge with getImageCandidate when Kotlin
+    private static String getVideoCandidate(final Media media, final CandidateType type) {
+        if (media == null) return null;
+        final List<MediaCandidate> candidates = media.getVideoVersions();
+        if (candidates == null || candidates.isEmpty()) return null;
+        final boolean isSquare = Integer.compare(media.getOriginalWidth(), media.getOriginalHeight()) == 0;
+        final List<MediaCandidate> sortedCandidates = candidates.stream()
+                                                                .sorted((c1, c2) -> Integer.compare(c2.getWidth(), c1.getWidth()))
+                                                                .collect(Collectors.toList());
+        final List<MediaCandidate> filteredCandidates = sortedCandidates.stream()
+                                                                        .filter(c ->
+                                                                                        c.getWidth() <= media.getOriginalWidth()
+                                                                                                && c.getWidth() <= type.getValue()
+                                                                                                && (isSquare || Integer
+                                                                                                .compare(c.getWidth(), c.getHeight()) != 0)
+                                                                        )
+                                                                        .collect(Collectors.toList());
+        if (filteredCandidates.size() == 0) return sortedCandidates.get(0).getUrl();
+        final MediaCandidate candidate = filteredCandidates.get(0);
+        if (candidate == null) return null;
+        return candidate.getUrl();
+    }
+
     public static StoryModel parseBroadcastItem(final JSONObject data) throws JSONException {
         final StoryModel model = new StoryModel(data.getString("id"),
                                                 data.getString("cover_frame_url"),
@@ -453,6 +482,7 @@ public final class ResponseBodyUtils {
     }
 
     private enum CandidateType {
+        VIDEO_THUMBNAIL(700),
         THUMBNAIL(1000),
         DOWNLOAD(10000);
 

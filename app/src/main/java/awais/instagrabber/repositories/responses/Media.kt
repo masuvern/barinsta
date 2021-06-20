@@ -24,7 +24,7 @@ data class Media(
     var likeCount: Long = 0,
     var hasLiked: Boolean = false,
     val isReelMedia: Boolean = false,
-    val videoVersions: List<VideoVersion>? = null,
+    val videoVersions: List<MediaCandidate>? = null,
     val hasAudio: Boolean = false,
     val videoDuration: Double = 0.0,
     val viewCount: Long = 0,

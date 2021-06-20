@@ -43,7 +43,7 @@ import awais.instagrabber.models.enums.MediaItemType;
 import awais.instagrabber.repositories.responses.Audio;
 import awais.instagrabber.repositories.responses.Media;
 import awais.instagrabber.repositories.responses.User;
-import awais.instagrabber.repositories.responses.VideoVersion;
+import awais.instagrabber.repositories.responses.MediaCandidate;
 import awais.instagrabber.workers.DownloadWorker;
 
 import static awais.instagrabber.fragments.settings.PreferenceKeys.PREF_BARINSTA_DIR_URI;
@@ -340,7 +340,8 @@ public final class DownloadUtils {
         switch (media.getMediaType()) {
             case MEDIA_TYPE_IMAGE:
             case MEDIA_TYPE_VIDEO: {
-                final String url = ResponseBodyUtils.getImageUrl(media);
+                final String url = media.getMediaType() == MediaItemType.MEDIA_TYPE_VIDEO
+                        ? ResponseBodyUtils.getVideoUrl(media) : ResponseBodyUtils.getImageUrl(media);
                 final Pair<List<String>, String> file = getDownloadSavePaths(new ArrayList<>(userFolderPaths), media.getCode(), url, "");
                 final boolean fileExists = file.first != null && checkPathExists(file.first);
                 boolean usernameFileExists = false;
@@ -357,7 +358,8 @@ public final class DownloadUtils {
                 for (int i = 0; i < sliderItems.size(); i++) {
                     final Media child = sliderItems.get(i);
                     if (child == null) continue;
-                    final String url = ResponseBodyUtils.getImageUrl(child);
+                    final String url = child.getMediaType() == MediaItemType.MEDIA_TYPE_VIDEO
+                            ? ResponseBodyUtils.getVideoUrl(child) : ResponseBodyUtils.getImageUrl(child);
                     final Pair<List<String>, String> file = getDownloadChildSavePaths(
                             new ArrayList<>(userFolderPaths), media.getCode(), i + 1, url, "");
                     final boolean fileExists = file.first != null && checkPathExists(file.first);
@@ -548,10 +550,10 @@ public final class DownloadUtils {
                 return ResponseBodyUtils.getImageUrl(media);
             }
             case MEDIA_TYPE_VIDEO: {
-                final List<VideoVersion> videoVersions = media.getVideoVersions();
+                final List<MediaCandidate> videoVersions = media.getVideoVersions();
                 String url = null;
                 if (videoVersions != null && !videoVersions.isEmpty()) {
-                    final VideoVersion videoVersion = videoVersions.get(0);
+                    final MediaCandidate videoVersion = videoVersions.get(0);
                     if (videoVersion != null) {
                         url = videoVersion.getUrl();
                     }

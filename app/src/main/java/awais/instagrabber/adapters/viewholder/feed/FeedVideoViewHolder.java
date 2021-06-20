@@ -20,7 +20,7 @@ import awais.instagrabber.customviews.VideoPlayerViewHelper;
 import awais.instagrabber.databinding.ItemFeedVideoBinding;
 import awais.instagrabber.fragments.settings.PreferenceKeys;
 import awais.instagrabber.repositories.responses.Media;
-import awais.instagrabber.repositories.responses.VideoVersion;
+import awais.instagrabber.repositories.responses.MediaCandidate;
 import awais.instagrabber.utils.NumberUtils;
 import awais.instagrabber.utils.ResponseBodyUtils;
 import awais.instagrabber.utils.Utils;
@@ -85,9 +85,9 @@ public class FeedVideoViewHolder extends FeedItemViewHolder {
         };
         final float aspectRatio = (float) media.getOriginalWidth() / media.getOriginalHeight();
         String videoUrl = null;
-        final List<VideoVersion> videoVersions = media.getVideoVersions();
+        final List<MediaCandidate> videoVersions = media.getVideoVersions();
         if (videoVersions != null && !videoVersions.isEmpty()) {
-            final VideoVersion videoVersion = videoVersions.get(0);
+            final MediaCandidate videoVersion = videoVersions.get(0);
             videoUrl = videoVersion.getUrl();
         }
         final VideoPlayerViewHelper videoPlayerViewHelper = new VideoPlayerViewHelper(binding.getRoot().getContext(),

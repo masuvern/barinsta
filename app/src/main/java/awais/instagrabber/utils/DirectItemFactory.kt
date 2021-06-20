@@ -38,11 +38,9 @@ fun createImageOrVideo(
     isVideo: Boolean
 ): DirectItem {
     val imageVersions2 = ImageVersions2(listOf(MediaCandidate(width, height, uri.toString())))
-    var videoVersions: List<VideoVersion>? = null
+    var videoVersions: List<MediaCandidate>? = null
     if (isVideo) {
-        val videoVersion = VideoVersion(
-            null,
-            null,
+        val videoVersion = MediaCandidate(
             width,
             height,
             uri.toString()

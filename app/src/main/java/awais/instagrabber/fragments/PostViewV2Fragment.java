@@ -94,7 +94,7 @@ import awais.instagrabber.repositories.responses.Caption;
 import awais.instagrabber.repositories.responses.Location;
 import awais.instagrabber.repositories.responses.Media;
 import awais.instagrabber.repositories.responses.User;
-import awais.instagrabber.repositories.responses.VideoVersion;
+import awais.instagrabber.repositories.responses.MediaCandidate;
 import awais.instagrabber.repositories.responses.directmessages.RankedRecipient;
 import awais.instagrabber.utils.DownloadUtils;
 import awais.instagrabber.utils.NullSafePair;
@@ -1148,9 +1148,9 @@ public class PostViewV2Fragment extends Fragment implements EditTextDialogFragme
         };
         final float aspectRatio = (float) media.getOriginalWidth() / media.getOriginalHeight();
         String videoUrl = null;
-        final List<VideoVersion> videoVersions = media.getVideoVersions();
+        final List<MediaCandidate> videoVersions = media.getVideoVersions();
         if (videoVersions != null && !videoVersions.isEmpty()) {
-            final VideoVersion videoVersion = videoVersions.get(0);
+            final MediaCandidate videoVersion = videoVersions.get(0);
             if (videoVersion != null) {
                 videoUrl = videoVersion.getUrl();
             }
