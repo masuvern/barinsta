@@ -29,6 +29,7 @@
     <string name="hide_muted_reels_setting">Απόκρυψη ιστοριών που βρίσκονται σε σίγαση από τη ροή</string>
     <string name="dm_mark_as_seen_setting">Επισήμανση μηνυμάτων ως αναγνωσμένων μετά την προβολή</string>
     <string name="dm_mark_as_seen_setting_summary">Τα υπόλοιπα μέλη θα γνωρίζουν ότι προβλήθηκε</string>
+    <string name="autoplay_stories_setting">Autoplay video stories</string>
     <string name="activity_setting">Ενεργοποίηση ειδοποιήσεων δραστηριότητας</string>
     <string name="story_sort_setting">Ταξινόμηση ροής ιστορίων</string>
     <string name="error_loading_profile">Σφάλμα κατά τη φόρτωση προφίλ! Είναι το όνομα χρήστη έγκυρο; Αν ναι, μπορεί να είστε περιορισμένος.</string>
@@ -296,6 +297,11 @@
     <string name="unknown">Άγνωστο</string>
     <string name="removed_from_favs">Αφαίρεση από τα αγαπημένα!</string>
     <string name="backup_and_restore">Αντίγραφα ασφαλείας &amp; Επαναφορά</string>
+    <string name="auto_backup">Auto Backup</string>
+    <string name="auto_backup_summary">Starting from Android 6, Android\'s Auto Backup feature will upload all app settings, account login data, and favorites onto your Google Drive, which can be restored by reinstalling the app after uninstallation.</string>
+    <string name="auto_backup_warning">This preference has no effect if Google Play Services is not present, or if Auto Backup is disabled from your device settings. Disabling here does not erase existing backups.</string>
+    <string name="auto_backup_setting">Enable Auto Backup</string>
+    <string name="manual_backup">Manual Backup</string>
     <string name="backup_summary">Δημιουργία αντιγράφου ασφαλείας των ρυθμίσεων της εφαρμογής, των δεδομένων σύνδεσης του λογαριασμού και/ή των αγαπημένων, σε ακρυπτογράφητο ή κρυπτογραφημένο αρχείο για μεταγενέστερη επαναφορά.</string>
     <string name="backup_warning">Αν δημιουργείτε αντίγραφα ασφαλείας των δεδομένων σύνδεσης λογαριασμού, αντιμετωπίστε το αρχείο ως απόρρητο και κρατήστε το σε ασφαλές μέρος!</string>
     <string name="create_backup">Δημιουργία νέου αρχείου αντιγράφου ασφαλείας</string>
@@ -400,7 +406,6 @@
     <string name="dms_action_remove_admin">Κατάργηση ως Διαχειριστής</string>
     <string name="edit_unsuccessful">Η επεξεργασία απέτυχε</string>
     <string name="message">Μήνυμα</string>
-    <string name="reply">Απάντηση</string>
     <string name="tap_to_remove">Πατήστε για αφαίρεση</string>
     <string name="forward">Προώθηση</string>
     <string name="forward_outgoing">Προωθήσατε ένα μήνυμα</string>
@@ -473,7 +478,6 @@
     <string name="error">Σφάλμα</string>
     <string name="account_logged_out">Αυτός ο λογαριασμός έχει αποσυνδεθεί.</string>
     <string name="login_required">Απαιτείται σύνδεση!</string>
-    <string name="sentry_block">Φραγή Sentry.</string>
     <string name="inactive_user">Ο χρήστης είναι ανενεργός!</string>
     <string name="crash_report_subject">Αναφορά Κατάρρευσης Barinsta</string>
     <string name="crash_report_title">Επιλέξτε μια εφαρμογή ηλ. ταχυδρομείου για αποστολή αρχείων καταγραφής κατάρρευσης</string>
@@ -507,4 +511,5 @@
     <string name="sending">Γίνεται αποστολή...</string>
     <string name="share_via_dm">Κοινοποίηση μέσω</string>
     <string name="share_link">Κοινοποίηση συνδέσμου…</string>
+    <string name="slide_to_cancel">Slide to Cancel</string>
 </resources>

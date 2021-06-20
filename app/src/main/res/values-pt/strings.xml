@@ -29,6 +29,7 @@
     <string name="hide_muted_reels_setting">Esconder stories silenciados do feed</string>
     <string name="dm_mark_as_seen_setting">Marcar DM como vista após a visualização</string>
     <string name="dm_mark_as_seen_setting_summary">Outros membros saberão que você viu</string>
+    <string name="autoplay_stories_setting">Reproduzir vídeos dos stories automaticamente</string>
     <string name="activity_setting">Ativar notificações de atividade</string>
     <string name="story_sort_setting">Ordenação dos stories</string>
     <string name="error_loading_profile">Erro ao carregar perfil! O nome de usuário é válido? Se sim, você pode ter sido limitado pelo Instagram.</string>
@@ -296,6 +297,11 @@
     <string name="unknown">Desconhecido</string>
     <string name="removed_from_favs">Removido dos Favoritos!</string>
     <string name="backup_and_restore">Becape e Restauração</string>
+    <string name="auto_backup">Backup Automático</string>
+    <string name="auto_backup_summary">A partir do Android 6, o recurso de Backup Automático do Android carregará todas as configurações do aplicativo, dados de login da conta e favoritos no Google Drive, que pode ser restaurado reinstalando o aplicativo após a desinstalação.</string>
+    <string name="auto_backup_warning">Essa preferência não tem efeito se o Google Play Services não estiver presente ou se o Backup Automático estiver desativado das configurações do dispositivo. Desativar aqui não apaga backups existentes.</string>
+    <string name="auto_backup_setting">Ativar Backup Automático</string>
+    <string name="manual_backup">Backup Manual</string>
     <string name="backup_summary">Faça o becape das configurações de aplicativo do Barinsta, dados de login da conta e/ou favoritos para um texto simples ou arquivo de becape criptografado para restauração posterior.</string>
     <string name="backup_warning">Se você estiver fazendo o becape dos dados de login da conta, trate o arquivo como confidencial e mantenha-o em algum lugar seguro!</string>
     <string name="create_backup">Criar novo arquivo de becape</string>
@@ -400,7 +406,6 @@
     <string name="dms_action_remove_admin">Remover como Administrador</string>
     <string name="edit_unsuccessful">Falha ao editar</string>
     <string name="message">Mensagem</string>
-    <string name="reply">Responder</string>
     <string name="tap_to_remove">Toque para remover</string>
     <string name="forward">Encaminhar</string>
     <string name="forward_outgoing">Você encaminhou uma mensagem</string>
@@ -473,7 +478,6 @@
     <string name="error">Erro</string>
     <string name="account_logged_out">Esta conta foi desconectada.</string>
     <string name="login_required">Login necessário!</string>
-    <string name="sentry_block">Sentry bloqueado.</string>
     <string name="inactive_user">O usuário está inativo!</string>
     <string name="crash_report_subject">Relatório de Travamento do Barinsta</string>
     <string name="crash_report_title">Selecione um aplicativo de e-mail para enviar os registros de travamento</string>
@@ -507,4 +511,5 @@
     <string name="sending">Enviando...</string>
     <string name="share_via_dm">Compartilhar via DM</string>
     <string name="share_link">Compartilhar link…</string>
+    <string name="slide_to_cancel">Deslize para Cancelar</string>
 </resources>

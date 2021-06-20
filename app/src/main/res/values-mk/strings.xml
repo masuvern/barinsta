@@ -29,6 +29,7 @@
     <string name="hide_muted_reels_setting">Hide muted stories from feed</string>
     <string name="dm_mark_as_seen_setting">Означи порака како видена</string>
     <string name="dm_mark_as_seen_setting_summary">Другите членови ќе знаат дека сте ја виделе содржината на пораката</string>
+    <string name="autoplay_stories_setting">Autoplay video stories</string>
     <string name="activity_setting">Овозможи нотификации</string>
     <string name="story_sort_setting">Сортирање на објави</string>
     <string name="error_loading_profile">Грешка при вчитување на профилот! Проверете дали корисничкото име е валидно?</string>
@@ -296,6 +297,11 @@
     <string name="unknown">Непознато</string>
     <string name="removed_from_favs">Одстрането од Омилени!</string>
     <string name="backup_and_restore">Направете Резервна Копија &amp; Враќање</string>
+    <string name="auto_backup">Auto Backup</string>
+    <string name="auto_backup_summary">Starting from Android 6, Android\'s Auto Backup feature will upload all app settings, account login data, and favorites onto your Google Drive, which can be restored by reinstalling the app after uninstallation.</string>
+    <string name="auto_backup_warning">This preference has no effect if Google Play Services is not present, or if Auto Backup is disabled from your device settings. Disabling here does not erase existing backups.</string>
+    <string name="auto_backup_setting">Enable Auto Backup</string>
+    <string name="manual_backup">Manual Backup</string>
     <string name="backup_summary">Зачувај опции од апликацијата, кориснички профил, и/или информации од твоите омилени профили во обичен текст или со енкрипција за подоцна да можеш да ги вратиш.</string>
     <string name="backup_warning">Ако зачувуваш информации за најавување, третирај го генералниот фајл како многу важен, чувај го на безбедно место!</string>
     <string name="create_backup">Креирај новa резервна копија</string>
@@ -400,7 +406,6 @@
     <string name="dms_action_remove_admin">Одстрани од Администратор</string>
     <string name="edit_unsuccessful">Уредувањето беше неуспешно</string>
     <string name="message">Порака</string>
-    <string name="reply">Одговори</string>
     <string name="tap_to_remove">Допри за да одтсраниш</string>
     <string name="forward">Препрати</string>
     <string name="forward_outgoing">Ти препрати порака</string>
@@ -473,7 +478,6 @@
     <string name="error">Грешка</string>
     <string name="account_logged_out">Оваа сметка е одјавена.</string>
     <string name="login_required">Потребна е најава!</string>
-    <string name="sentry_block">Sentry block.</string>
     <string name="inactive_user">Корисникот е неактивен!</string>
     <string name="crash_report_subject">Barinsta Crash Report</string>
     <string name="crash_report_title">Select an email app to send crash logs</string>
@@ -507,4 +511,5 @@
     <string name="sending">Се испраќа...</string>
     <string name="share_via_dm">Сподели преку ДП</string>
     <string name="share_link">Сподели линк…</string>
+    <string name="slide_to_cancel">Slide to Cancel</string>
 </resources>

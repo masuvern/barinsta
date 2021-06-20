@@ -29,6 +29,7 @@
     <string name="hide_muted_reels_setting">动态隐藏静音快拍</string>
     <string name="dm_mark_as_seen_setting">查看私信后将其标记为已读</string>
     <string name="dm_mark_as_seen_setting_summary">其他成员会知道你看过了</string>
+    <string name="autoplay_stories_setting">自动播放快拍视频</string>
     <string name="activity_setting">启用活动通知</string>
     <string name="story_sort_setting">快拍动态排序</string>
     <string name="error_loading_profile">加载用户资料时出错！用户名是否有效？如果是的话，您的 IP 可能已被 Instagram 所限制。</string>
@@ -292,6 +293,11 @@
     <string name="unknown">未知</string>
     <string name="removed_from_favs">已从收藏夹中删除！</string>
     <string name="backup_and_restore">备份及恢复</string>
+    <string name="auto_backup">自动备份</string>
+    <string name="auto_backup_summary">从 Android 6 开始，系统的自动备份功能会将所有应用设置、帐户登录设置及收藏夹上传到您的 Google 云端硬盘，以供卸载后重新安装时恢复。</string>
+    <string name="auto_backup_warning">若设备未安装 Google Play 服务，或您已在系统设置中禁用自动备份，本选项将不会生效。禁用本选项不会移除现有的备份。</string>
+    <string name="auto_backup_setting">启用自动备份</string>
+    <string name="manual_backup">手动备份</string>
     <string name="backup_summary">将应用设置，帐户登录信息，和/或收藏数据备份至纯文本或加密文本，以备日后恢复。</string>
     <string name="backup_warning">如果您备份登录信息，请务必妥善保管您的备份文件：把它当作密码看待！</string>
     <string name="create_backup">创建新备份文件</string>
@@ -391,7 +397,6 @@
     <string name="dms_action_remove_admin">移除管理员</string>
     <string name="edit_unsuccessful">编辑失败</string>
     <string name="message">消息</string>
-    <string name="reply">回复</string>
     <string name="tap_to_remove">点击删除</string>
     <string name="forward">转发</string>
     <string name="forward_outgoing">您转发了一条消息</string>
@@ -464,7 +469,6 @@
     <string name="error">错误</string>
     <string name="account_logged_out">您已经退出。</string>
     <string name="login_required">需要登录！</string>
-    <string name="sentry_block">Sentry 故障。</string>
     <string name="inactive_user">账户已冻结！</string>
     <string name="crash_report_subject">Barinsta 崩溃报告</string>
     <string name="crash_report_title">选择一个电子邮件应用来发送崩溃日志</string>
@@ -498,4 +502,5 @@
     <string name="sending">发送中...</string>
     <string name="share_via_dm">分享至私信</string>
     <string name="share_link">分享链接…</string>
+    <string name="slide_to_cancel">滑动以取消</string>
 </resources>

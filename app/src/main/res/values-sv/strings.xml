@@ -29,6 +29,7 @@
     <string name="hide_muted_reels_setting">Göm historier utan ljud från flödet</string>
     <string name="dm_mark_as_seen_setting">Markera DM som sedd efter visning</string>
     <string name="dm_mark_as_seen_setting_summary">Andra medlemmar kommer att veta att du har sett den</string>
+    <string name="autoplay_stories_setting">Autoplay video stories</string>
     <string name="activity_setting">Aktivera aktivitetsaviseringar</string>
     <string name="story_sort_setting">Sortering av historier i flödet</string>
     <string name="error_loading_profile">Fel uppstod när profilen laddades! Är användarnamnet giltigt? Om det är det så kan du vara data-begränsad.</string>
@@ -296,6 +297,11 @@
     <string name="unknown">Okänd</string>
     <string name="removed_from_favs">Togs bort från Favoriter!</string>
     <string name="backup_and_restore">Säkerhetskopiera &amp; Återställ</string>
+    <string name="auto_backup">Auto Backup</string>
+    <string name="auto_backup_summary">Starting from Android 6, Android\'s Auto Backup feature will upload all app settings, account login data, and favorites onto your Google Drive, which can be restored by reinstalling the app after uninstallation.</string>
+    <string name="auto_backup_warning">This preference has no effect if Google Play Services is not present, or if Auto Backup is disabled from your device settings. Disabling here does not erase existing backups.</string>
+    <string name="auto_backup_setting">Enable Auto Backup</string>
+    <string name="manual_backup">Manual Backup</string>
     <string name="backup_summary">Backup Barinsta app settings, account login data, and/or favorites to a plain text or encrypted backup file for later restoration.</string>
     <string name="backup_warning">If you\'re backing up account login data, treat the file as confidential and keep it somewhere safe!</string>
     <string name="create_backup">Create new backup file</string>
@@ -400,7 +406,6 @@
     <string name="dms_action_remove_admin">Ta bort som admin</string>
     <string name="edit_unsuccessful">Redigeringen lyckades inte</string>
     <string name="message">Meddelande</string>
-    <string name="reply">Svara</string>
     <string name="tap_to_remove">Tryck för att ta bort</string>
     <string name="forward">Vidarebefordra</string>
     <string name="forward_outgoing">Du vidarebefordrade ett meddelande</string>
@@ -473,7 +478,6 @@
     <string name="error">Fel</string>
     <string name="account_logged_out">Det här kontot har blivit utloggat.</string>
     <string name="login_required">Inloggning krävs!</string>
-    <string name="sentry_block">Sentry block.</string>
     <string name="inactive_user">Användaren är inaktiv!</string>
     <string name="crash_report_subject">Kraschrapport för Barinsta</string>
     <string name="crash_report_title">Välj en e-postapplikation för att skicka kraschloggar</string>
@@ -507,4 +511,5 @@
     <string name="sending">Sending...</string>
     <string name="share_via_dm">Share via DM</string>
     <string name="share_link">Share link…</string>
+    <string name="slide_to_cancel">Slide to Cancel</string>
 </resources>

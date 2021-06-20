@@ -29,6 +29,7 @@
     <string name="hide_muted_reels_setting">Ocultar historias silenciadas del feed</string>
     <string name="dm_mark_as_seen_setting">Marcar Mensaje Directo como visto después de verlo</string>
     <string name="dm_mark_as_seen_setting_summary">Otros miembros sabrán que lo has visto</string>
+    <string name="autoplay_stories_setting">Autorreproducir vídeohistorias</string>
     <string name="activity_setting">Activar notificaciones de actividad</string>
     <string name="story_sort_setting">Orden de las historias</string>
     <string name="error_loading_profile">¡Error al cargar el perfil! ¿Es el nombre de usuario válido? Si es así, puede que su conexión esté baneada en el servidor.</string>
@@ -296,6 +297,11 @@
     <string name="unknown">Desconocido</string>
     <string name="removed_from_favs">¡Eliminado de favoritos!</string>
     <string name="backup_and_restore">Respaldar &amp; restaurar</string>
+    <string name="auto_backup">Respaldo automático</string>
+    <string name="auto_backup_summary">A partir de Android 6, la función Respaldo automático de Android subirá todos los ajustes de la aplicación, los datos de inicio de sesión de la cuenta y favoritos en tu Google Drive, que se puede restaurar reinstalando la aplicación después de la desinstalación.</string>
+    <string name="auto_backup_warning">Esta preferencia no tiene efecto si Google Play Services no está presente, o si el respaldo automático está deshabilitado de la configuración de su dispositivo. Deshabilitar aquí no borra los respaldos existentes.</string>
+    <string name="auto_backup_setting">Habilitar respaldos automáticos</string>
+    <string name="manual_backup">Respaldo manual</string>
     <string name="backup_summary">Respalda los ajustes de Barinsta, datos de inicios de sesión, y/o favoritos a un archivo de texto plano o a un archivo cifrado para su posterior restauración.</string>
     <string name="backup_warning">Si está respaldando datos de inicios de sesión, trate el archivo como confidencial y ¡manténgalo a buen recaudo!</string>
     <string name="create_backup">Crear un nuevo archivo del respaldo</string>
@@ -400,7 +406,6 @@
     <string name="dms_action_remove_admin">Retirar administrador</string>
     <string name="edit_unsuccessful">La edición no tuvo éxito</string>
     <string name="message">Mensaje</string>
-    <string name="reply">Responder</string>
     <string name="tap_to_remove">Toca para eliminar</string>
     <string name="forward">Reenviar</string>
     <string name="forward_outgoing">Has reenviado un mensaje</string>
@@ -473,7 +478,6 @@
     <string name="error">Error</string>
     <string name="account_logged_out">Esta cuenta ha sido desconectada.</string>
     <string name="login_required">¡Inicio de sesión requerido!</string>
-    <string name="sentry_block">Bloqueo de Sentry.</string>
     <string name="inactive_user">¡Usuario inactivo!</string>
     <string name="crash_report_subject">Informe de fallos de Barinsta</string>
     <string name="crash_report_title">Seleccione una aplicación de correo electrónico para enviar registros de errores</string>
@@ -507,4 +511,5 @@
     <string name="sending">Enviando...</string>
     <string name="share_via_dm">Compartir por MD</string>
     <string name="share_link">Compartir enlace…</string>
+    <string name="slide_to_cancel">Desliza para cancelar</string>
 </resources>

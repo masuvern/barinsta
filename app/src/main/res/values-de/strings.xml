@@ -29,6 +29,7 @@
     <string name="hide_muted_reels_setting">Stummgeschaltete Stories im Feed ausblenden</string>
     <string name="dm_mark_as_seen_setting">Direktnachrichten nach dem Ansehen als gesehen markieren</string>
     <string name="dm_mark_as_seen_setting_summary">Andere Mitglieder werden wissen, dass du sie gesehen hast</string>
+    <string name="autoplay_stories_setting">Autoplay video stories</string>
     <string name="activity_setting">Aktivitätsbenachrichtigungen aktivieren</string>
     <string name="story_sort_setting">Sortierung des Storyfeeds</string>
     <string name="error_loading_profile">Fehler beim Laden des Profils! Ist der Benutzername gültig? Wenn ja, könnte es sein, dass deine Zugriffe begrenzt werden.</string>
@@ -296,6 +297,11 @@
     <string name="unknown">Unbekannt</string>
     <string name="removed_from_favs">Aus Favoriten entfernt!</string>
     <string name="backup_and_restore">Sichern &amp; Wiederherstellen</string>
+    <string name="auto_backup">Auto Backup</string>
+    <string name="auto_backup_summary">Starting from Android 6, Android\'s Auto Backup feature will upload all app settings, account login data, and favorites onto your Google Drive, which can be restored by reinstalling the app after uninstallation.</string>
+    <string name="auto_backup_warning">This preference has no effect if Google Play Services is not present, or if Auto Backup is disabled from your device settings. Disabling here does not erase existing backups.</string>
+    <string name="auto_backup_setting">Enable Auto Backup</string>
+    <string name="manual_backup">Manual Backup</string>
     <string name="backup_summary">Sichere die Einstellungen der Barinsta-App, die Anmeldedaten des Kontos und/oder die Favoriten in einer Klartext- oder verschlüsselten Sicherungsdatei zur späteren Wiederherstellung.</string>
     <string name="backup_warning">Wenn du die Anmeldedaten eines Kontos sicherst, behandle die Datei vertraulich und bewahre sie an einem sicheren Ort auf!</string>
     <string name="create_backup">Neue Sicherungsdatei erstellen</string>
@@ -400,7 +406,6 @@
     <string name="dms_action_remove_admin">Als Administrator entfernen</string>
     <string name="edit_unsuccessful">Bearbeiten fehlgeschlagen</string>
     <string name="message">Nachricht</string>
-    <string name="reply">Antworten</string>
     <string name="tap_to_remove">Tippe zum Entfernen</string>
     <string name="forward">Weiterleiten</string>
     <string name="forward_outgoing">Du hast eine Nachricht weitergeleitet</string>
@@ -465,20 +470,19 @@
     <string name="hint_keyword">Suchbegriff</string>
     <string name="toggle_keyword_filter">Aktiviere Suchbegriff-Filter</string>
     <string name="edit_keyword_filter">Suchbegriff-Filter bearbeiten</string>
-    <string name="added_keywords">Added keyword: %s to filter list</string>
-    <string name="removed_keywords">Removed keyword: %s from filter list</string>
+    <string name="added_keywords">Suchbegriff: %s zur Filterliste hinzugefügt</string>
+    <string name="removed_keywords">Suchbegriff: %s aus der Filterliste entfernt</string>
     <string name="marked_as_seen">Als gesehen markieren</string>
     <string name="delete_unsuccessful">Löschen fehlgeschlagen</string>
     <string name="throttle_error">Aufgrund von zu vielen API-Anfragen von Instagram gedrosselt. Warte eine Zeit lang, bevor du es erneut versuchst.</string>
     <string name="error">Fehler</string>
     <string name="account_logged_out">Dieses Konto wurde abgemeldet.</string>
     <string name="login_required">Anmeldung erforderlich!</string>
-    <string name="sentry_block">Sentry Block.</string>
     <string name="inactive_user">Benutzer ist inaktiv!</string>
     <string name="crash_report_subject">Barinsta Absturzbericht</string>
     <string name="crash_report_title">Wähle eine E-Mail-App zum Senden von Absturzprotokollen</string>
     <string name="not_found">Nicht gefunden!</string>
-    <string name="rate_limit">Deine IP wurde von Instagram beschränkt. Warte eine Stunde und probiere es dann erneut. &lt;a href=\"https://redd.it/msxlko\"&gt;Mehr erfahren.&lt;/a&gt;</string>
+    <string name="rate_limit">Instagram hat die Zugriffe mit deiner IP beschränkt. Warte eine Stunde und probiere es dann erneut. &lt;a href=\"https://redd.it/msxlko\"&gt;Mehr erfahren.&lt;/a&gt;</string>
     <string name="skip_update">Dieses Update überspringen</string>
     <string name="on_latest_version">Du bist bereits auf der neuesten Version</string>
     <string name="tab_order">Reihenfolge der Anzeige</string>
@@ -487,16 +491,16 @@
     <string name="dm_remove_warning">Wenn übernommen, werden alle PN-bezogenen Funktionen beim nächsten Start deaktiviert</string>
     <string name="copy_caption">Bildunterschrift kopieren</string>
     <string name="copy_reply">Antwort kopieren</string>
-    <string name="restore">Restore</string>
-    <string name="backup">Backup</string>
-    <string name="dir_select_default_message">Select a folder where Barinsta can store downloads and temporary files.\n\nYou can change this later in More &gt; Settings &gt; Downloads.</string>
-    <string name="dir_select_reselect_message">Android has changed the way apps can access files and directories on storage. Currently Barinsta does not have permission to access the following folder:</string>
-    <string name="dir_select_permission_revoked_message">Permissions for the previously selected folder were revoked by the system:</string>
-    <string name="dir_select_folder_not_exist">The previously selected folder does not exist now:</string>
-    <string name="dir_select_message2">Re-select the directory or select a new directory by clicking the button below.</string>
-    <string name="select_a_folder">No folder selected!</string>
-    <string name="dir_select_success_message">Success! Please wait. Starting app…</string>
-    <string name="barinsta_folder">Barinsta folder</string>
+    <string name="restore">Wiederherstellen</string>
+    <string name="backup">Sichern</string>
+    <string name="dir_select_default_message">Wähle einen Ordner, in dem Barinsta Downloads und temporäre Dateien speichern kann.\n\nDu kannst dies später unter Mehr &gt; Einstellungen &gt; Downloads ändern.</string>
+    <string name="dir_select_reselect_message">Android hat die Art und Weise geändert, wie Apps auf Dateien und Verzeichnisse im Speicher zugreifen können. Derzeit hat Barinsta keine Berechtigung für den Zugriff auf den folgenden Ordner:</string>
+    <string name="dir_select_permission_revoked_message">Die Berechtigungen für den zuvor ausgewählten Ordner wurden vom System entzogen:</string>
+    <string name="dir_select_folder_not_exist">Der zuvor ausgewählte Ordner existiert nicht mehr:</string>
+    <string name="dir_select_message2">Wähle das Verzeichnis erneut aus oder wähle ein neues Verzeichnis, indem du unten auf die Schaltfläche klickst.</string>
+    <string name="select_a_folder">Kein Ordner ausgewählt!</string>
+    <string name="dir_select_success_message">Erfolg! Bitte warten. App wird gestartet…</string>
+    <string name="barinsta_folder">Barinsta-Ordner</string>
     <string name="top">Anfang</string>
     <string name="recent">Neueste</string>
     <string name="clear">Leeren</string>
@@ -507,4 +511,5 @@
     <string name="sending">Wird gesendet...</string>
     <string name="share_via_dm">Über PN teilen</string>
     <string name="share_link">Link teilen…</string>
+    <string name="slide_to_cancel">Zum Abbrechen wischen</string>
 </resources>

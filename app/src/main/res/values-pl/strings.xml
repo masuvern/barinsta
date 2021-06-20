@@ -29,6 +29,7 @@
     <string name="hide_muted_reels_setting">Ukryj wyciszone relacje z kanału</string>
     <string name="dm_mark_as_seen_setting">Oznacz wiadomość jako przeczytaną</string>
     <string name="dm_mark_as_seen_setting_summary">Inni użytkownicy będą wiedzieli, że to wyświetliłeś</string>
+    <string name="autoplay_stories_setting">Autoplay video stories</string>
     <string name="activity_setting">Włącz powiadomienia o aktywności</string>
     <string name="story_sort_setting">Sortowanie relacji</string>
     <string name="error_loading_profile">Błąd ładowania profilu! Czy nazwa użytkownika jest prawidłowa? Jeśli tak, możesz być ograniczony.</string>
@@ -304,6 +305,11 @@
     <string name="unknown">Nieznany</string>
     <string name="removed_from_favs">Usunięto z ulubionych!</string>
     <string name="backup_and_restore">Kopia zapasowa &amp; Przywracanie</string>
+    <string name="auto_backup">Automatyczna Kopia Zapasowa</string>
+    <string name="auto_backup_summary">Począwszy od Androida 6, funkcja automatycznego tworzenia kopii zapasowej będzie przesyłać wszystkie ustawienia aplikacji, dane logowania konta, i ulubionych na Dysk Google. Mogą one zostać przywrócone przez ponowną instalację aplikacji po jej odinstalowaniu.</string>
+    <string name="auto_backup_warning">To ustawienie nie będzie działać, jeśli usługi Google Play nie są zainstalowe, lub jeśli automatyczne kopie zapasowe są wyłączone w ustawieniach urządzenia. Wyłączenie tutaj nie usuwa istniejących kopii.</string>
+    <string name="auto_backup_setting">Włącz automatyczne tworzenie kopii zapasowej</string>
+    <string name="manual_backup">Ręczna Kopia Zapasowa</string>
     <string name="backup_summary">Kopia zapasowa ustawień aplikacji Barinsta, danych logowania do konta i/lub ulubionych do zwykłego tekstu lub zaszyfrowanego pliku kopii zapasowej w celu późniejszego przywrócenia.</string>
     <string name="backup_warning">Jeśli tworzysz kopię zapasową danych logowania do konta, potraktuj plik jako poufny i przechowuj go w bezpiecznym miejscu!</string>
     <string name="create_backup">Utwórz nowy plik kopii zapasowej</string>
@@ -381,8 +387,8 @@
     </plurals>
     <plurals name="replies_count">
         <item quantity="one">%d odpowiedź</item>
-        <item quantity="few">%d replies</item>
-        <item quantity="many">%d replies</item>
+        <item quantity="few">%d odpowiedzi</item>
+        <item quantity="many">%d odpowiedzi</item>
         <item quantity="other">%d odpowiedzi</item>
     </plurals>
     <plurals name="comments_count">
@@ -418,7 +424,6 @@
     <string name="dms_action_remove_admin">Usuń uprawnienia administratora</string>
     <string name="edit_unsuccessful">Edycja nie powiodła się</string>
     <string name="message">Wiadomość</string>
-    <string name="reply">Odpowiedz</string>
     <string name="tap_to_remove">Dotknij, aby usunąć</string>
     <string name="forward">Przekaż dalej</string>
     <string name="forward_outgoing">Przesłano wiadomość</string>
@@ -491,7 +496,6 @@
     <string name="error">Błąd</string>
     <string name="account_logged_out">To konto zostało wylogowane.</string>
     <string name="login_required">Wymagane logowanie!</string>
-    <string name="sentry_block">Sentry block.</string>
     <string name="inactive_user">Użytkownik jest nieaktywny!</string>
     <string name="crash_report_subject">Raport awarii Barinsta</string>
     <string name="crash_report_title">Wybierz aplikację e-mail do wysyłania dzienników awarii</string>
@@ -525,4 +529,5 @@
     <string name="sending">Wysyłanie...</string>
     <string name="share_via_dm">Udostępnij przez PW</string>
     <string name="share_link">Udostępnij link…</string>
+    <string name="slide_to_cancel">Przesuń, by anulować</string>
 </resources>

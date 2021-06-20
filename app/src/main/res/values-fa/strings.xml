@@ -29,6 +29,7 @@
     <string name="hide_muted_reels_setting">پنهان کردن داستان‌های بی‌صدا شده از خوراک‌خوان</string>
     <string name="dm_mark_as_seen_setting">نشان کردن پیام خصوصی بعنوان دیده شده بعد از دیدن</string>
     <string name="dm_mark_as_seen_setting_summary">کاربران دیگر خواهند فهمید شما این را دیده اید</string>
+    <string name="autoplay_stories_setting">Autoplay video stories</string>
     <string name="activity_setting">روشن کردن آگهداد فعالیت ها</string>
     <string name="story_sort_setting">مرتب کردن خوراک‌خوان داستان‌ها</string>
     <string name="error_loading_profile">خطای بارگذاری نمایه! آیا نام کاربری درست است؟ اگر بله، ممکن است که محدود شده باشید.</string>
@@ -297,6 +298,11 @@
     <string name="unknown">ناشناخته</string>
     <string name="removed_from_favs">Removed from Favourites!</string>
     <string name="backup_and_restore">Backup &amp; Restore</string>
+    <string name="auto_backup">Auto Backup</string>
+    <string name="auto_backup_summary">Starting from Android 6, Android\'s Auto Backup feature will upload all app settings, account login data, and favorites onto your Google Drive, which can be restored by reinstalling the app after uninstallation.</string>
+    <string name="auto_backup_warning">This preference has no effect if Google Play Services is not present, or if Auto Backup is disabled from your device settings. Disabling here does not erase existing backups.</string>
+    <string name="auto_backup_setting">Enable Auto Backup</string>
+    <string name="manual_backup">Manual Backup</string>
     <string name="backup_summary">Backup Barinsta app settings, account login data, and/or favorites to a plain text or encrypted backup file for later restoration.</string>
     <string name="backup_warning">If you\'re backing up account login data, treat the file as confidential and keep it somewhere safe!</string>
     <string name="create_backup">Create new backup file</string>
@@ -401,7 +407,6 @@
     <string name="dms_action_remove_admin">Remove as Admin</string>
     <string name="edit_unsuccessful">Edit was unsuccessful</string>
     <string name="message">پیام</string>
-    <string name="reply">Reply</string>
     <string name="tap_to_remove">Tap to remove</string>
     <string name="forward">Forward</string>
     <string name="forward_outgoing">You forwarded a message</string>
@@ -474,7 +479,6 @@
     <string name="error">Error</string>
     <string name="account_logged_out">This account has been logged out.</string>
     <string name="login_required">Login required!</string>
-    <string name="sentry_block">Sentry block.</string>
     <string name="inactive_user">User is inactive!</string>
     <string name="crash_report_subject">Barinsta Crash Report</string>
     <string name="crash_report_title">Select an email app to send crash logs</string>
@@ -508,4 +512,5 @@
     <string name="sending">Sending...</string>
     <string name="share_via_dm">Share via DM</string>
     <string name="share_link">Share link…</string>
+    <string name="slide_to_cancel">Slide to Cancel</string>
 </resources>

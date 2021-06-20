@@ -29,6 +29,7 @@
     <string name="hide_muted_reels_setting">Nascondi storie silenziate dal feed</string>
     <string name="dm_mark_as_seen_setting">Segna il DM come visto dopo la visualizzazione</string>
     <string name="dm_mark_as_seen_setting_summary">Altri membri sapranno che lo hai visualizzato</string>
+    <string name="autoplay_stories_setting">Autoplay video stories</string>
     <string name="activity_setting">Abilita notifiche attività</string>
     <string name="story_sort_setting">Ordinamento storie feed</string>
     <string name="error_loading_profile">Errore nel caricamento del profilo! Il nome utente è valido? Se sì, potresti essere considerato limitato.</string>
@@ -296,6 +297,11 @@
     <string name="unknown">Sconosciuto</string>
     <string name="removed_from_favs">Rimosso dai Preferiti!</string>
     <string name="backup_and_restore">Backup &amp; Ripristino</string>
+    <string name="auto_backup">Backup automatico</string>
+    <string name="auto_backup_summary">A partire da Android 6, la funzione di backup automatico di Android caricherà tutte le impostazioni dell\'app, i dati di accesso dell\'account, e preferiti sul tuo Google Drive, che può essere ripristinato reinstallando l\'app dopo la disinstallazione.</string>
+    <string name="auto_backup_warning">Questa preferenza non ha effetto se Google Play Services non è presente, o se il Backup Automatico è disabilitato dalle impostazioni del dispositivo. Disabilitare qui non cancella i backup esistenti.</string>
+    <string name="auto_backup_setting">Attiva il backup automatico</string>
+    <string name="manual_backup">Backup Manuale</string>
     <string name="backup_summary">Backup delle impostazioni dell\'app Barinsta, dei dati di login dell\'account e/o dei preferiti in un file di backup semplice o crittografato per il ripristino successivo.</string>
     <string name="backup_warning">Se stai effettuando il backup dei dati di accesso dell\'account, tratta il file come confidenziale e tienilo in qualche posto sicuro!</string>
     <string name="create_backup">Crea un nuovo file di salvataggio</string>
@@ -400,7 +406,6 @@
     <string name="dms_action_remove_admin">Rimuovi come Amministratore</string>
     <string name="edit_unsuccessful">Modifica non riuscita</string>
     <string name="message">Messaggio</string>
-    <string name="reply">Rispondi</string>
     <string name="tap_to_remove">Tocca per rimuovere</string>
     <string name="forward">Inoltra</string>
     <string name="forward_outgoing">Hai inoltrato un messaggio</string>
@@ -473,7 +478,6 @@
     <string name="error">Errore</string>
     <string name="account_logged_out">Questo account è stato disconnesso.</string>
     <string name="login_required">Login richiesto!</string>
-    <string name="sentry_block">Blocco sentinella.</string>
     <string name="inactive_user">Utente è inattivo!</string>
     <string name="crash_report_subject">Rapporto sugli errori di Barinsta</string>
     <string name="crash_report_title">Selezionare un\'applicazione di posta elettronica per inviare i registri di errori</string>
@@ -507,4 +511,5 @@
     <string name="sending">Invio in corso...</string>
     <string name="share_via_dm">Condividi tramite DM</string>
     <string name="share_link">Condivisione link…</string>
+    <string name="slide_to_cancel">Trascinare per cancellare</string>
 </resources>

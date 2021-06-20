@@ -29,6 +29,7 @@
     <string name="hide_muted_reels_setting">Hide muted stories from feed</string>
     <string name="dm_mark_as_seen_setting">Mark DM as seen after viewing</string>
     <string name="dm_mark_as_seen_setting_summary">Other members will know you viewed it</string>
+    <string name="autoplay_stories_setting">Autoplay video stories</string>
     <string name="activity_setting">Enable activity notifications</string>
     <string name="story_sort_setting">Feed stories sort</string>
     <string name="error_loading_profile">Error loading profile! Is the username valid? If so, you may be ratelimited.</string>
@@ -292,6 +293,11 @@
     <string name="unknown">알 수 없음</string>
     <string name="removed_from_favs">즐겨찾기에서 삭제되었습니다!</string>
     <string name="backup_and_restore">Backup &amp; Restore</string>
+    <string name="auto_backup">Auto Backup</string>
+    <string name="auto_backup_summary">Starting from Android 6, Android\'s Auto Backup feature will upload all app settings, account login data, and favorites onto your Google Drive, which can be restored by reinstalling the app after uninstallation.</string>
+    <string name="auto_backup_warning">This preference has no effect if Google Play Services is not present, or if Auto Backup is disabled from your device settings. Disabling here does not erase existing backups.</string>
+    <string name="auto_backup_setting">Enable Auto Backup</string>
+    <string name="manual_backup">Manual Backup</string>
     <string name="backup_summary">Backup Barinsta app settings, account login data, and/or favorites to a plain text or encrypted backup file for later restoration.</string>
     <string name="backup_warning">If you\'re backing up account login data, treat the file as confidential and keep it somewhere safe!</string>
     <string name="create_backup">Create new backup file</string>
@@ -391,7 +397,6 @@
     <string name="dms_action_remove_admin">관리자 제거</string>
     <string name="edit_unsuccessful">Edit was unsuccessful</string>
     <string name="message">메시지</string>
-    <string name="reply">답장</string>
     <string name="tap_to_remove">제거하려면 탭하세요</string>
     <string name="forward">전달</string>
     <string name="forward_outgoing">회원님이 메시지를 전달했습니다.</string>
@@ -464,7 +469,6 @@
     <string name="error">오류</string>
     <string name="account_logged_out">This account has been logged out.</string>
     <string name="login_required">Login required!</string>
-    <string name="sentry_block">Sentry block.</string>
     <string name="inactive_user">User is inactive!</string>
     <string name="crash_report_subject">Barinsta Crash Report</string>
     <string name="crash_report_title">Select an email app to send crash logs</string>
@@ -498,4 +502,5 @@
     <string name="sending">Sending...</string>
     <string name="share_via_dm">Share via DM</string>
     <string name="share_link">Share link…</string>
+    <string name="slide_to_cancel">Slide to Cancel</string>
 </resources>
