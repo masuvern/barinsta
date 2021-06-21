@@ -130,7 +130,8 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
     private HighlightsViewModel highlightsViewModel;
     private MenuItem blockMenuItem, restrictMenuItem, chainingMenuItem;
     private MenuItem muteStoriesMenuItem, mutePostsMenuItem, removeFollowerMenuItem;
-    private MenuItem shareLinkMenuItem, shareDmMenuItem;
+    private MenuItem shareLinkMenuItem;
+//    private MenuItem shareDmMenuItem;
     private boolean accountIsUpdated = false;
     private boolean postsSetupDone = false;
     private Set<Media> selectedFeedModels;
@@ -469,10 +470,10 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
         if (shareLinkMenuItem != null) {
             shareLinkMenuItem.setVisible(profileModel != null && !TextUtils.isEmpty(profileModel.getUsername()));
         }
-        shareDmMenuItem = menu.findItem(R.id.share_dm);
-        if (shareDmMenuItem != null) {
-            shareDmMenuItem.setVisible(profileModel != null && profileModel.getPk() != 0L);
-        }
+//        shareDmMenuItem = menu.findItem(R.id.share_dm);
+//        if (shareDmMenuItem != null) {
+//            shareDmMenuItem.setVisible(profileModel != null && profileModel.getPk() != 0L);
+//        }
     }
 
     @Override
@@ -585,20 +586,21 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
             startActivity(sharingIntent);
             return true;
         } else if (itemId == R.id.share_dm) {
-            final UserSearchNavGraphDirections.ActionGlobalUserSearch actionGlobalUserSearch = UserSearchFragmentDirections
-                    .actionGlobalUserSearch()
-                    .setTitle(getString(R.string.share))
-                    .setActionLabel(getString(R.string.send))
-                    .setShowGroups(true)
-                    .setMultiple(true)
-                    .setSearchMode(UserSearchFragment.SearchMode.RAVEN);
-            final NavController navController = NavHostFragment.findNavController(ProfileFragment.this);
-            try {
-                navController.navigate(actionGlobalUserSearch);
-            } catch (Exception e) {
-                Log.e(TAG, "setupShare: ", e);
-            }
-            return true;
+//            final UserSearchNavGraphDirections.ActionGlobalUserSearch actionGlobalUserSearch = UserSearchFragmentDirections
+//                    .actionGlobalUserSearch()
+//                    .setTitle(getString(R.string.share))
+//                    .setActionLabel(getString(R.string.send))
+//                    .setShowGroups(true)
+//                    .setMultiple(true)
+//                    .setSearchMode(UserSearchFragment.SearchMode.RAVEN);
+//            final NavController navController = NavHostFragment.findNavController(ProfileFragment.this);
+//            try {
+//                navController.navigate(actionGlobalUserSearch);
+//            } catch (Exception e) {
+//                Log.e(TAG, "setupShare: ", e);
+//            }
+//            return true;
+            return false;
         }
         return super.onOptionsItemSelected(item);
     }
@@ -1061,9 +1063,9 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
             if (shareLinkMenuItem != null) {
                 shareLinkMenuItem.setVisible(!TextUtils.isEmpty(profileModel.getUsername()));
             }
-            if (shareDmMenuItem != null) {
-                shareDmMenuItem.setVisible(profileModel.getPk() != 0L);
-            }
+//            if (shareDmMenuItem != null) {
+//                shareDmMenuItem.setVisible(profileModel.getPk() != 0L);
+//            }
         }
     }
 
