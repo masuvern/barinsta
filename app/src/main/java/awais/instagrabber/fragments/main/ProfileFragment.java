@@ -583,7 +583,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
             final Intent sharingIntent = new Intent(Intent.ACTION_SEND);
             sharingIntent.setType("text/plain");
             sharingIntent.putExtra(Intent.EXTRA_TEXT, "https://instagram.com/" + profileModel.getUsername());
-            startActivity(sharingIntent);
+            startActivity(Intent.createChooser(sharingIntent, null));
             return true;
         } else if (itemId == R.id.share_dm) {
 //            final UserSearchNavGraphDirections.ActionGlobalUserSearch actionGlobalUserSearch = UserSearchFragmentDirections
