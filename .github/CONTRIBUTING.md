@@ -36,7 +36,7 @@ If you have questions, don't be afraid to ask for help from any current maintain
 
 ## I found a bug!
 
-**Please read [FAQ](https://barinsta.austinhuang.me/en/latest/faq/) first.**
+**Please read [FAQ](https://barinsta.austinhuang.me/en/latest/faq.html) first.**
 
 Bugs are inevitable during active development, as nobody can cover all the possible test cases. 
 
