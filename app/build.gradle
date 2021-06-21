@@ -164,7 +164,7 @@ dependencies {
     coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:1.1.5'
 
     def nav_version = '2.3.5'
-    def exoplayer_version = '2.13.3'
+    def exoplayer_version = '2.14.1'
 
     implementation 'com.google.android.material:material:1.4.0-beta01'
 
@@ -219,9 +219,9 @@ dependencies {
 
     implementation "ru.gildor.coroutines:kotlin-coroutines-okhttp:1.0"
 
-    implementation 'com.facebook.fresco:fresco:2.3.0'
-    implementation 'com.facebook.fresco:animated-webp:2.3.0'
-    implementation 'com.facebook.fresco:webpsupport:2.3.0'
+    implementation 'com.facebook.fresco:fresco:2.5.0'
+    implementation 'com.facebook.fresco:animated-webp:2.5.0'
+    implementation 'com.facebook.fresco:webpsupport:2.5.0'
 
     implementation 'com.squareup.retrofit2:retrofit:2.9.0'
     implementation 'com.squareup.retrofit2:converter-scalars:2.9.0'
