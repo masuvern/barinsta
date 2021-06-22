@@ -1,46 +1,53 @@
-package awais.instagrabber.utils;
+package awais.instagrabber.utils
 
-import android.content.Context;
-import android.content.pm.PackageManager;
+import android.Manifest.permission
+import android.content.Context
+import androidx.core.content.PermissionChecker
+import awais.instagrabber.utils.PermissionUtils
+import androidx.core.content.ContextCompat
+import android.content.pm.PackageManager
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.fragment.app.Fragment
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
-import androidx.core.content.PermissionChecker;
-import androidx.fragment.app.Fragment;
-
-import static android.Manifest.permission.CAMERA;
-import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
-import static android.Manifest.permission.RECORD_AUDIO;
-import static androidx.core.content.PermissionChecker.checkSelfPermission;
-
-public class PermissionUtils {
-    public static final String[] AUDIO_RECORD_PERMS = new String[]{RECORD_AUDIO};
-    public static final String[] ATTACH_MEDIA_PERMS = new String[]{READ_EXTERNAL_STORAGE};
-    public static final String[] CAMERA_PERMS = new String[]{CAMERA};
-
-    public static boolean hasAudioRecordPerms(@NonNull final Context context) {
-        return checkSelfPermission(context, RECORD_AUDIO) == PermissionChecker.PERMISSION_GRANTED;
+object PermissionUtils {
+    val AUDIO_RECORD_PERMS = arrayOf(permission.RECORD_AUDIO)
+    val ATTACH_MEDIA_PERMS = arrayOf(permission.READ_EXTERNAL_STORAGE)
+    val CAMERA_PERMS = arrayOf(permission.CAMERA)
+    @JvmStatic
+    fun hasAudioRecordPerms(context: Context): Boolean {
+        return PermissionChecker.checkSelfPermission(
+            context,
+            permission.RECORD_AUDIO
+        ) == PermissionChecker.PERMISSION_GRANTED
     }
 
-    public static void requestAudioRecordPerms(final Fragment fragment, final int requestCode) {
-        fragment.requestPermissions(AUDIO_RECORD_PERMS, requestCode);
+    @JvmStatic
+    fun requestAudioRecordPerms(fragment: Fragment, requestCode: Int) {
+        fragment.requestPermissions(AUDIO_RECORD_PERMS, requestCode)
     }
 
-    public static boolean hasAttachMediaPerms(@NonNull final Context context) {
-        return checkSelfPermission(context, READ_EXTERNAL_STORAGE) == PermissionChecker.PERMISSION_GRANTED;
+    @JvmStatic
+    fun hasAttachMediaPerms(context: Context): Boolean {
+        return PermissionChecker.checkSelfPermission(
+            context,
+            permission.READ_EXTERNAL_STORAGE
+        ) == PermissionChecker.PERMISSION_GRANTED
     }
 
-    public static void requestAttachMediaPerms(final Fragment fragment, final int requestCode) {
-        fragment.requestPermissions(ATTACH_MEDIA_PERMS, requestCode);
+    @JvmStatic
+    fun requestAttachMediaPerms(fragment: Fragment, requestCode: Int) {
+        fragment.requestPermissions(ATTACH_MEDIA_PERMS, requestCode)
     }
 
-    public static boolean hasCameraPerms(final Context context) {
-        return ContextCompat.checkSelfPermission(context, CAMERA) == PackageManager.PERMISSION_GRANTED;
+    fun hasCameraPerms(context: Context?): Boolean {
+        return ContextCompat.checkSelfPermission(
+            context!!,
+            permission.CAMERA
+        ) == PackageManager.PERMISSION_GRANTED
     }
 
-    public static void requestCameraPerms(final AppCompatActivity activity, final int requestCode) {
-        ActivityCompat.requestPermissions(activity, CAMERA_PERMS, requestCode);
+    fun requestCameraPerms(activity: AppCompatActivity?, requestCode: Int) {
+        ActivityCompat.requestPermissions(activity!!, CAMERA_PERMS, requestCode)
     }
 }

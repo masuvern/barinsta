@@ -132,7 +132,7 @@ class MediaRepository(private val service: MediaService) {
                 videoOptions.clips = listOf(Clip(videoOptions.length, options.sourceType))
             }
         }
-        val timezoneOffset = DateUtils.getTimezoneOffset().toString()
+        val timezoneOffset = DateUtils.timezoneOffset.toString()
         val form = mutableMapOf<String, Any>(
             "timezone_offset" to timezoneOffset,
             "_csrftoken" to csrfToken,
