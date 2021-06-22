@@ -10,9 +10,7 @@ import awais.instagrabber.utils.Utils.settingsHelper
 
 class BarinstaBackupAgent : BackupAgent() {
     override fun onFullBackup(data: FullBackupDataOutput?) {
-        if (data != null && settingsHelper.getBoolean(PreferenceKeys.PREF_AUTO_BACKUP_ENABLED)) {
-            super.onFullBackup(data)
-        }
+        super.onFullBackup(if (settingsHelper.getBoolean(PreferenceKeys.PREF_AUTO_BACKUP_ENABLED)) data else null)
     }
 
     // no key-value backups
