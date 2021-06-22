@@ -81,6 +81,10 @@ public class DirectorySelectActivity extends BaseLanguageActivity {
             showErrorDialog(getString(R.string.select_a_folder));
             return;
         }
+        if (!"com.android.externalstorage.documents".equals(data.getData().getAuthority())) {
+            showErrorDialog(getString(R.string.dir_select_no_download_folder));
+            return;
+        }
         AppExecutors.INSTANCE.getMainThread().execute(() -> {
             try {
                 viewModel.setupSelectedDir(data);

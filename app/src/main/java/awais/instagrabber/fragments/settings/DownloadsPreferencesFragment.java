@@ -102,7 +102,9 @@ public class DownloadsPreferencesFragment extends BasePreferencesFragment {
                     final ConfirmDialogFragment dialogFragment = ConfirmDialogFragment.newInstance(
                             123,
                             R.string.error,
-                            "Please report this error to the developers:\n\n" + sw.toString(),
+                            "com.android.externalstorage.documents".equals(data.getData().getAuthority())
+                                ? "Please report this error to the developers:\n\n" + sw.toString()
+                                : getString(R.string.dir_select_no_download_folder),
                             R.string.ok,
                             0,
                             0

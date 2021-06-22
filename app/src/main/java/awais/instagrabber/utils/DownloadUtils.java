@@ -68,7 +68,7 @@ public final class DownloadUtils {
         if (TextUtils.isEmpty(barinstaDirUri)) {
             throw new ReselectDocumentTreeException("folder path is null or empty");
         }
-        if (!barinstaDirUri.startsWith("content")) {
+        if (!barinstaDirUri.startsWith("content://com.android.externalstorage.documents")) {
             // reselect the folder in selector view
             throw new ReselectDocumentTreeException(Uri.parse(barinstaDirUri));
         }
