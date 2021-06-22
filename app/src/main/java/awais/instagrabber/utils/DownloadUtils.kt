@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.DialogInterface
 import android.content.UriPermission
 import android.net.Uri
+import android.provider.DocumentsContract
 import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
@@ -24,6 +25,7 @@ import java.io.IOException
 import java.io.OutputStreamWriter
 import java.util.*
 import java.util.regex.Pattern
+
 
 object DownloadUtils {
     private val TAG = DownloadUtils::class.java.simpleName
@@ -143,10 +145,8 @@ object DownloadUtils {
 
     private fun getSubPathForUserFolder(username: String?): MutableList<String> {
         val list: MutableList<String> = ArrayList()
-        if (!Utils.settingsHelper.getBoolean(PreferenceKeys.DOWNLOAD_USER_FOLDER) || isEmpty(
-                username
-            )
-        ) {
+        if (!Utils.settingsHelper.getBoolean(PreferenceKeys.DOWNLOAD_USER_FOLDER) ||
+                username.isNullOrEmpty()) {
             list.add(DIR_DOWNLOADS)
             return list
         }
@@ -280,7 +280,7 @@ object DownloadUtils {
     }
 
     @JvmStatic
-    fun checkDownloaded(media: Media): List<Boolean> {
+    fun checkDownloaded(media: Media, context: Context): List<Boolean> {
         val checkList: MutableList<Boolean> = LinkedList()
         val user = media.user
         var username = "username"
@@ -295,17 +295,13 @@ object DownloadUtils {
                         media
                     ) else ResponseBodyUtils.getImageUrl(media)
                 val file = getDownloadSavePaths(ArrayList(userFolderPaths), media.code, url, "")
-                val fileExists = file!!.first != null && checkPathExists(
-                    file.first
-                )
+                val fileExists = file!!.first != null && checkPathExists(file.first, context)
                 var usernameFileExists = false
                 if (!fileExists) {
                     val usernameFile = getDownloadSavePaths(
                         ArrayList(userFolderPaths), media.code, url, username
                     )
-                    usernameFileExists = usernameFile!!.first != null && checkPathExists(
-                        usernameFile.first
-                    )
+                    usernameFileExists = usernameFile!!.first != null && checkPathExists(usernameFile.first, context)
                 }
                 checkList.add(fileExists || usernameFileExists)
             }
@@ -321,17 +317,13 @@ object DownloadUtils {
                     val file = getDownloadChildSavePaths(
                         ArrayList(userFolderPaths), media.code, i + 1, url, ""
                     )
-                    val fileExists = file!!.first != null && checkPathExists(
-                        file.first
-                    )
+                    val fileExists = file!!.first != null && checkPathExists(file.first, context)
                     var usernameFileExists = false
                     if (!fileExists) {
                         val usernameFile = getDownloadChildSavePaths(
                             ArrayList(userFolderPaths), media.code, i + 1, url, username
                         )
-                        usernameFileExists = usernameFile!!.first != null && checkPathExists(
-                            usernameFile.first
-                        )
+                        usernameFileExists = usernameFile!!.first != null && checkPathExists(usernameFile.first, context)
                     }
                     checkList.add(fileExists || usernameFileExists)
                     i++
@@ -343,14 +335,29 @@ object DownloadUtils {
         return checkList
     }
 
-    private fun checkPathExists(paths: List<String>): Boolean {
+    private fun checkPathExists(paths: List<String>, context: Context): Boolean {
         if (root == null) return false
-        var dir = root
+        val uri = root!!.getUri()
+        var found = false
+        var docId = DocumentsContract.getTreeDocumentId(uri)
         for (path in paths) {
-            dir = dir!!.findFile(path)
-            if (dir == null || !dir.exists()) {
-                return false
+            val docUri = DocumentsContract.buildChildDocumentsUriUsingTree(uri, docId)
+            val docCursor = context.contentResolver.query(
+                docUri, arrayOf(
+                    DocumentsContract.Document.COLUMN_DISPLAY_NAME,
+                    DocumentsContract.Document.COLUMN_DOCUMENT_ID
+                ), null, null, null
+            )
+            if (docCursor == null) return false
+            while (docCursor!!.moveToNext() && !found) {
+                if (path.equals(docCursor.getString(0))) {
+                    docId = docCursor.getString(1)
+                    found = true
+                }
             }
+            docCursor.close()
+            if (!found) return false
+            found = false
         }
         return true
     }

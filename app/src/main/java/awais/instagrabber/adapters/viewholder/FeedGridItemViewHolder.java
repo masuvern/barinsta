@@ -1,5 +1,6 @@
 package awais.instagrabber.adapters.viewholder;
 
+import android.content.Context;
 import android.content.res.ColorStateList;
 import android.net.Uri;
 import android.view.View;
@@ -107,8 +108,12 @@ public class FeedGridItemViewHolder extends RecyclerView.ViewHolder {
             binding.typeIcon.setImageResource(typeIconRes);
         }
         binding.downloaded.setVisibility(View.GONE);
+        final Context context = itemView.getContext();
+        if (context == null) {
+            return;
+        }
         AppExecutors.INSTANCE.getTasksThread().execute(() -> {
-            final List<Boolean> checkList = DownloadUtils.checkDownloaded(media);
+            final List<Boolean> checkList = DownloadUtils.checkDownloaded(media, context);
             if (checkList.isEmpty()) {
                 return;
             }
