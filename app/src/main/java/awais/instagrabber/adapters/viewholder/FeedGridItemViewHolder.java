@@ -24,6 +24,7 @@ import awais.instagrabber.models.PostsLayoutPreferences;
 import awais.instagrabber.models.enums.MediaItemType;
 import awais.instagrabber.repositories.responses.Media;
 import awais.instagrabber.repositories.responses.User;
+import awais.instagrabber.utils.AppExecutors;
 import awais.instagrabber.utils.DownloadUtils;
 import awais.instagrabber.utils.ResponseBodyUtils;
 import awais.instagrabber.utils.TextUtils;
@@ -105,28 +106,33 @@ public class FeedGridItemViewHolder extends RecyclerView.ViewHolder {
             binding.typeIcon.setVisibility(View.VISIBLE);
             binding.typeIcon.setImageResource(typeIconRes);
         }
-        final List<Boolean> checkList = DownloadUtils.checkDownloaded(media);
-        if (checkList.isEmpty()) {
-            return;
-        }
-        switch (media.getMediaType()) {
-            case MEDIA_TYPE_IMAGE:
-            case MEDIA_TYPE_VIDEO:
-                binding.downloaded.setVisibility(checkList.get(0) ? View.VISIBLE : View.GONE);
-                binding.downloaded.setImageTintList(ColorStateList.valueOf(itemView.getResources().getColor(R.color.green_A400)));
-                break;
-            case MEDIA_TYPE_SLIDER:
-                binding.downloaded.setVisibility(checkList.get(0) ? View.VISIBLE : View.GONE);
-                final List<Media> carouselMedia = media.getCarouselMedia();
-                boolean allDownloaded = checkList.size() == (carouselMedia == null ? 0 : carouselMedia.size());
-                if (allDownloaded) {
-                    allDownloaded = checkList.stream().allMatch(downloaded -> downloaded);
+        binding.downloaded.setVisibility(View.GONE);
+        AppExecutors.INSTANCE.getTasksThread().execute(() -> {
+            final List<Boolean> checkList = DownloadUtils.checkDownloaded(media);
+            if (checkList.isEmpty()) {
+                return;
+            }
+            AppExecutors.INSTANCE.getMainThread().execute(() -> {
+                switch (media.getMediaType()) {
+                    case MEDIA_TYPE_IMAGE:
+                    case MEDIA_TYPE_VIDEO:
+                        binding.downloaded.setVisibility(checkList.get(0) ? View.VISIBLE : View.GONE);
+                        binding.downloaded.setImageTintList(ColorStateList.valueOf(itemView.getResources().getColor(R.color.green_A400)));
+                        break;
+                    case MEDIA_TYPE_SLIDER:
+                        binding.downloaded.setVisibility(checkList.get(0) ? View.VISIBLE : View.GONE);
+                        final List<Media> carouselMedia = media.getCarouselMedia();
+                        boolean allDownloaded = checkList.size() == (carouselMedia == null ? 0 : carouselMedia.size());
+                        if (allDownloaded) {
+                            allDownloaded = checkList.stream().allMatch(downloaded -> downloaded);
+                        }
+                        binding.downloaded.setImageTintList(ColorStateList.valueOf(itemView.getResources().getColor(
+                                allDownloaded ? R.color.green_A400 : R.color.yellow_400)));
+                        break;
+                    default:
                 }
-                binding.downloaded.setImageTintList(ColorStateList.valueOf(itemView.getResources().getColor(
-                        allDownloaded ? R.color.green_A400 : R.color.yellow_400)));
-                break;
-            default:
-        }
+            });
+        });
     }
 
     private void setThumbImage(final String thumbnailUrl) {
