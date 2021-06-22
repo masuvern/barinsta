@@ -63,8 +63,8 @@ public final class DownloadUtils {
     public static final String WRITE_PERMISSION = Manifest.permission.WRITE_EXTERNAL_STORAGE;
     public static final String[] PERMS = new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE};
 
-    public static void init(@NonNull final Context context) throws ReselectDocumentTreeException {
-        final String barinstaDirUri = Utils.settingsHelper.getString(PREF_BARINSTA_DIR_URI);
+    public static void init(@NonNull final Context context,
+                            @Nullable final String barinstaDirUri) throws ReselectDocumentTreeException {
         if (TextUtils.isEmpty(barinstaDirUri)) {
             throw new ReselectDocumentTreeException("folder path is null or empty");
         }
@@ -88,6 +88,7 @@ public final class DownloadUtils {
             root = null;
             throw new ReselectDocumentTreeException(uri);
         }
+        Utils.settingsHelper.putString(PREF_BARINSTA_DIR_URI, uri.toString());
     }
 
     public static void destroy() {

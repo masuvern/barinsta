@@ -34,6 +34,7 @@ import static awais.instagrabber.utils.Utils.settingsHelper;
 
 public class DownloadsPreferencesFragment extends BasePreferencesFragment {
     private static final String TAG = DownloadsPreferencesFragment.class.getSimpleName();
+    private Preference dirPreference;
 
     @Override
     void setupPreferenceScreen(final PreferenceScreen screen) {
@@ -53,26 +54,25 @@ public class DownloadsPreferencesFragment extends BasePreferencesFragment {
     }
 
     private Preference getSaveToCustomFolderPreference(@NonNull final Context context) {
-        final Preference preference = new Preference(context);
-        preference.setKey(PreferenceKeys.PREF_BARINSTA_DIR_URI);
-        preference.setIconSpaceReserved(false);
-        preference.setTitle(R.string.barinsta_folder);
-        preference.setSummaryProvider(p -> {
-            final String currentValue = settingsHelper.getString(PreferenceKeys.PREF_BARINSTA_DIR_URI);
-            if (TextUtils.isEmpty(currentValue)) return "";
+        dirPreference = new Preference(context);
+        dirPreference.setIconSpaceReserved(false);
+        dirPreference.setTitle(R.string.barinsta_folder);
+        final String currentValue = settingsHelper.getString(PreferenceKeys.PREF_BARINSTA_DIR_URI);
+        if (TextUtils.isEmpty(currentValue)) dirPreference.setSummary("");
+        else {
             String path;
             try {
                 path = URLDecoder.decode(currentValue, StandardCharsets.UTF_8.toString());
             } catch (UnsupportedEncodingException e) {
                 path = currentValue;
             }
-            return path;
-        });
-        preference.setOnPreferenceClickListener(p -> {
+            dirPreference.setSummary(path);
+        }
+        dirPreference.setOnPreferenceClickListener(p -> {
             openDirectoryChooser(DownloadUtils.getRootDirUri());
             return true;
         });
-        return preference;
+        return dirPreference;
     }
 
     private void openDirectoryChooser(final Uri initialUri) {
@@ -93,6 +93,13 @@ public class DownloadsPreferencesFragment extends BasePreferencesFragment {
         AppExecutors.INSTANCE.getMainThread().execute(() -> {
             try {
                 Utils.setupSelectedDir(context, data);
+                String path;
+                try {
+                    path = URLDecoder.decode(data.getData().toString(), StandardCharsets.UTF_8.toString());
+                } catch (UnsupportedEncodingException e) {
+                    path = data.getData().toString();
+                }
+                dirPreference.setSummary(path);
             } catch (Exception e) {
                 // Should not come to this point.
                 // If it does, we have to show this error to the user so that they can report it.

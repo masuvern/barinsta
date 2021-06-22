@@ -592,9 +592,8 @@ public final class Utils {
         if (dirUri == null) return;
         final int takeFlags = intent.getFlags() & (Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
         context.getContentResolver().takePersistableUriPermission(dirUri, takeFlags);
-        settingsHelper.putString(PREF_BARINSTA_DIR_URI, dirUri.toString());
         // re-init DownloadUtils
-        DownloadUtils.init(context);
+        DownloadUtils.init(context, dirUri.toString());
     }
 
     @NonNull

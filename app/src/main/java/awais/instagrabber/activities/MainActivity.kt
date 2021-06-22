@@ -111,7 +111,8 @@ class MainActivity : BaseLanguageActivity(), FragmentManager.OnBackStackChangedL
 
     override fun onCreate(savedInstanceState: Bundle?) {
         try {
-            DownloadUtils.init(this)
+            DownloadUtils.init(this,
+                Utils.settingsHelper.getString(PreferenceKeys.PREF_BARINSTA_DIR_URI))
         } catch (e: ReselectDocumentTreeException) {
             super.onCreate(savedInstanceState)
             val intent = Intent(this, DirectorySelectActivity::class.java)
