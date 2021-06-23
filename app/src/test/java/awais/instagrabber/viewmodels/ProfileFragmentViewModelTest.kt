@@ -14,6 +14,7 @@ import awais.instagrabber.models.Resource
 import awais.instagrabber.repositories.responses.User
 import awais.instagrabber.webservices.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import org.json.JSONException
 import org.junit.Rule
 import org.junit.Test
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -34,6 +35,12 @@ internal class ProfileFragmentViewModelTest {
         pk = 100,
         username = "test",
         fullName = "Test user"
+    )
+
+    private val testPublicUser1 = User(
+        pk = 101,
+        username = "test1",
+        fullName = "Test1 user1"
     )
 
     @ExperimentalCoroutinesApi
@@ -180,5 +187,48 @@ internal class ProfileFragmentViewModelTest {
             profile = viewModel.profile.getOrAwaitValue()
         }
         assertEquals(testPublicUser, profile.data)
+    }
+
+    @ExperimentalCoroutinesApi
+    @Test
+    fun `state username changes`() {
+        val state = SavedStateHandle(
+            mutableMapOf<String, Any?>(
+                "username" to testPublicUser.username
+            )
+        )
+        val graphQLRepository = object : GraphQLRepository(GraphQLServiceAdapter()) {
+            override suspend fun fetchUser(username: String): User {
+                return when(username) {
+                    testPublicUser.username -> testPublicUser
+                    testPublicUser1.username -> testPublicUser1
+                    else -> throw JSONException("")
+                }
+            }
+        }
+        val viewModel = ProfileFragmentViewModel(
+            state,
+            UserRepository(UserServiceAdapter()),
+            FriendshipRepository(FriendshipServiceAdapter()),
+            StoriesRepository(StoriesServiceAdapter()),
+            MediaRepository(MediaServiceAdapter()),
+            graphQLRepository,
+            AccountRepository(AccountDataSource(AccountDaoAdapter())),
+            FavoriteRepository(FavoriteDataSource(FavoriteDaoAdapter())),
+            coroutineScope.dispatcher,
+        )
+        viewModel.setCurrentUser(Resource.success(null))
+        assertEquals(false, viewModel.isLoggedIn.getOrAwaitValue())
+        var profile = viewModel.profile.getOrAwaitValue()
+        while (profile.status == Resource.Status.LOADING) {
+            profile = viewModel.profile.getOrAwaitValue()
+        }
+        assertEquals(testPublicUser, profile.data)
+        state.set("username", testPublicUser1.username)
+        profile = viewModel.profile.getOrAwaitValue()
+        while (profile.status == Resource.Status.LOADING) {
+            profile = viewModel.profile.getOrAwaitValue()
+        }
+        assertEquals(testPublicUser1, profile.data)
     }
 }
