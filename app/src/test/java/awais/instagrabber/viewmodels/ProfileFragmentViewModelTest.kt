@@ -23,12 +23,6 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 internal class ProfileFragmentViewModelTest {
 
-    private val testPublicUser = User(
-        pk = 100,
-        username = "test",
-        fullName = "Test user"
-    )
-
     @get:Rule
     var instantExecutorRule = InstantTaskExecutorRule()
 
@@ -36,9 +30,15 @@ internal class ProfileFragmentViewModelTest {
     @get:Rule
     val coroutineScope = MainCoroutineScopeRule()
 
+    private val testPublicUser = User(
+        pk = 100,
+        username = "test",
+        fullName = "Test user"
+    )
+
     @ExperimentalCoroutinesApi
     @Test
-    fun testNoUsernameNoCurrentUser() {
+    fun `no state username and null current user`() {
         val viewModel = ProfileFragmentViewModel(
             SavedStateHandle(),
             UserRepository(UserServiceAdapter()),
@@ -60,7 +60,7 @@ internal class ProfileFragmentViewModelTest {
 
     @ExperimentalCoroutinesApi
     @Test
-    fun testNoUsernameWithCurrentUser() {
+    fun `no state username with current user provided`() {
         val viewModel = ProfileFragmentViewModel(
             SavedStateHandle(),
             UserRepository(UserServiceAdapter()),
@@ -86,17 +86,32 @@ internal class ProfileFragmentViewModelTest {
 
     @ExperimentalCoroutinesApi
     @Test
-    fun testPublicUsernameWithNoCurrentUser() {
+    fun `state username without '@' and no current user`() {
         // username without `@`
         val state = SavedStateHandle(
             mutableMapOf<String, Any?>(
                 "username" to testPublicUser.username
             )
         )
+        testPublicUsernameNoCurrentUserCommon(state)
+    }
+
+    @ExperimentalCoroutinesApi
+    @Test
+    fun `state username with '@' and no current user`() {
+        // username with `@`
+        val state = SavedStateHandle(
+            mutableMapOf<String, Any?>(
+                "username" to "@${testPublicUser.username}"
+            )
+        )
+        testPublicUsernameNoCurrentUserCommon(state)
+    }
+
+    @ExperimentalCoroutinesApi
+    private fun testPublicUsernameNoCurrentUserCommon(state: SavedStateHandle) {
         val graphQLRepository = object : GraphQLRepository(GraphQLServiceAdapter()) {
-            override suspend fun fetchUser(username: String): User {
-                return testPublicUser
-            }
+            override suspend fun fetchUser(username: String): User = testPublicUser
         }
         val viewModel = ProfileFragmentViewModel(
             state,
@@ -111,6 +126,55 @@ internal class ProfileFragmentViewModelTest {
         )
         viewModel.setCurrentUser(Resource.success(null))
         assertEquals(false, viewModel.isLoggedIn.getOrAwaitValue())
+        var profile = viewModel.profile.getOrAwaitValue()
+        while (profile.status == Resource.Status.LOADING) {
+            profile = viewModel.profile.getOrAwaitValue()
+        }
+        assertEquals(testPublicUser, profile.data)
+    }
+
+    @ExperimentalCoroutinesApi
+    @Test
+    fun `state username without '@' and current user provided`() {
+        // username without `@`
+        val state = SavedStateHandle(
+            mutableMapOf<String, Any?>(
+                "username" to testPublicUser.username
+            )
+        )
+        testPublicUsernameCurrentUserCommon(state)
+    }
+
+    @ExperimentalCoroutinesApi
+    @Test
+    fun `state username with '@' and current user provided`() {
+        // username with `@`
+        val state = SavedStateHandle(
+            mutableMapOf<String, Any?>(
+                "username" to "@${testPublicUser.username}"
+            )
+        )
+        testPublicUsernameCurrentUserCommon(state)
+    }
+
+    @ExperimentalCoroutinesApi
+    private fun testPublicUsernameCurrentUserCommon(state: SavedStateHandle) {
+        val userRepository = object: UserRepository(UserServiceAdapter()) {
+            override suspend fun getUsernameInfo(username: String): User = testPublicUser
+        }
+        val viewModel = ProfileFragmentViewModel(
+            state,
+            userRepository,
+            FriendshipRepository(FriendshipServiceAdapter()),
+            StoriesRepository(StoriesServiceAdapter()),
+            MediaRepository(MediaServiceAdapter()),
+            GraphQLRepository(GraphQLServiceAdapter()),
+            AccountRepository(AccountDataSource(AccountDaoAdapter())),
+            FavoriteRepository(FavoriteDataSource(FavoriteDaoAdapter())),
+            coroutineScope.dispatcher,
+        )
+        viewModel.setCurrentUser(Resource.success(User()))
+        assertEquals(true, viewModel.isLoggedIn.getOrAwaitValue())
         var profile = viewModel.profile.getOrAwaitValue()
         while (profile.status == Resource.Status.LOADING) {
             profile = viewModel.profile.getOrAwaitValue()

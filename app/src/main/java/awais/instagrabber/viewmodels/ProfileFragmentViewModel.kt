@@ -41,7 +41,7 @@ class ProfileFragmentViewModel(
                     value = currentUser to stateUsername
                 }
                 addSource(state.getLiveData<String?>("username")) { username ->
-                    this.stateUsername = Resource.success(username)
+                    this.stateUsername = Resource.success(username.substringAfter('@'))
                     value = user to this.stateUsername
                 }
                 // trigger currentUserAndStateUsernameLiveData switch map with a state username success resource
@@ -87,6 +87,7 @@ class ProfileFragmentViewModel(
             Resource.Status.SUCCESS -> it.data?.username ?: ""
         }
     }
+
     init {
         // Log.d(TAG, "${state.keys()} $userRepository $friendshipRepository $storiesRepository $mediaRepository")
     }

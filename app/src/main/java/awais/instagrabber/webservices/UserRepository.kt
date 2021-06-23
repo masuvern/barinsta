@@ -7,14 +7,14 @@ import awais.instagrabber.repositories.responses.UserSearchResponse
 import awais.instagrabber.webservices.RetrofitFactory.retrofit
 import java.util.*
 
-class UserRepository(private val service: UserService) {
+open class UserRepository(private val service: UserService) {
 
     suspend fun getUserInfo(uid: Long): User {
         val response = service.getUserInfo(uid)
         return response.user
     }
 
-    suspend fun getUsernameInfo(username: String): User {
+    open suspend fun getUsernameInfo(username: String): User {
         val response = service.getUsernameInfo(username)
         return response.user
     }
