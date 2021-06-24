@@ -1,15 +1,19 @@
 package awais.instagrabber.viewmodels
 
 import android.os.Bundle
+import android.util.Log
 import androidx.lifecycle.*
 import androidx.savedstate.SavedStateRegistryOwner
+import awais.instagrabber.db.entities.Favorite
 import awais.instagrabber.db.repositories.AccountRepository
 import awais.instagrabber.db.repositories.FavoriteRepository
 import awais.instagrabber.managers.DirectMessagesManager
 import awais.instagrabber.models.Resource
+import awais.instagrabber.models.enums.FavoriteType
 import awais.instagrabber.repositories.responses.User
 import awais.instagrabber.repositories.responses.directmessages.RankedRecipient
 import awais.instagrabber.utils.ControlledRunner
+import awais.instagrabber.utils.extensions.TAG
 import awais.instagrabber.webservices.*
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
@@ -22,14 +26,16 @@ class ProfileFragmentViewModel(
     mediaRepository: MediaRepository,
     graphQLRepository: GraphQLRepository,
     accountRepository: AccountRepository,
-    favoriteRepository: FavoriteRepository,
+    private val favoriteRepository: FavoriteRepository,
     ioDispatcher: CoroutineDispatcher,
 ) : ViewModel() {
     private val _currentUser = MutableLiveData<Resource<User?>>(Resource.loading(null))
+    private val _isFavorite = MutableLiveData(false)
     private var messageManager: DirectMessagesManager? = null
 
     val currentUser: LiveData<Resource<User?>> = _currentUser
     val isLoggedIn: LiveData<Boolean> = currentUser.map { it.data != null }
+    val isFavorite: LiveData<Boolean> = _isFavorite
 
     private val currentUserAndStateUsernameLiveData: LiveData<Pair<Resource<User?>, Resource<String?>>> =
         object : MediatorLiveData<Pair<Resource<User?>, Resource<String?>>>() {
@@ -78,9 +84,37 @@ class ProfileFragmentViewModel(
                     }
                 }
                 emit(Resource.success(fetchedUser))
+                if (fetchedUser != null) {
+                    checkAndInsertFavorite(fetchedUser)
+                }
             } catch (e: Exception) {
                 emit(Resource.error(e.message, null))
+                Log.e(TAG, "fetching user: ", e)
             }
+        }
+    }
+
+    private suspend fun checkAndInsertFavorite(fetchedUser: User) {
+        try {
+            val favorite = favoriteRepository.getFavorite(fetchedUser.username, FavoriteType.USER)
+            if (favorite == null) {
+                _isFavorite.postValue(false)
+                return
+            }
+            _isFavorite.postValue(true)
+            favoriteRepository.insertOrUpdateFavorite(
+                Favorite(
+                    favorite.id,
+                    fetchedUser.username,
+                    FavoriteType.USER,
+                    fetchedUser.fullName,
+                    fetchedUser.profilePicUrl,
+                    favorite.dateAdded
+                )
+            )
+        } catch (e: Exception) {
+            _isFavorite.postValue(false)
+            Log.e(TAG, "checkAndInsertFavorite: ", e)
         }
     }
 

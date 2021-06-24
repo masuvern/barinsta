@@ -3,7 +3,6 @@ package awais.instagrabber.fragments.main;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.Handler;
@@ -54,7 +53,6 @@ import java.util.Objects;
 import java.util.Set;
 
 import awais.instagrabber.R;
-import awais.instagrabber.UserSearchNavGraphDirections;
 import awais.instagrabber.activities.MainActivity;
 import awais.instagrabber.adapters.FeedAdapterV2;
 import awais.instagrabber.adapters.HighlightsAdapter;
@@ -69,8 +67,6 @@ import awais.instagrabber.db.repositories.FavoriteRepository;
 import awais.instagrabber.dialogs.PostsLayoutPreferencesDialogFragment;
 import awais.instagrabber.dialogs.ProfilePicDialogFragment;
 import awais.instagrabber.fragments.PostViewV2Fragment;
-import awais.instagrabber.fragments.UserSearchFragment;
-import awais.instagrabber.fragments.UserSearchFragmentDirections;
 import awais.instagrabber.managers.DirectMessagesManager;
 import awais.instagrabber.managers.InboxManager;
 import awais.instagrabber.models.HighlightModel;
@@ -131,7 +127,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
     private MenuItem blockMenuItem, restrictMenuItem, chainingMenuItem;
     private MenuItem muteStoriesMenuItem, mutePostsMenuItem, removeFollowerMenuItem;
     private MenuItem shareLinkMenuItem;
-//    private MenuItem shareDmMenuItem;
+    //    private MenuItem shareDmMenuItem;
     private boolean accountIsUpdated = false;
     private boolean postsSetupDone = false;
     private Set<Media> selectedFeedModels;
@@ -470,10 +466,10 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
         if (shareLinkMenuItem != null) {
             shareLinkMenuItem.setVisible(profileModel != null && !TextUtils.isEmpty(profileModel.getUsername()));
         }
-//        shareDmMenuItem = menu.findItem(R.id.share_dm);
-//        if (shareDmMenuItem != null) {
-//            shareDmMenuItem.setVisible(profileModel != null && profileModel.getPk() != 0L);
-//        }
+        //        shareDmMenuItem = menu.findItem(R.id.share_dm);
+        //        if (shareDmMenuItem != null) {
+        //            shareDmMenuItem.setVisible(profileModel != null && profileModel.getPk() != 0L);
+        //        }
     }
 
     @Override
@@ -586,20 +582,20 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
             startActivity(Intent.createChooser(sharingIntent, null));
             return true;
         } else if (itemId == R.id.share_dm) {
-//            final UserSearchNavGraphDirections.ActionGlobalUserSearch actionGlobalUserSearch = UserSearchFragmentDirections
-//                    .actionGlobalUserSearch()
-//                    .setTitle(getString(R.string.share))
-//                    .setActionLabel(getString(R.string.send))
-//                    .setShowGroups(true)
-//                    .setMultiple(true)
-//                    .setSearchMode(UserSearchFragment.SearchMode.RAVEN);
-//            final NavController navController = NavHostFragment.findNavController(ProfileFragment.this);
-//            try {
-//                navController.navigate(actionGlobalUserSearch);
-//            } catch (Exception e) {
-//                Log.e(TAG, "setupShare: ", e);
-//            }
-//            return true;
+            //            final UserSearchNavGraphDirections.ActionGlobalUserSearch actionGlobalUserSearch = UserSearchFragmentDirections
+            //                    .actionGlobalUserSearch()
+            //                    .setTitle(getString(R.string.share))
+            //                    .setActionLabel(getString(R.string.send))
+            //                    .setShowGroups(true)
+            //                    .setMultiple(true)
+            //                    .setSearchMode(UserSearchFragment.SearchMode.RAVEN);
+            //            final NavController navController = NavHostFragment.findNavController(ProfileFragment.this);
+            //            try {
+            //                navController.navigate(actionGlobalUserSearch);
+            //            } catch (Exception e) {
+            //                Log.e(TAG, "setupShare: ", e);
+            //            }
+            //            return true;
             return false;
         }
         return super.onOptionsItemSelected(item);
@@ -750,7 +746,9 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                     if (throwable != null || favorite == null) {
                         profileDetailsBinding.favChip.setChipIconResource(R.drawable.ic_outline_star_plus_24);
                         profileDetailsBinding.favChip.setText(R.string.add_to_favorites);
-                        Log.e(TAG, "setProfileDetails: ", throwable);
+                        if (throwable != null) {
+                            Log.e(TAG, "setProfileDetails: ", throwable);
+                        }
                         return;
                     }
                     profileDetailsBinding.favChip.setChipIconResource(R.drawable.ic_star_check_24);
@@ -1063,9 +1061,9 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
             if (shareLinkMenuItem != null) {
                 shareLinkMenuItem.setVisible(!TextUtils.isEmpty(profileModel.getUsername()));
             }
-//            if (shareDmMenuItem != null) {
-//                shareDmMenuItem.setVisible(profileModel.getPk() != 0L);
-//            }
+            //            if (shareDmMenuItem != null) {
+            //                shareDmMenuItem.setVisible(profileModel.getPk() != 0L);
+            //            }
         }
     }
 

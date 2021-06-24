@@ -7,10 +7,12 @@ import awais.instagrabber.MainCoroutineScopeRule
 import awais.instagrabber.common.*
 import awais.instagrabber.db.datasources.AccountDataSource
 import awais.instagrabber.db.datasources.FavoriteDataSource
+import awais.instagrabber.db.entities.Favorite
 import awais.instagrabber.db.repositories.AccountRepository
 import awais.instagrabber.db.repositories.FavoriteRepository
 import awais.instagrabber.getOrAwaitValue
 import awais.instagrabber.models.Resource
+import awais.instagrabber.models.enums.FavoriteType
 import awais.instagrabber.repositories.responses.FriendshipStatus
 import awais.instagrabber.repositories.responses.User
 import awais.instagrabber.webservices.*
@@ -18,9 +20,9 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.json.JSONException
 import org.junit.Rule
 import org.junit.Test
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.*
 import org.junit.runner.RunWith
+import java.time.LocalDateTime
 
 @RunWith(AndroidJUnit4::class)
 internal class ProfileFragmentViewModelTest {
@@ -232,5 +234,51 @@ internal class ProfileFragmentViewModelTest {
             profile = viewModel.profile.getOrAwaitValue()
         }
         assertEquals(testPublicUser1, profile.data)
+    }
+
+    @ExperimentalCoroutinesApi
+    @Test
+    fun `should update favorite in db if fetched user is a favorite`() {
+        val state = SavedStateHandle(
+            mutableMapOf<String, Any?>(
+                "username" to testPublicUser.username
+            )
+        )
+        val favorite = Favorite(
+            1,
+            testPublicUser.username,
+            FavoriteType.USER,
+            testPublicUser.username,
+            "test url",
+            LocalDateTime.now()
+        )
+        val graphQLRepository = object : GraphQLRepository(GraphQLServiceAdapter()) {
+            override suspend fun fetchUser(username: String): User = testPublicUser
+        }
+        var updateFavoriteCalled = false
+        val favoriteRepository = FavoriteRepository(FavoriteDataSource(object : FavoriteDaoAdapter() {
+            override suspend fun findFavoriteByQueryAndType(query: String, type: FavoriteType): Favorite = favorite
+            override suspend fun updateFavorites(vararg favorites: Favorite) {
+                updateFavoriteCalled = true
+            }
+        }))
+        val viewModel = ProfileFragmentViewModel(
+            state,
+            UserRepository(UserServiceAdapter()),
+            FriendshipRepository(FriendshipServiceAdapter()),
+            StoriesRepository(StoriesServiceAdapter()),
+            MediaRepository(MediaServiceAdapter()),
+            graphQLRepository,
+            AccountRepository(AccountDataSource(AccountDaoAdapter())),
+            favoriteRepository,
+            coroutineScope.dispatcher,
+        )
+        viewModel.setCurrentUser(Resource.success(null))
+        assertEquals(false, viewModel.isLoggedIn.getOrAwaitValue())
+        var profile = viewModel.profile.getOrAwaitValue()
+        while (profile.status == Resource.Status.LOADING) {
+            profile = viewModel.profile.getOrAwaitValue()
+        }
+        assertTrue(updateFavoriteCalled)
     }
 }

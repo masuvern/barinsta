@@ -156,28 +156,16 @@ open class AccountDaoAdapter : AccountDao {
     }
 }
 
-open class FavoriteDaoAdapter: FavoriteDao {
-    override suspend fun getAllFavorites(): List<Favorite> {
-        TODO("Not yet implemented")
-    }
+open class FavoriteDaoAdapter : FavoriteDao {
+    override suspend fun getAllFavorites(): List<Favorite> = emptyList()
 
-    override suspend fun findFavoriteByQueryAndType(query: String, type: FavoriteType): Favorite? {
-        TODO("Not yet implemented")
-    }
+    override suspend fun findFavoriteByQueryAndType(query: String, type: FavoriteType): Favorite? = null
 
-    override suspend fun insertFavorites(vararg favorites: Favorite) {
-        TODO("Not yet implemented")
-    }
+    override suspend fun insertFavorites(vararg favorites: Favorite) {}
 
-    override suspend fun updateFavorites(vararg favorites: Favorite) {
-        TODO("Not yet implemented")
-    }
+    override suspend fun updateFavorites(vararg favorites: Favorite) {}
 
-    override suspend fun deleteFavorites(vararg favorites: Favorite) {
-        TODO("Not yet implemented")
-    }
+    override suspend fun deleteFavorites(vararg favorites: Favorite) {}
 
-    override suspend fun deleteAllFavorites() {
-        TODO("Not yet implemented")
-    }
+    override suspend fun deleteAllFavorites() {}
 }
