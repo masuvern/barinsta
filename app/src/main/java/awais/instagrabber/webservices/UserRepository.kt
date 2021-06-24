@@ -19,7 +19,7 @@ open class UserRepository(private val service: UserService) {
         return response.user
     }
 
-    suspend fun getUserFriendship(uid: Long): FriendshipStatus = service.getUserFriendship(uid)
+    open suspend fun getUserFriendship(uid: Long): FriendshipStatus = service.getUserFriendship(uid)
 
     suspend fun search(query: String): UserSearchResponse {
         val timezoneOffset = TimeZone.getDefault().rawOffset.toFloat() / 1000

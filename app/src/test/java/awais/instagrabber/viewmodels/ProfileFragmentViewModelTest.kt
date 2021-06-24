@@ -11,6 +11,7 @@ import awais.instagrabber.db.repositories.AccountRepository
 import awais.instagrabber.db.repositories.FavoriteRepository
 import awais.instagrabber.getOrAwaitValue
 import awais.instagrabber.models.Resource
+import awais.instagrabber.repositories.responses.FriendshipStatus
 import awais.instagrabber.repositories.responses.User
 import awais.instagrabber.webservices.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -166,8 +167,10 @@ internal class ProfileFragmentViewModelTest {
 
     @ExperimentalCoroutinesApi
     private fun testPublicUsernameCurrentUserCommon(state: SavedStateHandle) {
-        val userRepository = object: UserRepository(UserServiceAdapter()) {
+        val friendshipStatus = FriendshipStatus(following = true)
+        val userRepository = object : UserRepository(UserServiceAdapter()) {
             override suspend fun getUsernameInfo(username: String): User = testPublicUser
+            override suspend fun getUserFriendship(uid: Long): FriendshipStatus = friendshipStatus
         }
         val viewModel = ProfileFragmentViewModel(
             state,
@@ -187,6 +190,7 @@ internal class ProfileFragmentViewModelTest {
             profile = viewModel.profile.getOrAwaitValue()
         }
         assertEquals(testPublicUser, profile.data)
+        assertEquals(friendshipStatus, profile.data?.friendshipStatus)
     }
 
     @ExperimentalCoroutinesApi
@@ -198,12 +202,10 @@ internal class ProfileFragmentViewModelTest {
             )
         )
         val graphQLRepository = object : GraphQLRepository(GraphQLServiceAdapter()) {
-            override suspend fun fetchUser(username: String): User {
-                return when(username) {
-                    testPublicUser.username -> testPublicUser
-                    testPublicUser1.username -> testPublicUser1
-                    else -> throw JSONException("")
-                }
+            override suspend fun fetchUser(username: String): User = when (username) {
+                testPublicUser.username -> testPublicUser
+                testPublicUser1.username -> testPublicUser1
+                else -> throw JSONException("")
             }
         }
         val viewModel = ProfileFragmentViewModel(

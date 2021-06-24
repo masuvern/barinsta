@@ -9,6 +9,7 @@ import awais.instagrabber.managers.DirectMessagesManager
 import awais.instagrabber.models.Resource
 import awais.instagrabber.repositories.responses.User
 import awais.instagrabber.repositories.responses.directmessages.RankedRecipient
+import awais.instagrabber.utils.ControlledRunner
 import awais.instagrabber.webservices.*
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
@@ -52,6 +53,7 @@ class ProfileFragmentViewModel(
             }
         }
 
+    private val profileFetchControlledRunner = ControlledRunner<User?>()
     val profile: LiveData<Resource<User?>> = currentUserAndStateUsernameLiveData.switchMap {
         val (userResource, stateUsernameResource) = it
         liveData<Resource<User?>>(context = viewModelScope.coroutineContext + ioDispatcher) {
@@ -66,10 +68,14 @@ class ProfileFragmentViewModel(
                 return@liveData
             }
             try {
-                val fetchedUser = if (user != null) {
-                    userRepository.getUsernameInfo(stateUsername) // logged in
-                } else {
-                    graphQLRepository.fetchUser(stateUsername) // anonymous
+                val fetchedUser = profileFetchControlledRunner.cancelPreviousThenRun {
+                    return@cancelPreviousThenRun if (user != null) {
+                        val tempUser = userRepository.getUsernameInfo(stateUsername) // logged in
+                        tempUser.friendshipStatus = userRepository.getUserFriendship(tempUser.pk)
+                        return@cancelPreviousThenRun tempUser
+                    } else {
+                        graphQLRepository.fetchUser(stateUsername) // anonymous
+                    }
                 }
                 emit(Resource.success(fetchedUser))
             } catch (e: Exception) {
