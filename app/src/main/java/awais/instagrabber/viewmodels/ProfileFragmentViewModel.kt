@@ -11,6 +11,7 @@ import awais.instagrabber.managers.DirectMessagesManager
 import awais.instagrabber.models.HighlightModel
 import awais.instagrabber.models.Resource
 import awais.instagrabber.models.StoryModel
+import awais.instagrabber.models.enums.BroadcastItemType
 import awais.instagrabber.models.enums.FavoriteType
 import awais.instagrabber.repositories.requests.StoryViewerOptions
 import awais.instagrabber.repositories.responses.User
@@ -212,14 +213,16 @@ class ProfileFragmentViewModel(
         if (messageManager == null) {
             messageManager = DirectMessagesManager
         }
-//        messageManager?.sendMedia(result, mediaId, BroadcastItemType.PROFILE, viewModelScope)
+        val mediaId = profile.value?.data?.pk ?: return
+        messageManager?.sendMedia(result, mediaId.toString(10), BroadcastItemType.PROFILE, viewModelScope)
     }
 
     fun shareDm(recipients: Set<RankedRecipient>) {
         if (messageManager == null) {
             messageManager = DirectMessagesManager
         }
-//        messageManager?.sendMedia(recipients, mediaId, BroadcastItemType.PROFILE, viewModelScope)
+        val mediaId = profile.value?.data?.pk ?: return
+        messageManager?.sendMedia(recipients, mediaId.toString(10), BroadcastItemType.PROFILE, viewModelScope)
     }
 }
 

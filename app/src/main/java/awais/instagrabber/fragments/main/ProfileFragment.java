@@ -35,6 +35,7 @@ import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.NavBackStackEntry;
 import androidx.navigation.NavController;
 import androidx.navigation.NavDirections;
 import androidx.navigation.fragment.NavHostFragment;
@@ -53,6 +54,7 @@ import java.util.Objects;
 import java.util.Set;
 
 import awais.instagrabber.R;
+import awais.instagrabber.UserSearchNavGraphDirections;
 import awais.instagrabber.activities.MainActivity;
 import awais.instagrabber.adapters.FeedAdapterV2;
 import awais.instagrabber.adapters.HighlightsAdapter;
@@ -67,6 +69,8 @@ import awais.instagrabber.db.repositories.FavoriteRepository;
 import awais.instagrabber.dialogs.PostsLayoutPreferencesDialogFragment;
 import awais.instagrabber.dialogs.ProfilePicDialogFragment;
 import awais.instagrabber.fragments.PostViewV2Fragment;
+import awais.instagrabber.fragments.UserSearchFragment;
+import awais.instagrabber.fragments.UserSearchFragmentDirections;
 import awais.instagrabber.managers.DirectMessagesManager;
 import awais.instagrabber.managers.InboxManager;
 import awais.instagrabber.models.HighlightModel;
@@ -126,8 +130,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
     private HighlightsViewModel highlightsViewModel;
     private MenuItem blockMenuItem, restrictMenuItem, chainingMenuItem;
     private MenuItem muteStoriesMenuItem, mutePostsMenuItem, removeFollowerMenuItem;
-    private MenuItem shareLinkMenuItem;
-    //    private MenuItem shareDmMenuItem;
+    private MenuItem shareLinkMenuItem, shareDmMenuItem;
     private boolean accountIsUpdated = false;
     private boolean postsSetupDone = false;
     private Set<Media> selectedFeedModels;
@@ -141,7 +144,6 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
     private ProfileFragmentViewModel viewModel;
     private String csrfToken;
     private String deviceUuid;
-    private MutableLiveData<Object> backStackSavedStateCollectionLiveData;
     private MutableLiveData<Object> backStackSavedStateResultLiveData;
 
     private final ServiceCallback<FriendshipChangeResponse> changeCb = new ServiceCallback<FriendshipChangeResponse>() {
@@ -334,7 +336,6 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
             }
         }
         // clear result
-        backStackSavedStateCollectionLiveData.postValue(null);
         backStackSavedStateResultLiveData.postValue(null);
     };
 
@@ -466,10 +467,10 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
         if (shareLinkMenuItem != null) {
             shareLinkMenuItem.setVisible(profileModel != null && !TextUtils.isEmpty(profileModel.getUsername()));
         }
-        //        shareDmMenuItem = menu.findItem(R.id.share_dm);
-        //        if (shareDmMenuItem != null) {
-        //            shareDmMenuItem.setVisible(profileModel != null && profileModel.getPk() != 0L);
-        //        }
+        shareDmMenuItem = menu.findItem(R.id.share_dm);
+        if (shareDmMenuItem != null) {
+            shareDmMenuItem.setVisible(profileModel != null && profileModel.getPk() != 0L);
+        }
     }
 
     @Override
@@ -582,21 +583,20 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
             startActivity(Intent.createChooser(sharingIntent, null));
             return true;
         } else if (itemId == R.id.share_dm) {
-            //            final UserSearchNavGraphDirections.ActionGlobalUserSearch actionGlobalUserSearch = UserSearchFragmentDirections
-            //                    .actionGlobalUserSearch()
-            //                    .setTitle(getString(R.string.share))
-            //                    .setActionLabel(getString(R.string.send))
-            //                    .setShowGroups(true)
-            //                    .setMultiple(true)
-            //                    .setSearchMode(UserSearchFragment.SearchMode.RAVEN);
-            //            final NavController navController = NavHostFragment.findNavController(ProfileFragment.this);
-            //            try {
-            //                navController.navigate(actionGlobalUserSearch);
-            //            } catch (Exception e) {
-            //                Log.e(TAG, "setupShare: ", e);
-            //            }
-            //            return true;
-            return false;
+            final UserSearchNavGraphDirections.ActionGlobalUserSearch actionGlobalUserSearch = UserSearchFragmentDirections
+                    .actionGlobalUserSearch()
+                    .setTitle(getString(R.string.share))
+                    .setActionLabel(getString(R.string.send))
+                    .setShowGroups(true)
+                    .setMultiple(true)
+                    .setSearchMode(UserSearchFragment.SearchMode.RAVEN);
+            final NavController navController = NavHostFragment.findNavController(ProfileFragment.this);
+            try {
+                navController.navigate(actionGlobalUserSearch);
+            } catch (Exception e) {
+                Log.e(TAG, "setupShare: ", e);
+            }
+            return true;
         }
         return super.onOptionsItemSelected(item);
     }
@@ -606,6 +606,17 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
         profileDetailsBinding.countsDivider.getRoot().setVisibility(View.GONE);
         profileDetailsBinding.mainProfileImage.setVisibility(View.INVISIBLE);
         fetchProfileDetails();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        final NavController navController = NavHostFragment.findNavController(this);
+        final NavBackStackEntry backStackEntry = navController.getCurrentBackStackEntry();
+        if (backStackEntry != null) {
+            backStackSavedStateResultLiveData = backStackEntry.getSavedStateHandle().getLiveData("result");
+            backStackSavedStateResultLiveData.observe(getViewLifecycleOwner(), backStackSavedStateObserver);
+        }
     }
 
     @Override
@@ -1061,9 +1072,9 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
             if (shareLinkMenuItem != null) {
                 shareLinkMenuItem.setVisible(!TextUtils.isEmpty(profileModel.getUsername()));
             }
-            //            if (shareDmMenuItem != null) {
-            //                shareDmMenuItem.setVisible(profileModel.getPk() != 0L);
-            //            }
+            if (shareDmMenuItem != null) {
+                shareDmMenuItem.setVisible(profileModel.getPk() != 0L);
+            }
         }
     }
 
