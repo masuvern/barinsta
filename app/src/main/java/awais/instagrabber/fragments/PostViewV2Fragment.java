@@ -187,9 +187,6 @@ public class PostViewV2Fragment extends Fragment implements EditTextDialogFragme
     public void onCreate(@Nullable final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         viewModel = new ViewModelProvider(this).get(PostViewV2ViewModel.class);
-        final MainActivity activity = (MainActivity) getActivity();
-        if (activity == null) return;
-        controller = new WindowInsetsControllerCompat(activity.getWindow(), activity.getRootView());
     }
 
     @Nullable
@@ -199,6 +196,9 @@ public class PostViewV2Fragment extends Fragment implements EditTextDialogFragme
                              @Nullable final Bundle savedInstanceState) {
         binding = DialogPostViewBinding.inflate(inflater, container, false);
         bottom = LayoutPostViewBottomBinding.bind(binding.getRoot());
+        final MainActivity activity = (MainActivity) getActivity();
+        if (activity == null) return null;
+        controller = new WindowInsetsControllerCompat(activity.getWindow(), activity.getRootView());
         return binding.getRoot();
     }
 
