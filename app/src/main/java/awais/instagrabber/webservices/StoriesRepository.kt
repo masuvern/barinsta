@@ -19,7 +19,7 @@ import org.json.JSONArray
 import org.json.JSONObject
 import java.util.*
 
-class StoriesRepository(private val service: StoriesService) {
+open class StoriesRepository(private val service: StoriesService) {
 
     suspend fun fetch(mediaId: Long): StoryModel {
         val response = service.fetch(mediaId)
@@ -99,7 +99,7 @@ class StoriesRepository(private val service: StoriesService) {
         return sort(feedStoryModels)
     }
 
-    suspend fun fetchHighlights(profileId: Long): List<HighlightModel> {
+    open suspend fun fetchHighlights(profileId: Long): List<HighlightModel> {
         val response = service.fetchHighlights(profileId)
         val highlightsReel = JSONObject(response).getJSONArray("tray")
         val length = highlightsReel.length()
@@ -150,7 +150,7 @@ class StoriesRepository(private val service: StoriesService) {
         return ArchiveFetchResponse(highlightModels, data.getBoolean("more_available"), data.getString("max_id"))
     }
 
-    suspend fun getUserStory(options: StoryViewerOptions): List<StoryModel> {
+    open suspend fun getUserStory(options: StoryViewerOptions): List<StoryModel> {
         val url = buildUrl(options) ?: return emptyList()
         val response = service.getUserStory(url)
         val isLocOrHashtag = options.type == StoryViewerOptions.Type.LOCATION || options.type == StoryViewerOptions.Type.HASHTAG

@@ -5,14 +5,14 @@ import awais.instagrabber.models.stickers.*
 import java.io.Serializable
 
 data class StoryModel(
-    val storyMediaId: String?,
-    val storyUrl: String?,
-    var thumbnail: String?,
-    val itemType: MediaItemType?,
-    val timestamp: Long,
-    val username: String?,
-    val userId: Long,
-    val canReply: Boolean
+    val storyMediaId: String? = null,
+    val storyUrl: String? = null,
+    var thumbnail: String? = null,
+    val itemType: MediaItemType? = null,
+    val timestamp: Long = 0,
+    val username: String? = null,
+    val userId: Long = 0,
+    val canReply: Boolean = false,
 ) : Serializable {
     var videoUrl: String? = null
     var tappableShortCode: String? = null

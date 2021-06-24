@@ -8,8 +8,11 @@ import awais.instagrabber.db.entities.Favorite
 import awais.instagrabber.db.repositories.AccountRepository
 import awais.instagrabber.db.repositories.FavoriteRepository
 import awais.instagrabber.managers.DirectMessagesManager
+import awais.instagrabber.models.HighlightModel
 import awais.instagrabber.models.Resource
+import awais.instagrabber.models.StoryModel
 import awais.instagrabber.models.enums.FavoriteType
+import awais.instagrabber.repositories.requests.StoryViewerOptions
 import awais.instagrabber.repositories.responses.User
 import awais.instagrabber.repositories.responses.directmessages.RankedRecipient
 import awais.instagrabber.utils.ControlledRunner
@@ -22,7 +25,7 @@ class ProfileFragmentViewModel(
     state: SavedStateHandle,
     userRepository: UserRepository,
     friendshipRepository: FriendshipRepository,
-    storiesRepository: StoriesRepository,
+    private val storiesRepository: StoriesRepository,
     mediaRepository: MediaRepository,
     graphQLRepository: GraphQLRepository,
     accountRepository: AccountRepository,
@@ -61,27 +64,21 @@ class ProfileFragmentViewModel(
 
     private val profileFetchControlledRunner = ControlledRunner<User?>()
     val profile: LiveData<Resource<User?>> = currentUserAndStateUsernameLiveData.switchMap {
-        val (userResource, stateUsernameResource) = it
+        val (currentUserResource, stateUsernameResource) = it
         liveData<Resource<User?>>(context = viewModelScope.coroutineContext + ioDispatcher) {
-            if (userResource.status == Resource.Status.LOADING || stateUsernameResource.status == Resource.Status.LOADING) {
+            if (currentUserResource.status == Resource.Status.LOADING || stateUsernameResource.status == Resource.Status.LOADING) {
                 emit(Resource.loading(null))
                 return@liveData
             }
-            val user = userResource.data
+            val currentUser = currentUserResource.data
             val stateUsername = stateUsernameResource.data
             if (stateUsername.isNullOrBlank()) {
-                emit(Resource.success(user))
+                emit(Resource.success(currentUser))
                 return@liveData
             }
             try {
                 val fetchedUser = profileFetchControlledRunner.cancelPreviousThenRun {
-                    return@cancelPreviousThenRun if (user != null) {
-                        val tempUser = userRepository.getUsernameInfo(stateUsername) // logged in
-                        tempUser.friendshipStatus = userRepository.getUserFriendship(tempUser.pk)
-                        return@cancelPreviousThenRun tempUser
-                    } else {
-                        graphQLRepository.fetchUser(stateUsername) // anonymous
-                    }
+                    return@cancelPreviousThenRun fetchUser(currentUser, userRepository, stateUsername, graphQLRepository)
                 }
                 emit(Resource.success(fetchedUser))
                 if (fetchedUser != null) {
@@ -93,6 +90,81 @@ class ProfileFragmentViewModel(
             }
         }
     }
+
+    private val storyFetchControlledRunner = ControlledRunner<List<StoryModel>?>()
+    val userStories: LiveData<Resource<List<StoryModel>?>> = profile.switchMap { userResource ->
+        liveData<Resource<List<StoryModel>?>>(context = viewModelScope.coroutineContext + ioDispatcher) {
+            // don't fetch if not logged in
+            if (isLoggedIn.value != true) {
+                emit(Resource.success(null))
+                return@liveData
+            }
+            if (userResource.status == Resource.Status.LOADING) {
+                emit(Resource.loading(null))
+                return@liveData
+            }
+            val user = userResource.data
+            if (user == null) {
+                emit(Resource.success(null))
+                return@liveData
+            }
+            try {
+                val fetchedStories = storyFetchControlledRunner.cancelPreviousThenRun { fetchUserStory(user) }
+                emit(Resource.success(fetchedStories))
+            } catch (e: Exception) {
+                emit(Resource.error(e.message, null))
+                Log.e(TAG, "fetching story: ", e)
+            }
+        }
+    }
+
+    private val highlightsFetchControlledRunner = ControlledRunner<List<HighlightModel>?>()
+    val userHighlights: LiveData<Resource<List<HighlightModel>?>> = profile.switchMap { userResource ->
+        liveData<Resource<List<HighlightModel>?>>(context = viewModelScope.coroutineContext + ioDispatcher) {
+            // don't fetch if not logged in
+            if (isLoggedIn.value != true) {
+                emit(Resource.success(null))
+                return@liveData
+            }
+            if (userResource.status == Resource.Status.LOADING) {
+                emit(Resource.loading(null))
+                return@liveData
+            }
+            val user = userResource.data
+            if (user == null) {
+                emit(Resource.success(null))
+                return@liveData
+            }
+            try {
+                val fetchedHighlights = highlightsFetchControlledRunner.cancelPreviousThenRun { fetchUserHighlights(user) }
+                emit(Resource.success(fetchedHighlights))
+            } catch (e: Exception) {
+                emit(Resource.error(e.message, null))
+                Log.e(TAG, "fetching story: ", e)
+            }
+        }
+    }
+
+    private suspend fun fetchUser(
+        currentUser: User?,
+        userRepository: UserRepository,
+        stateUsername: String,
+        graphQLRepository: GraphQLRepository
+    ) = if (currentUser != null) {
+        // logged in
+        val tempUser = userRepository.getUsernameInfo(stateUsername)
+        tempUser.friendshipStatus = userRepository.getUserFriendship(tempUser.pk)
+        tempUser
+    } else {
+        // anonymous
+        graphQLRepository.fetchUser(stateUsername)
+    }
+
+    private suspend fun fetchUserStory(fetchedUser: User): List<StoryModel> = storiesRepository.getUserStory(
+        StoryViewerOptions.forUser(fetchedUser.pk, fetchedUser.fullName)
+    )
+
+    private suspend fun fetchUserHighlights(fetchedUser: User): List<HighlightModel> = storiesRepository.fetchHighlights(fetchedUser.pk)
 
     private suspend fun checkAndInsertFavorite(fetchedUser: User) {
         try {

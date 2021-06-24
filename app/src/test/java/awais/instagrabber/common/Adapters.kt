@@ -17,9 +17,7 @@ open class UserServiceAdapter : UserService {
         TODO("Not yet implemented")
     }
 
-    override suspend fun getUserFriendship(uid: Long): FriendshipStatus {
-        TODO("Not yet implemented")
-    }
+    override suspend fun getUserFriendship(uid: Long): FriendshipStatus = FriendshipStatus()
 
     override suspend fun search(timezoneOffset: Float, query: String): UserSearchResponse {
         TODO("Not yet implemented")
