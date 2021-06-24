@@ -11,8 +11,11 @@ import awais.instagrabber.db.entities.Favorite
 import awais.instagrabber.db.repositories.AccountRepository
 import awais.instagrabber.db.repositories.FavoriteRepository
 import awais.instagrabber.getOrAwaitValue
+import awais.instagrabber.models.HighlightModel
 import awais.instagrabber.models.Resource
+import awais.instagrabber.models.StoryModel
 import awais.instagrabber.models.enums.FavoriteType
+import awais.instagrabber.repositories.requests.StoryViewerOptions
 import awais.instagrabber.repositories.responses.FriendshipStatus
 import awais.instagrabber.repositories.responses.User
 import awais.instagrabber.webservices.*
@@ -281,5 +284,52 @@ internal class ProfileFragmentViewModelTest {
         }
         assertEquals(true, viewModel.isFavorite.getOrAwaitValue())
         assertTrue(updateFavoriteCalled)
+    }
+
+
+    @ExperimentalCoroutinesApi
+    @Test
+    fun `should fetch user stories and highlights when logged in`() {
+        val state = SavedStateHandle(
+            mutableMapOf<String, Any?>(
+                "username" to testPublicUser.username
+            )
+        )
+        val testUserStories = listOf(StoryModel())
+        val testUserHighlights = listOf(HighlightModel())
+        val userRepository = object : UserRepository(UserServiceAdapter()) {
+            override suspend fun getUsernameInfo(username: String): User = testPublicUser
+        }
+        val storiesRepository = object : StoriesRepository(StoriesServiceAdapter()) {
+            override suspend fun getUserStory(options: StoryViewerOptions): List<StoryModel> = testUserStories
+            override suspend fun fetchHighlights(profileId: Long): List<HighlightModel> = testUserHighlights
+        }
+        val viewModel = ProfileFragmentViewModel(
+            state,
+            userRepository,
+            FriendshipRepository(FriendshipServiceAdapter()),
+            storiesRepository,
+            MediaRepository(MediaServiceAdapter()),
+            GraphQLRepository(GraphQLServiceAdapter()),
+            AccountRepository(AccountDataSource(AccountDaoAdapter())),
+            FavoriteRepository(FavoriteDataSource(FavoriteDaoAdapter())),
+            coroutineScope.dispatcher,
+        )
+        viewModel.setCurrentUser(Resource.success(User()))
+        assertEquals(true, viewModel.isLoggedIn.getOrAwaitValue())
+        var profile = viewModel.profile.getOrAwaitValue()
+        while (profile.status == Resource.Status.LOADING) {
+            profile = viewModel.profile.getOrAwaitValue()
+        }
+        var userStories = viewModel.userStories.getOrAwaitValue()
+        while (userStories.status == Resource.Status.LOADING) {
+            userStories = viewModel.userStories.getOrAwaitValue()
+        }
+        assertEquals(testUserStories, userStories.data)
+        var userHighlights = viewModel.userHighlights.getOrAwaitValue()
+        while (userHighlights.status == Resource.Status.LOADING) {
+            userHighlights = viewModel.userHighlights.getOrAwaitValue()
+        }
+        assertEquals(testUserHighlights, userHighlights.data)
     }
 }
