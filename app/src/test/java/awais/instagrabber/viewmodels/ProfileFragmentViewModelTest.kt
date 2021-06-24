@@ -279,6 +279,7 @@ internal class ProfileFragmentViewModelTest {
         while (profile.status == Resource.Status.LOADING) {
             profile = viewModel.profile.getOrAwaitValue()
         }
+        assertEquals(true, viewModel.isFavorite.getOrAwaitValue())
         assertTrue(updateFavoriteCalled)
     }
 }
