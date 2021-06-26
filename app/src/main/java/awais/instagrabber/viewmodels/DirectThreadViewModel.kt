@@ -76,10 +76,6 @@ class DirectThreadViewModel(
         return threadManager.sendText(text, viewModelScope)
     }
 
-    fun sendUri(entry: MediaController.MediaEntry): LiveData<Resource<Any?>> {
-        return threadManager.sendUri(entry, viewModelScope)
-    }
-
     fun sendUri(uri: Uri): LiveData<Resource<Any?>> {
         return threadManager.sendUri(uri, viewModelScope)
     }

@@ -367,17 +367,6 @@ class ThreadManager(
         return data
     }
 
-    fun sendUri(entry: MediaController.MediaEntry, scope: CoroutineScope): LiveData<Resource<Any?>> {
-        val data = MutableLiveData<Resource<Any?>>()
-        val uri = Uri.fromFile(File(entry.path))
-        if (!entry.isVideo) {
-            sendPhoto(data, uri, entry.width, entry.height, scope)
-            return data
-        }
-        sendVideo(data, uri, entry.size, entry.duration, entry.width, entry.height, scope)
-        return data
-    }
-
     fun sendUri(uri: Uri, scope: CoroutineScope): LiveData<Resource<Any?>> {
         val data = MutableLiveData<Resource<Any?>>()
         val mimeType = Utils.getMimeType(uri, contentResolver)
