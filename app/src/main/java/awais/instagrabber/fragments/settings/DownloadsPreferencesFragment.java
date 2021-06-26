@@ -111,7 +111,7 @@ public class DownloadsPreferencesFragment extends BasePreferencesFragment {
                             R.string.error,
                             "com.android.externalstorage.documents".equals(data.getData().getAuthority())
                                 ? "Please report this error to the developers:\n\n" + sw.toString()
-                                : getString(R.string.dir_select_no_download_folder),
+                                : getString(R.string.dir_select_no_download_folder, data.getData().getAuthority()),
                             R.string.ok,
                             0,
                             0

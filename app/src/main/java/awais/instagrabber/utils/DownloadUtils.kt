@@ -38,8 +38,6 @@ object DownloadUtils {
     private const val DIR_TEMP = "Temp"
     private const val DIR_BACKUPS = "Backups"
     private var root: DocumentFile? = null
-    const val WRITE_PERMISSION = Manifest.permission.WRITE_EXTERNAL_STORAGE
-    val PERMS = arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE)
     @JvmStatic
     @Throws(ReselectDocumentTreeException::class)
     fun init(
@@ -49,11 +47,11 @@ object DownloadUtils {
         if (isEmpty(barinstaDirUri)) {
             throw ReselectDocumentTreeException("folder path is null or empty")
         }
+        val uri = Uri.parse(barinstaDirUri)
         if (!barinstaDirUri!!.startsWith("content://com.android.externalstorage.documents")) {
             // reselect the folder in selector view
-            throw ReselectDocumentTreeException(Uri.parse(barinstaDirUri))
+            throw ReselectDocumentTreeException(uri)
         }
-        val uri = Uri.parse(barinstaDirUri)
         val existingPermissions = context.contentResolver.persistedUriPermissions
         if (existingPermissions.isEmpty()) {
             // reselect the folder in selector view
@@ -150,7 +148,7 @@ object DownloadUtils {
             list.add(DIR_DOWNLOADS)
             return list
         }
-        val finalUsername = if (username!!.startsWith("@")) username.substring(1) else username
+        val finalUsername = if (username.startsWith("@")) username.substring(1) else username
         list.add(DIR_DOWNLOADS)
         list.add(finalUsername)
         return list
@@ -337,7 +335,7 @@ object DownloadUtils {
 
     private fun checkPathExists(paths: List<String>, context: Context): Boolean {
         if (root == null) return false
-        val uri = root!!.getUri()
+        val uri = root!!.uri
         var found = false
         var docId = DocumentsContract.getTreeDocumentId(uri)
         for (path in paths) {
@@ -349,7 +347,7 @@ object DownloadUtils {
                 ), null, null, null
             )
             if (docCursor == null) return false
-            while (docCursor!!.moveToNext() && !found) {
+            while (docCursor.moveToNext() && !found) {
                 if (path.equals(docCursor.getString(0))) {
                     docId = docCursor.getString(1)
                     found = true
