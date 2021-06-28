@@ -68,20 +68,21 @@ object DirectMessagesManager {
 
     suspend fun createThread(userPk: Long): DirectThread = DirectMessagesService.createThread(csrfToken, viewerId, deviceUuid, listOf(userPk), null)
 
-    fun sendMedia(recipient: RankedRecipient, mediaId: String, itemType: BroadcastItemType, scope: CoroutineScope) {
-        sendMedia(setOf(recipient), mediaId, itemType, scope)
+    fun sendMedia(recipient: RankedRecipient, mediaId: String, secondId: String?, itemType: BroadcastItemType, scope: CoroutineScope) {
+        sendMedia(setOf(recipient), mediaId, secondId, itemType, scope)
     }
 
     fun sendMedia(
         recipients: Set<RankedRecipient>,
         mediaId: String,
+        secondId: String?,
         itemType: BroadcastItemType,
         scope: CoroutineScope,
     ) {
         val threadIds = recipients.mapNotNull{ it.thread?.threadId }
         val userIdsTemp = recipients.mapNotNull{ it.user?.pk }
         val userIds = userIdsTemp.map{ listOf(it.toString(10)) }
-        sendMedia(threadIds, userIds, mediaId, itemType, scope) {
+        sendMedia(threadIds, userIds, mediaId, secondId, itemType, scope) {
             inboxManager.refresh(scope)
         }
     }
@@ -90,6 +91,7 @@ object DirectMessagesManager {
         threadIds: List<String>,
         userIds: List<List<String>>,
         mediaId: String,
+        secondId: String?,
         itemType: BroadcastItemType,
         scope: CoroutineScope,
         callback: (() -> Unit)?,

@@ -214,7 +214,7 @@ class ProfileFragmentViewModel(
             messageManager = DirectMessagesManager
         }
         val mediaId = profile.value?.data?.pk ?: return
-        messageManager?.sendMedia(result, mediaId.toString(10), BroadcastItemType.PROFILE, viewModelScope)
+        messageManager?.sendMedia(result, mediaId.toString(10), null, BroadcastItemType.PROFILE, viewModelScope)
     }
 
     fun shareDm(recipients: Set<RankedRecipient>) {
@@ -222,7 +222,7 @@ class ProfileFragmentViewModel(
             messageManager = DirectMessagesManager
         }
         val mediaId = profile.value?.data?.pk ?: return
-        messageManager?.sendMedia(recipients, mediaId.toString(10), BroadcastItemType.PROFILE, viewModelScope)
+        messageManager?.sendMedia(recipients, mediaId.toString(10), null, BroadcastItemType.PROFILE, viewModelScope)
     }
 }
 

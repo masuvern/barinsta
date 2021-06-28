@@ -336,7 +336,7 @@ class PostViewV2ViewModel : ViewModel() {
             messageManager = DirectMessagesManager
         }
         val mediaId = media.id ?: return
-        messageManager?.sendMedia(result, mediaId, BroadcastItemType.MEDIA_SHARE, viewModelScope)
+        messageManager?.sendMedia(result, mediaId, null, BroadcastItemType.MEDIA_SHARE, viewModelScope)
     }
 
     fun shareDm(recipients: Set<RankedRecipient>) {
@@ -344,6 +344,6 @@ class PostViewV2ViewModel : ViewModel() {
             messageManager = DirectMessagesManager
         }
         val mediaId = media.id ?: return
-        messageManager?.sendMedia(recipients, mediaId, BroadcastItemType.MEDIA_SHARE, viewModelScope)
+        messageManager?.sendMedia(recipients, mediaId, null, BroadcastItemType.MEDIA_SHARE, viewModelScope)
     }
 }
