@@ -68,16 +68,27 @@ public class DirectItemMediaShareViewHolder extends DirectItemViewHolder {
             setupTitle(media);
             setupCaption(media);
         });
+        final int index;
+        final Media toDisplay;
+        final MediaItemType mediaType = media.getMediaType();
+        switch (mediaType) {
+            case MEDIA_TYPE_SLIDER:
+                toDisplay = media.getCarouselMedia().stream()
+                        .filter(m -> media.getCarouselShareChildMediaId() != null &&
+                                media.getCarouselShareChildMediaId().equals(m.getId()))
+                        .findAny()
+                        .orElse(media.getCarouselMedia().get(0));
+                index = media.getCarouselMedia().indexOf(toDisplay);
+                break;
+            default:
+                toDisplay = media;
+                index = 0;
+        }
         itemView.post(() -> {
-            final MediaItemType mediaType = media.getMediaType();
             setupTypeIndicator(mediaType);
-            if (mediaType == MediaItemType.MEDIA_TYPE_SLIDER) {
-                setupPreview(media.getCarouselMedia().get(0), messageDirection);
-                return;
-            }
-            setupPreview(media, messageDirection);
+            setupPreview(toDisplay, messageDirection);
         });
-        itemView.setOnClickListener(v -> openMedia(media));
+        itemView.setOnClickListener(v -> openMedia(media, index));
     }
 
     private void setupTypeIndicator(final MediaItemType mediaType) {

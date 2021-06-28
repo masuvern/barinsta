@@ -50,7 +50,7 @@ public class DirectItemRavenMediaViewHolder extends DirectItemViewHolder {
         setPreview(visualMedia, messageDirection);
         final boolean expired = TextUtils.isEmpty(media.getId());
         if (expired) return;
-        itemView.setOnClickListener(v -> openMedia(media));
+        itemView.setOnClickListener(v -> openMedia(media, -1));
         /*final boolean isExpired = visualMedia == null || (mediaModel = visualMedia.getMedia()) == null ||
                 TextUtils.isEmpty(mediaModel.getThumbUrl()) && mediaModel.getPk() < 1;
 

@@ -401,7 +401,7 @@ public final class DirectItemsAdapter extends RecyclerView.Adapter<RecyclerView.
 
         void onEmailClick(String email);
 
-        void onMediaClick(Media media);
+        void onMediaClick(Media media, int index);
 
         void onStoryClick(DirectItemStoryShare storyShare);
 

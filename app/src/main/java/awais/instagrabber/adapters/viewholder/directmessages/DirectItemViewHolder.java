@@ -501,8 +501,8 @@ public abstract class DirectItemViewHolder extends RecyclerView.ViewHolder imple
         callback.onURLClick(url);
     }
 
-    protected void openMedia(final Media media) {
-        callback.onMediaClick(media);
+    protected void openMedia(final Media media, final int index) {
+        callback.onMediaClick(media, index);
     }
 
     protected void openStory(final DirectItemStoryShare storyShare) {

@@ -76,7 +76,7 @@ public class DirectItemReelShareViewHolder extends DirectItemViewHolder {
         }
         if (!expired) {
             setPreview(media);
-            itemView.setOnClickListener(v -> openMedia(media));
+            itemView.setOnClickListener(v -> openMedia(media, -1));
         }
     }
 

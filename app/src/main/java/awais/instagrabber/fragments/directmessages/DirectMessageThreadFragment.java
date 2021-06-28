@@ -220,7 +220,7 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
         }
 
         @Override
-        public void onMediaClick(final Media media) {
+        public void onMediaClick(final Media media, final int index) {
             if (media.isReelMedia()) {
                 final String pk = media.getPk();
                 try {
@@ -239,6 +239,7 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
             final NavController navController = NavHostFragment.findNavController(DirectMessageThreadFragment.this);
             final Bundle bundle = new Bundle();
             bundle.putSerializable(PostViewV2Fragment.ARG_MEDIA, media);
+            bundle.putInt(PostViewV2Fragment.ARG_SLIDER_POSITION, index);
             try {
                 navController.navigate(R.id.action_global_post_view, bundle);
             } catch (Exception e) {
