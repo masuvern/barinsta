@@ -183,7 +183,7 @@ dependencies {
 
     implementation 'com.google.guava:guava:27.0.1-android'
 
-    def core_version = "1.6.0-beta01"
+    def core_version = "1.6.0-rc01"
     implementation "androidx.core:core:$core_version"
 
     // Fragment
