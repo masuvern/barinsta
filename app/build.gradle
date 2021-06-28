@@ -166,7 +166,7 @@ dependencies {
     def nav_version = '2.3.5'
     def exoplayer_version = '2.14.1'
 
-    implementation 'com.google.android.material:material:1.4.0-beta01'
+    implementation 'com.google.android.material:material:1.4.0-rc01'
 
     implementation "com.google.android.exoplayer:exoplayer-core:$exoplayer_version"
     implementation "com.google.android.exoplayer:exoplayer-dash:$exoplayer_version"
