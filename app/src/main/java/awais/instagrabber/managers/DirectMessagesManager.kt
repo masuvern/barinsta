@@ -107,7 +107,8 @@ object DirectMessagesManager {
                         deviceUuid,
                         UUID.randomUUID().toString(),
                         ThreadIdsOrUserIds(threadIds, userIds),
-                        mediaId
+                        mediaId,
+                        secondId
                     )
                 if (itemType == BroadcastItemType.PROFILE)
                     DirectMessagesService.broadcastProfile(

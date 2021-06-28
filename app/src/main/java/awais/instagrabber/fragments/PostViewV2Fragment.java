@@ -152,7 +152,7 @@ public class PostViewV2Fragment extends Fragment implements EditTextDialogFragme
             if (context != null) {
                 Toast.makeText(context, R.string.sending, Toast.LENGTH_SHORT).show();
             }
-            viewModel.shareDm((RankedRecipient) result);
+            viewModel.shareDm((RankedRecipient) result, sliderPosition);
         } else if ((result instanceof Set)) {
             try {
                 // Log.d(TAG, "result: " + result);
@@ -161,7 +161,7 @@ public class PostViewV2Fragment extends Fragment implements EditTextDialogFragme
                     Toast.makeText(context, R.string.sending, Toast.LENGTH_SHORT).show();
                 }
                 //noinspection unchecked
-                viewModel.shareDm((Set<RankedRecipient>) result);
+                viewModel.shareDm((Set<RankedRecipient>) result, sliderPosition);
             } catch (Exception e) {
                 Log.e(TAG, "share: ", e);
             }
