@@ -206,7 +206,7 @@ dependencies {
     def camerax_version = "1.1.0-alpha05"
     implementation "androidx.camera:camera-camera2:$camerax_version"
     implementation "androidx.camera:camera-lifecycle:$camerax_version"
-    implementation "androidx.camera:camera-view:1.0.0-alpha24"
+    implementation "androidx.camera:camera-view:1.0.0-alpha25"
 
     // EmojiCompat
     def emoji_compat_version = "1.1.0"
