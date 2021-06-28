@@ -294,7 +294,7 @@ public class PostViewV2Fragment extends Fragment implements EditTextDialogFragme
             return;
         }
         final Media media = (Media) feedModelSerializable;
-        if (media.getMediaType() == MediaItemType.MEDIA_TYPE_SLIDER) {
+        if (media.getMediaType() == MediaItemType.MEDIA_TYPE_SLIDER && sliderPosition == -1) {
             sliderPosition = arguments.getInt(ARG_SLIDER_POSITION, 0);
         }
         viewModel.setMedia(media);
@@ -1039,6 +1039,7 @@ public class PostViewV2Fragment extends Fragment implements EditTextDialogFragme
         final String text = "1/" + carouselMedia.size();
         binding.mediaCounter.setText(text);
         sliderItemsAdapter.submitList(media.getCarouselMedia());
+        sliderParent.setCurrentItem(sliderPosition);
     }
 
     private void pauseSliderPlayer() {
