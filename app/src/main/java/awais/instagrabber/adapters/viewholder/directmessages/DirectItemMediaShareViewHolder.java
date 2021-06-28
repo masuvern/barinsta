@@ -65,7 +65,6 @@ public class DirectItemMediaShareViewHolder extends DirectItemViewHolder {
         if (media == null) return;
         itemView.post(() -> {
             setupUser(media);
-            setupTitle(media);
             setupCaption(media);
         });
         final int index;
@@ -137,16 +136,6 @@ public class DirectItemMediaShareViewHolder extends DirectItemViewHolder {
             binding.caption.setMaxLines(2);
         } else {
             binding.caption.setVisibility(View.GONE);
-        }
-    }
-
-    private void setupTitle(@NonNull final Media media) {
-        final String title = media.getTitle();
-        if (!TextUtils.isEmpty(title)) {
-            binding.title.setVisibility(View.VISIBLE);
-            binding.title.setText(title);
-        } else {
-            binding.title.setVisibility(View.GONE);
         }
     }
 
