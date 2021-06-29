@@ -8,7 +8,6 @@ import awais.instagrabber.R;
 import awais.instagrabber.adapters.FeedStoriesListAdapter.OnFeedStoryClickListener;
 import awais.instagrabber.adapters.HighlightStoriesListAdapter.OnHighlightStoryClickListener;
 import awais.instagrabber.databinding.ItemNotificationBinding;
-import awais.instagrabber.models.HighlightModel;
 import awais.instagrabber.repositories.responses.stories.Story;
 import awais.instagrabber.utils.ResponseBodyUtils;
 
@@ -58,7 +57,7 @@ public final class StoryListViewHolder extends RecyclerView.ViewHolder {
         });
     }
 
-    public void bind(final HighlightModel model,
+    public void bind(final Story model,
                      final int position,
                      final OnHighlightStoryClickListener notificationClickListener) {
         if (model == null) return;
@@ -74,7 +73,7 @@ public final class StoryListViewHolder extends RecyclerView.ViewHolder {
         binding.ivProfilePic.setVisibility(View.GONE);
 
         binding.ivPreviewPic.setVisibility(View.VISIBLE);
-        binding.ivPreviewPic.setImageURI(model.getThumbnailUrl());
+        binding.ivPreviewPic.setImageURI(model.getCoverImageVersion().getUrl());
 
         itemView.setOnClickListener(v -> {
             if (notificationClickListener == null) return;

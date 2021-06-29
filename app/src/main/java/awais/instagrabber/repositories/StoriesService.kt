@@ -1,5 +1,6 @@
 package awais.instagrabber.repositories
 
+import awais.instagrabber.repositories.responses.stories.ArchiveResponse
 import awais.instagrabber.repositories.responses.stories.ReelsTrayResponse
 import awais.instagrabber.repositories.responses.stories.StoryStickerResponse
 import retrofit2.http.*
@@ -16,7 +17,7 @@ interface StoriesService {
     suspend fun fetchHighlights(@Path("uid") uid: Long): ReelsTrayResponse
 
     @GET("/api/v1/archive/reel/day_shells/")
-    suspend fun fetchArchive(@QueryMap queryParams: Map<String, String>): String
+    suspend fun fetchArchive(@QueryMap queryParams: Map<String, String>): ArchiveResponse?
 
     @GET
     suspend fun getUserStory(@Url url: String): String

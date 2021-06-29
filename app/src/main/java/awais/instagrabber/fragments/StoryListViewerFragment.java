@@ -38,8 +38,8 @@ import awais.instagrabber.adapters.HighlightStoriesListAdapter.OnHighlightStoryC
 import awais.instagrabber.customviews.helpers.RecyclerLazyLoader;
 import awais.instagrabber.databinding.FragmentStoryListViewerBinding;
 import awais.instagrabber.fragments.settings.MorePreferencesFragmentDirections;
-import awais.instagrabber.models.HighlightModel;
 import awais.instagrabber.repositories.requests.StoryViewerOptions;
+import awais.instagrabber.repositories.responses.stories.ArchiveResponse;
 import awais.instagrabber.repositories.responses.stories.Story;
 import awais.instagrabber.utils.AppExecutors;
 import awais.instagrabber.utils.CoroutineUtilsKt;
@@ -48,7 +48,6 @@ import awais.instagrabber.viewmodels.ArchivesViewModel;
 import awais.instagrabber.viewmodels.FeedStoriesViewModel;
 import awais.instagrabber.webservices.ServiceCallback;
 import awais.instagrabber.webservices.StoriesRepository;
-import awais.instagrabber.webservices.StoriesRepository.ArchiveFetchResponse;
 import kotlinx.coroutines.Dispatchers;
 
 public final class StoryListViewerFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener {
@@ -88,7 +87,7 @@ public final class StoryListViewerFragment extends Fragment implements SwipeRefr
 
     private final OnHighlightStoryClickListener archiveClickListener = new OnHighlightStoryClickListener() {
         @Override
-        public void onHighlightClick(final HighlightModel model, final int position) {
+        public void onHighlightClick(final Story model, final int position) {
             if (model == null) return;
             final NavDirections action = StoryListViewerFragmentDirections
                     .actionStoryListFragmentToStoryViewerFragment(StoryViewerOptions.forStoryArchive(position));
@@ -101,9 +100,9 @@ public final class StoryListViewerFragment extends Fragment implements SwipeRefr
         }
     };
 
-    private final ServiceCallback<ArchiveFetchResponse> cb = new ServiceCallback<ArchiveFetchResponse>() {
+    private final ServiceCallback<ArchiveResponse> cb = new ServiceCallback<ArchiveResponse>() {
         @Override
-        public void onSuccess(final ArchiveFetchResponse result) {
+        public void onSuccess(final ArchiveResponse result) {
             binding.swipeRefreshLayout.setRefreshing(false);
             if (result == null) {
                 try {
@@ -111,10 +110,10 @@ public final class StoryListViewerFragment extends Fragment implements SwipeRefr
                     Toast.makeText(context, R.string.empty_list, Toast.LENGTH_SHORT).show();
                 } catch (Exception ignored) {}
             } else {
-                endCursor = result.getNextCursor();
-                final List<HighlightModel> models = archivesViewModel.getList().getValue();
-                final List<HighlightModel> modelsCopy = models == null ? new ArrayList<>() : new ArrayList<>(models);
-                modelsCopy.addAll(result.getResult());
+                endCursor = result.getMaxId();
+                final List<Story> models = archivesViewModel.getList().getValue();
+                final List<Story> modelsCopy = models == null ? new ArrayList<>() : new ArrayList<>(models);
+                modelsCopy.addAll(result.getItems());
                 archivesViewModel.getList().postValue(modelsCopy);
             }
         }

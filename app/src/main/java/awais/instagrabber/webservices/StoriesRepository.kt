@@ -1,10 +1,10 @@
 package awais.instagrabber.webservices
 
 import awais.instagrabber.fragments.settings.PreferenceKeys
-import awais.instagrabber.models.HighlightModel
 import awais.instagrabber.models.StoryModel
 import awais.instagrabber.repositories.StoriesService
 import awais.instagrabber.repositories.requests.StoryViewerOptions
+import awais.instagrabber.repositories.responses.stories.ArchiveResponse
 import awais.instagrabber.repositories.responses.stories.Story
 import awais.instagrabber.repositories.responses.stories.StoryStickerResponse
 import awais.instagrabber.utils.Constants
@@ -35,11 +35,12 @@ open class StoriesRepository(private val service: StoriesService) {
                     Story(
                         broadcast.id,
                         broadcast.publishedTime,
+                        1,
                         0L,
                         broadcast.broadcastOwner,
-                        1,
                         broadcast.muted,
                         false, // unclear
+                        null,
                         null,
                         null,
                         null,
@@ -53,11 +54,11 @@ open class StoriesRepository(private val service: StoriesService) {
 
     open suspend fun fetchHighlights(profileId: Long): List<Story> {
         val response = service.fetchHighlights(profileId)
-        val highlightModels = response.tray ?: listOf()
+        val highlightModels = response?.tray ?: listOf()
         return highlightModels
     }
 
-    suspend fun fetchArchive(maxId: String): ArchiveFetchResponse {
+    suspend fun fetchArchive(maxId: String): ArchiveResponse? {
         val form = mutableMapOf(
             "include_suggested_highlights" to "false",
             "is_in_archive_home" to "true",
@@ -66,24 +67,7 @@ open class StoriesRepository(private val service: StoriesService) {
         if (!isEmpty(maxId)) {
             form["max_id"] = maxId // NOT TESTED
         }
-        val response = service.fetchArchive(form)
-        val data = JSONObject(response)
-        val highlightsReel = data.getJSONArray("items")
-        val length = highlightsReel.length()
-        val highlightModels: MutableList<HighlightModel> = ArrayList()
-        for (i in 0 until length) {
-            val highlightNode = highlightsReel.getJSONObject(i)
-            highlightModels.add(
-                HighlightModel(
-                    null,
-                    highlightNode.getString(Constants.EXTRAS_ID),
-                    highlightNode.getJSONObject("cover_image_version").getString("url"),
-                    highlightNode.getLong("latest_reel_media"),
-                    highlightNode.getInt("media_count")
-                )
-            )
-        }
-        return ArchiveFetchResponse(highlightModels, data.getBoolean("more_available"), data.getString("max_id"))
+        return service.fetchArchive(form)
     }
 
     open suspend fun getUserStory(options: StoryViewerOptions): List<StoryModel> {
@@ -246,12 +230,6 @@ open class StoriesRepository(private val service: StoriesService) {
             }
         }
         return listCopy
-    }
-
-    class ArchiveFetchResponse(val result: List<HighlightModel>, val hasNextPage: Boolean, val nextCursor: String) {
-        fun hasNextPage(): Boolean {
-            return hasNextPage
-        }
     }
 
     companion object {

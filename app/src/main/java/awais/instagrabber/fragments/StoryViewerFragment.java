@@ -75,7 +75,6 @@ import awais.instagrabber.databinding.FragmentStoryViewerBinding;
 import awais.instagrabber.fragments.main.ProfileFragmentDirections;
 import awais.instagrabber.fragments.settings.PreferenceKeys;
 import awais.instagrabber.interfaces.SwipeEvent;
-import awais.instagrabber.models.HighlightModel;
 import awais.instagrabber.models.StoryModel;
 import awais.instagrabber.models.enums.MediaItemType;
 import awais.instagrabber.models.stickers.PollModel;
@@ -760,12 +759,12 @@ public class StoryViewerFragment extends Fragment {
             }
             case STORY_ARCHIVE: {
                 final ArchivesViewModel archivesViewModel = (ArchivesViewModel) viewModel;
-                final List<HighlightModel> models = archivesViewModel.getList().getValue();
+                final List<Story> models = archivesViewModel.getList().getValue();
                 if (models == null || models.isEmpty() || currentFeedStoryIndex >= models.size() || currentFeedStoryIndex < 0) {
                     Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
                     return;
                 }
-                final HighlightModel model = models.get(currentFeedStoryIndex);
+                final Story model = models.get(currentFeedStoryIndex);
                 currentStoryMediaId = parseStoryMediaId(model.getId());
                 currentStoryUsername = model.getTitle();
                 fetchOptions = StoryViewerOptions.forStoryArchive(model.getId());
