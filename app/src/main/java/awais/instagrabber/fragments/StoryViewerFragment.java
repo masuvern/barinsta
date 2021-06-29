@@ -2,7 +2,6 @@ package awais.instagrabber.fragments;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.content.pm.PackageManager;
 import android.graphics.drawable.Animatable;
 import android.net.Uri;
 import android.os.Bundle;
@@ -31,8 +30,6 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
 import androidx.core.view.GestureDetectorCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModel;
@@ -98,7 +95,7 @@ import awais.instagrabber.viewmodels.ArchivesViewModel;
 import awais.instagrabber.viewmodels.FeedStoriesViewModel;
 import awais.instagrabber.viewmodels.HighlightsViewModel;
 import awais.instagrabber.viewmodels.StoriesViewModel;
-import awais.instagrabber.webservices.DirectMessagesService;
+import awais.instagrabber.webservices.DirectMessagesRepository;
 import awais.instagrabber.webservices.MediaRepository;
 import awais.instagrabber.webservices.ServiceCallback;
 import awais.instagrabber.webservices.StoriesRepository;
@@ -148,7 +145,7 @@ public class StoryViewerFragment extends Fragment {
     // private boolean isHighlight;
     // private boolean isArchive;
     // private boolean isNotification;
-    private DirectMessagesService directMessagesService;
+    private DirectMessagesRepository directMessagesRepository;
     private StoryViewerOptions options;
     private String csrfToken;
     private String deviceId;
@@ -164,7 +161,7 @@ public class StoryViewerFragment extends Fragment {
         fragmentActivity = (AppCompatActivity) requireActivity();
         storiesRepository = StoriesRepository.Companion.getInstance();
         mediaRepository = MediaRepository.Companion.getInstance();
-        directMessagesService = DirectMessagesService.INSTANCE;
+        directMessagesRepository = DirectMessagesRepository.Companion.getInstance();
         setHasOptionsMenu(true);
     }
 
@@ -218,7 +215,7 @@ public class StoryViewerFragment extends Fragment {
             final AlertDialog ad = new AlertDialog.Builder(context)
                     .setTitle(R.string.reply_story)
                     .setView(input)
-                    .setPositiveButton(R.string.confirm, (d, w) -> directMessagesService.broadcastStoryReply(
+                    .setPositiveButton(R.string.confirm, (d, w) -> directMessagesRepository.broadcastStoryReply(
                                         csrfToken,
                                         userId,
                                         deviceId,

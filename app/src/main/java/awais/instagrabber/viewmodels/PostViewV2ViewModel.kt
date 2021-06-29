@@ -7,11 +7,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import awais.instagrabber.R
 import awais.instagrabber.managers.DirectMessagesManager
-import awais.instagrabber.models.enums.BroadcastItemType
 import awais.instagrabber.models.Resource
 import awais.instagrabber.models.Resource.Companion.error
 import awais.instagrabber.models.Resource.Companion.loading
 import awais.instagrabber.models.Resource.Companion.success
+import awais.instagrabber.models.enums.BroadcastItemType
 import awais.instagrabber.models.enums.MediaItemType
 import awais.instagrabber.repositories.responses.Caption
 import awais.instagrabber.repositories.responses.Location
@@ -280,9 +280,9 @@ class PostViewV2ViewModel : ViewModel() {
         }
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                val result = mediaRepository.translate(pk, "1")
+                val result = mediaRepository.translate(pk, "1") ?: return@launch
                 if (result.isBlank()) {
-                    data.postValue(error("", null))
+                    // data.postValue(error("", null))
                     return@launch
                 }
                 data.postValue(success(result))

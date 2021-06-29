@@ -30,7 +30,7 @@ import awais.instagrabber.utils.MediaUtils.OnInfoLoadListener
 import awais.instagrabber.utils.MediaUtils.VideoInfo
 import awais.instagrabber.utils.TextUtils.isEmpty
 import awais.instagrabber.utils.extensions.TAG
-import awais.instagrabber.webservices.DirectMessagesService
+import awais.instagrabber.webservices.DirectMessagesRepository
 import awais.instagrabber.webservices.FriendshipRepository
 import awais.instagrabber.webservices.MediaRepository
 import com.google.common.collect.ImmutableList
@@ -64,6 +64,7 @@ class ThreadManager(
     private val threadIdsOrUserIds: ThreadIdsOrUserIds = of(threadId)
     private val friendshipRepository: FriendshipRepository by lazy { FriendshipRepository.getInstance() }
     private val mediaRepository: MediaRepository by lazy { MediaRepository.getInstance() }
+    private val directMessagesRepository by lazy { DirectMessagesRepository.getInstance() }
 
     val thread: LiveData<DirectThread?> by lazy {
         distinctUntilChanged(map(inboxManager.getInbox()) { inboxResource: Resource<DirectInbox?>? ->
@@ -128,7 +129,7 @@ class ThreadManager(
         _fetching.postValue(loading(null))
         scope.launch(Dispatchers.IO) {
             try {
-                val threadFeedResponse = DirectMessagesService.fetchThread(threadId, cursor)
+                val threadFeedResponse = directMessagesRepository.fetchThread(threadId, cursor)
                 if (threadFeedResponse.status != null && threadFeedResponse.status != "ok") {
                     _fetching.postValue(error(R.string.generic_not_ok_response, null))
                     return@launch
@@ -156,7 +157,7 @@ class ThreadManager(
         if (isGroup == null || !isGroup) return
         scope.launch(Dispatchers.IO) {
             try {
-                val response = DirectMessagesService.participantRequests(threadId, 1)
+                val response = directMessagesRepository.participantRequests(threadId, 1)
                 _pendingRequests.postValue(response)
             } catch (e: Exception) {
                 Log.e(TAG, "fetchPendingRequests: ", e)
@@ -348,7 +349,7 @@ class ThreadManager(
         val repliedToClientContext = replyToItemValue?.clientContext
         scope.launch(Dispatchers.IO) {
             try {
-                val response = DirectMessagesService.broadcastText(
+                val response = directMessagesRepository.broadcastText(
                     csrfToken,
                     viewerId,
                     deviceUuid,
@@ -406,7 +407,7 @@ class ThreadManager(
         data.postValue(loading(directItem))
         scope.launch(Dispatchers.IO) {
             try {
-                val request = DirectMessagesService.broadcastAnimatedMedia(
+                val request = directMessagesRepository.broadcastAnimatedMedia(
                     csrfToken,
                     userId,
                     deviceUuid,
@@ -455,7 +456,7 @@ class ThreadManager(
                     null
                 )
                 mediaRepository.uploadFinish(csrfToken, userId, deviceUuid, uploadFinishOptions)
-                val broadcastResponse = DirectMessagesService.broadcastVoice(
+                val broadcastResponse = directMessagesRepository.broadcastVoice(
                     csrfToken,
                     viewerId,
                     deviceUuid,
@@ -499,7 +500,7 @@ class ThreadManager(
         }
         scope.launch(Dispatchers.IO) {
             try {
-                DirectMessagesService.broadcastReaction(
+                directMessagesRepository.broadcastReaction(
                     csrfToken,
                     userId,
                     deviceUuid,
@@ -539,7 +540,7 @@ class ThreadManager(
         }
         scope.launch(Dispatchers.IO) {
             try {
-                DirectMessagesService.broadcastReaction(
+                directMessagesRepository.broadcastReaction(
                     csrfToken,
                     viewerId,
                     deviceUuid,
@@ -567,7 +568,7 @@ class ThreadManager(
         }
         scope.launch(Dispatchers.IO) {
             try {
-                DirectMessagesService.deleteItem(csrfToken, deviceUuid, threadId, itemId)
+                directMessagesRepository.deleteItem(csrfToken, deviceUuid, threadId, itemId)
             } catch (e: Exception) {
                 // add the item back if unsuccessful
                 addItems(index, listOf(item))
@@ -643,7 +644,7 @@ class ThreadManager(
         }
         scope.launch(Dispatchers.IO) {
             try {
-                DirectMessagesService.forward(
+                directMessagesRepository.forward(
                     thread.threadId,
                     itemTypeName,
                     threadId,
@@ -662,7 +663,7 @@ class ThreadManager(
         val data = MutableLiveData<Resource<Any?>>()
         scope.launch(Dispatchers.IO) {
             try {
-                DirectMessagesService.approveRequest(csrfToken, deviceUuid, threadId)
+                directMessagesRepository.approveRequest(csrfToken, deviceUuid, threadId)
                 data.postValue(success(Any()))
             } catch (e: Exception) {
                 Log.e(TAG, "acceptRequest: ", e)
@@ -676,7 +677,7 @@ class ThreadManager(
         val data = MutableLiveData<Resource<Any?>>()
         scope.launch(Dispatchers.IO) {
             try {
-                DirectMessagesService.declineRequest(csrfToken, deviceUuid, threadId)
+                directMessagesRepository.declineRequest(csrfToken, deviceUuid, threadId)
                 data.postValue(success(Any()))
             } catch (e: Exception) {
                 Log.e(TAG, "declineRequest: ", e)
@@ -732,7 +733,7 @@ class ThreadManager(
                 if (handleInvalidResponse(data, response)) return@launch
                 val response1 = response.response ?: return@launch
                 val uploadId = response1.optString("upload_id")
-                val response2 = DirectMessagesService.broadcastPhoto(csrfToken, viewerId, deviceUuid, clientContext, threadIdsOrUserIds, uploadId)
+                val response2 = directMessagesRepository.broadcastPhoto(csrfToken, viewerId, deviceUuid, clientContext, threadIdsOrUserIds, uploadId)
                 parseResponse(response2, data, directItem)
             } catch (e: Exception) {
                 data.postValue(error(e.message, null))
@@ -793,7 +794,7 @@ class ThreadManager(
                     VideoOptions(duration / 1000f, emptyList(), 0, false)
                 )
                 mediaRepository.uploadFinish(csrfToken, userId, deviceUuid, uploadFinishOptions)
-                val broadcastResponse = DirectMessagesService.broadcastVideo(
+                val broadcastResponse = directMessagesRepository.broadcastVideo(
                     csrfToken,
                     viewerId,
                     deviceUuid,
@@ -923,7 +924,7 @@ class ThreadManager(
         val data = MutableLiveData<Resource<Any?>>()
         scope.launch(Dispatchers.IO) {
             try {
-                val response = DirectMessagesService.updateTitle(csrfToken, deviceUuid, threadId, newTitle.trim())
+                val response = directMessagesRepository.updateTitle(csrfToken, deviceUuid, threadId, newTitle.trim())
                 handleDetailsChangeResponse(data, response)
             } catch (e: Exception) {
             }
@@ -935,7 +936,7 @@ class ThreadManager(
         val data = MutableLiveData<Resource<Any?>>()
         scope.launch(Dispatchers.IO) {
             try {
-                val response = DirectMessagesService.addUsers(
+                val response = directMessagesRepository.addUsers(
                     csrfToken,
                     deviceUuid,
                     threadId,
@@ -954,7 +955,7 @@ class ThreadManager(
         val data = MutableLiveData<Resource<Any?>>()
         scope.launch(Dispatchers.IO) {
             try {
-                DirectMessagesService.removeUsers(csrfToken, deviceUuid, threadId, setOf(user.pk))
+                directMessagesRepository.removeUsers(csrfToken, deviceUuid, threadId, setOf(user.pk))
                 data.postValue(success(Any()))
                 var activeUsers = users.value
                 var leftUsersValue = leftUsers.value
@@ -989,7 +990,7 @@ class ThreadManager(
         if (isAdmin(user)) return data
         scope.launch(Dispatchers.IO) {
             try {
-                DirectMessagesService.addAdmins(csrfToken, deviceUuid, threadId, setOf(user.pk))
+                directMessagesRepository.addAdmins(csrfToken, deviceUuid, threadId, setOf(user.pk))
                 val currentAdminIds = adminUserIds.value
                 val updatedAdminIds = ImmutableList.builder<Long>()
                     .addAll(currentAdminIds ?: emptyList())
@@ -1017,7 +1018,7 @@ class ThreadManager(
         if (!isAdmin(user)) return data
         scope.launch(Dispatchers.IO) {
             try {
-                DirectMessagesService.removeAdmins(csrfToken, deviceUuid, threadId, setOf(user.pk))
+                directMessagesRepository.removeAdmins(csrfToken, deviceUuid, threadId, setOf(user.pk))
                 val currentAdmins = adminUserIds.value ?: return@launch
                 val updatedAdminUserIds = currentAdmins.filter { userId1: Long -> userId1 != user.pk }
                 val currentThread = thread.value ?: return@launch
@@ -1047,7 +1048,7 @@ class ThreadManager(
         }
         scope.launch(Dispatchers.IO) {
             try {
-                DirectMessagesService.mute(csrfToken, deviceUuid, threadId)
+                directMessagesRepository.mute(csrfToken, deviceUuid, threadId)
                 data.postValue(success(Any()))
                 val currentThread = thread.value ?: return@launch
                 try {
@@ -1075,7 +1076,7 @@ class ThreadManager(
         }
         scope.launch(Dispatchers.IO) {
             try {
-                DirectMessagesService.unmute(csrfToken, deviceUuid, threadId)
+                directMessagesRepository.unmute(csrfToken, deviceUuid, threadId)
                 data.postValue(success(Any()))
                 val currentThread = thread.value ?: return@launch
                 try {
@@ -1103,7 +1104,7 @@ class ThreadManager(
         }
         scope.launch(Dispatchers.IO) {
             try {
-                DirectMessagesService.muteMentions(csrfToken, deviceUuid, threadId)
+                directMessagesRepository.muteMentions(csrfToken, deviceUuid, threadId)
                 data.postValue(success(Any()))
                 val currentThread = thread.value ?: return@launch
                 try {
@@ -1131,7 +1132,7 @@ class ThreadManager(
         }
         scope.launch(Dispatchers.IO) {
             try {
-                DirectMessagesService.unmuteMentions(csrfToken, deviceUuid, threadId)
+                directMessagesRepository.unmuteMentions(csrfToken, deviceUuid, threadId)
                 data.postValue(success(Any()))
                 val currentThread = thread.value ?: return@launch
                 try {
@@ -1210,7 +1211,7 @@ class ThreadManager(
         data.postValue(loading(null))
         scope.launch(Dispatchers.IO) {
             try {
-                val response = DirectMessagesService.approveParticipantRequests(
+                val response = directMessagesRepository.approveParticipantRequests(
                     csrfToken,
                     deviceUuid,
                     threadId,
@@ -1231,7 +1232,7 @@ class ThreadManager(
         data.postValue(loading(null))
         scope.launch(Dispatchers.IO) {
             try {
-                val response = DirectMessagesService.declineParticipantRequests(
+                val response = directMessagesRepository.declineParticipantRequests(
                     csrfToken,
                     deviceUuid,
                     threadId,
@@ -1273,7 +1274,7 @@ class ThreadManager(
         }
         scope.launch(Dispatchers.IO) {
             try {
-                val response = DirectMessagesService.approvalRequired(csrfToken, deviceUuid, threadId)
+                val response = directMessagesRepository.approvalRequired(csrfToken, deviceUuid, threadId)
                 handleDetailsChangeResponse(data, response)
                 val currentThread = thread.value ?: return@launch
                 try {
@@ -1301,7 +1302,7 @@ class ThreadManager(
         }
         scope.launch(Dispatchers.IO) {
             try {
-                val request = DirectMessagesService.approvalNotRequired(csrfToken, deviceUuid, threadId)
+                val request = directMessagesRepository.approvalNotRequired(csrfToken, deviceUuid, threadId)
                 handleDetailsChangeResponse(data, request)
                 val currentThread = thread.value ?: return@launch
                 try {
@@ -1324,7 +1325,7 @@ class ThreadManager(
         data.postValue(loading(null))
         scope.launch(Dispatchers.IO) {
             try {
-                val request = DirectMessagesService.leave(csrfToken, deviceUuid, threadId)
+                val request = directMessagesRepository.leave(csrfToken, deviceUuid, threadId)
                 handleDetailsChangeResponse(data, request)
             } catch (e: Exception) {
                 Log.e(TAG, "leave: ", e)
@@ -1339,7 +1340,7 @@ class ThreadManager(
         data.postValue(loading(null))
         scope.launch(Dispatchers.IO) {
             try {
-                val request = DirectMessagesService.end(csrfToken, deviceUuid, threadId)
+                val request = directMessagesRepository.end(csrfToken, deviceUuid, threadId)
                 handleDetailsChangeResponse(data, request)
                 val currentThread = thread.value ?: return@launch
                 try {
@@ -1376,7 +1377,7 @@ class ThreadManager(
         data.postValue(loading(null))
         scope.launch(Dispatchers.IO) {
             try {
-                val response = DirectMessagesService.markAsSeen(csrfToken, deviceUuid, threadId, directItem)
+                val response = directMessagesRepository.markAsSeen(csrfToken, deviceUuid, threadId, directItem)
                 if (response == null) {
                     data.postValue(error(R.string.generic_null_response, null))
                     return@launch

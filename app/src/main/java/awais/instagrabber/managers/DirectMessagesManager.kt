@@ -4,11 +4,11 @@ import android.content.ContentResolver
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import awais.instagrabber.models.enums.BroadcastItemType
 import awais.instagrabber.models.Resource
 import awais.instagrabber.models.Resource.Companion.error
 import awais.instagrabber.models.Resource.Companion.loading
 import awais.instagrabber.models.Resource.Companion.success
+import awais.instagrabber.models.enums.BroadcastItemType
 import awais.instagrabber.repositories.requests.directmessages.ThreadIdsOrUserIds
 import awais.instagrabber.repositories.responses.User
 import awais.instagrabber.repositories.responses.directmessages.DirectThread
@@ -17,7 +17,7 @@ import awais.instagrabber.utils.Constants
 import awais.instagrabber.utils.Utils
 import awais.instagrabber.utils.getCsrfTokenFromCookie
 import awais.instagrabber.utils.getUserIdFromCookie
-import awais.instagrabber.webservices.DirectMessagesService
+import awais.instagrabber.webservices.DirectMessagesRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -31,6 +31,7 @@ object DirectMessagesManager {
     private val viewerId: Long
     private val deviceUuid: String
     private val csrfToken: String
+    private val directMessagesRepository by lazy { DirectMessagesRepository.getInstance() }
 
     fun moveThreadFromPending(threadId: String) {
         val pendingThreads = pendingInboxManager.threads.value ?: return
@@ -66,7 +67,8 @@ object DirectMessagesManager {
         return ThreadManager(threadId, pending, currentUser, contentResolver, viewerId, csrfToken, deviceUuid)
     }
 
-    suspend fun createThread(userPk: Long): DirectThread = DirectMessagesService.createThread(csrfToken, viewerId, deviceUuid, listOf(userPk), null)
+    suspend fun createThread(userPk: Long): DirectThread =
+        directMessagesRepository.createThread(csrfToken, viewerId, deviceUuid, listOf(userPk), null)
 
     fun sendMedia(recipient: RankedRecipient, mediaId: String, itemType: BroadcastItemType, scope: CoroutineScope) {
         sendMedia(setOf(recipient), mediaId, itemType, scope)
@@ -78,9 +80,9 @@ object DirectMessagesManager {
         itemType: BroadcastItemType,
         scope: CoroutineScope,
     ) {
-        val threadIds = recipients.mapNotNull{ it.thread?.threadId }
-        val userIdsTemp = recipients.mapNotNull{ it.user?.pk }
-        val userIds = userIdsTemp.map{ listOf(it.toString(10)) }
+        val threadIds = recipients.mapNotNull { it.thread?.threadId }
+        val userIdsTemp = recipients.mapNotNull { it.user?.pk }
+        val userIds = userIdsTemp.map { listOf(it.toString(10)) }
         sendMedia(threadIds, userIds, mediaId, itemType, scope) {
             inboxManager.refresh(scope)
         }
@@ -99,7 +101,7 @@ object DirectMessagesManager {
         scope.launch(Dispatchers.IO) {
             try {
                 if (itemType == BroadcastItemType.MEDIA_SHARE)
-                    DirectMessagesService.broadcastMediaShare(
+                    directMessagesRepository.broadcastMediaShare(
                         csrfToken,
                         viewerId,
                         deviceUuid,
@@ -108,7 +110,7 @@ object DirectMessagesManager {
                         mediaId
                     )
                 if (itemType == BroadcastItemType.PROFILE)
-                    DirectMessagesService.broadcastProfile(
+                    directMessagesRepository.broadcastProfile(
                         csrfToken,
                         viewerId,
                         deviceUuid,
