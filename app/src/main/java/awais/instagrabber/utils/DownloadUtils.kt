@@ -13,9 +13,9 @@ import androidx.documentfile.provider.DocumentFile
 import androidx.work.*
 import awais.instagrabber.R
 import awais.instagrabber.fragments.settings.PreferenceKeys
-import awais.instagrabber.models.StoryModel
 import awais.instagrabber.models.enums.MediaItemType
 import awais.instagrabber.repositories.responses.Media
+import awais.instagrabber.repositories.responses.stories.StoryMedia
 import awais.instagrabber.utils.TextUtils.isEmpty
 import awais.instagrabber.workers.DownloadWorker
 import com.google.gson.Gson
@@ -392,18 +392,19 @@ object DownloadUtils {
     @JvmStatic
     fun download(
         context: Context,
-        storyModel: StoryModel
+        storyModel: StoryMedia
     ) {
-        val downloadDir = getDownloadDir(context, storyModel.username) ?: return
+        val downloadDir = getDownloadDir(context, storyModel.user?.username) ?: return
         val url =
-            if (storyModel.itemType == MediaItemType.MEDIA_TYPE_VIDEO) storyModel.videoUrl else storyModel.storyUrl
+            if (storyModel.mediaType == MediaItemType.MEDIA_TYPE_VIDEO) ResponseBodyUtils.getVideoUrl(storyModel)
+            else ResponseBodyUtils.getImageUrl(storyModel)
         val extension = getFileExtensionFromUrl(url)
-        val baseFileName = (storyModel.storyMediaId + "_"
-                + storyModel.timestamp + extension)
+        val baseFileName = (storyModel.id + "_"
+                + storyModel.takenAt + extension)
         val usernamePrepend =
             if (Utils.settingsHelper.getBoolean(PreferenceKeys.DOWNLOAD_PREPEND_USER_NAME)
-                && storyModel.username != null
-            ) storyModel.username + "_" else ""
+                && storyModel.user?.username != null
+            ) storyModel.user.username + "_" else ""
         val fileName = usernamePrepend + baseFileName
         var saveFile = downloadDir.findFile(fileName)
         if (saveFile == null) {

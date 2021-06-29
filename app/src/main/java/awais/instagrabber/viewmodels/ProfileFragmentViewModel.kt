@@ -8,7 +8,6 @@ import awais.instagrabber.db.entities.Favorite
 import awais.instagrabber.db.repositories.FavoriteRepository
 import awais.instagrabber.managers.DirectMessagesManager
 import awais.instagrabber.models.Resource
-import awais.instagrabber.models.StoryModel
 import awais.instagrabber.models.enums.BroadcastItemType
 import awais.instagrabber.models.enums.FavoriteType
 import awais.instagrabber.repositories.requests.StoryViewerOptions
@@ -17,6 +16,7 @@ import awais.instagrabber.repositories.responses.User
 import awais.instagrabber.repositories.responses.UserProfileContextLink
 import awais.instagrabber.repositories.responses.directmessages.RankedRecipient
 import awais.instagrabber.repositories.responses.stories.Story
+import awais.instagrabber.repositories.responses.stories.StoryMedia
 import awais.instagrabber.utils.ControlledRunner
 import awais.instagrabber.utils.Event
 import awais.instagrabber.utils.SingleRunner
@@ -153,9 +153,9 @@ class ProfileFragmentViewModel(
             }
         }
 
-    private val storyFetchControlledRunner = ControlledRunner<List<StoryModel>?>()
-    val userStories: LiveData<Resource<List<StoryModel>?>> = currentUserProfileActionLiveData.switchMap { currentUserAndProfilePair ->
-        liveData<Resource<List<StoryModel>?>>(context = viewModelScope.coroutineContext + ioDispatcher) {
+    private val storyFetchControlledRunner = ControlledRunner<List<StoryMedia>?>()
+    val userStories: LiveData<Resource<List<StoryMedia>?>> = currentUserProfileActionLiveData.switchMap { currentUserAndProfilePair ->
+        liveData<Resource<List<StoryMedia>?>>(context = viewModelScope.coroutineContext + ioDispatcher) {
             val (currentUserResource, profileResource, action) = currentUserAndProfilePair
             if (action != INIT && action != REFRESH) {
                 return@liveData
@@ -231,7 +231,7 @@ class ProfileFragmentViewModel(
         return graphQLRepository.fetchUser(stateUsername)
     }
 
-    private suspend fun fetchUserStory(fetchedUser: User): List<StoryModel> = storiesRepository.getUserStory(
+    private suspend fun fetchUserStory(fetchedUser: User): List<StoryMedia> = storiesRepository.getStories(
         StoryViewerOptions.forUser(fetchedUser.pk, fetchedUser.fullName)
     )
 

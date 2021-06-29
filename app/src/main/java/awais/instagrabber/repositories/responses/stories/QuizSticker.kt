@@ -9,6 +9,6 @@ data class QuizSticker(
     val quizId: Long?,
     val question: String?,
     val tallies: List<Tally>?,
-    val viewerAnswer: Int?,
+    var viewerAnswer: Int? = -1,
     val correctAnswer: Int?
 ) : Serializable

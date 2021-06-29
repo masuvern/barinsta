@@ -552,7 +552,7 @@ public class LocationFragment extends Fragment implements SwipeRefreshLayout.OnR
 //    private void fetchStories() {
 //        if (isLoggedIn) {
 //            storiesFetching = true;
-//            storiesRepository.getUserStory(
+//            storiesRepository.getStories(
 //                    StoryViewerOptions.forLocation(locationId, locationModel.getName()),
 //                    CoroutineUtilsKt.getContinuation((storyModels, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
 //                        if (throwable != null) {

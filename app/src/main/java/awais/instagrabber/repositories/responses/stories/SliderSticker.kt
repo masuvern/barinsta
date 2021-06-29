@@ -10,7 +10,7 @@ data class SliderSticker(
     val question: String?,
     val emoji: String?,
     val viewerCanVote: Boolean?,
-    val viewerVote: Double?,
+    var viewerVote: Double?,
     val sliderVoteAverage: Double?,
     val sliderVoteCount: Int?,
 ) : Serializable

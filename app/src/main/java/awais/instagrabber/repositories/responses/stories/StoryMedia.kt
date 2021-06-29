@@ -41,6 +41,8 @@ data class StoryMedia(
         val storyAppAttribution: StoryAppAttribution? = null
 ) : Serializable {
     private var dateString: String? = null
+    var position = 0
+    var isCurrentSlide = false
 
     // TODO use extension once all usages are converted to kotlin
     // val date: String by lazy {

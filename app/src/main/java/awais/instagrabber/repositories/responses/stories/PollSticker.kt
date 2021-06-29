@@ -9,5 +9,5 @@ data class PollSticker(
     val pollId: Long?,
     val question: String?,
     val tallies: List<Tally>?,
-    val viewerVote: Int?
+    var viewerVote: Int = -1
 ) : Serializable

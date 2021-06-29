@@ -1,26 +1,22 @@
 package awais.instagrabber.webservices
 
 import awais.instagrabber.fragments.settings.PreferenceKeys
-import awais.instagrabber.models.StoryModel
 import awais.instagrabber.repositories.StoriesService
 import awais.instagrabber.repositories.requests.StoryViewerOptions
 import awais.instagrabber.repositories.responses.stories.ArchiveResponse
 import awais.instagrabber.repositories.responses.stories.Story
+import awais.instagrabber.repositories.responses.stories.StoryMedia
 import awais.instagrabber.repositories.responses.stories.StoryStickerResponse
-import awais.instagrabber.utils.ResponseBodyUtils
 import awais.instagrabber.utils.TextUtils.isEmpty
 import awais.instagrabber.utils.Utils
 import awais.instagrabber.webservices.RetrofitFactory.retrofit
-import org.json.JSONArray
-import org.json.JSONObject
-import java.util.*
+import java.util.UUID
 
 open class StoriesRepository(private val service: StoriesService) {
 
-    suspend fun fetch(mediaId: Long): StoryModel {
+    suspend fun fetch(mediaId: Long): StoryMedia? {
         val response = service.fetch(mediaId)
-        val itemJson = JSONObject(response).getJSONArray("items").getJSONObject(0)
-        return ResponseBodyUtils.parseStoryItem(itemJson, false, null)
+        return response.items?.get(0)
     }
 
     suspend fun getFeedStories(): List<Story> {
@@ -70,31 +66,30 @@ open class StoriesRepository(private val service: StoriesService) {
         return service.fetchArchive(form)
     }
 
-    open suspend fun getUserStory(options: StoryViewerOptions): List<StoryModel> {
-        val url = buildUrl(options) ?: return emptyList()
-        val response = service.getUserStory(url)
-        val isLocOrHashtag = options.type == StoryViewerOptions.Type.LOCATION || options.type == StoryViewerOptions.Type.HASHTAG
-        val isHighlight = options.type == StoryViewerOptions.Type.HIGHLIGHT || options.type == StoryViewerOptions.Type.STORY_ARCHIVE
-        var data: JSONObject? = JSONObject(response)
-        data = if (!isHighlight) {
-            data?.optJSONObject(if (isLocOrHashtag) "story" else "reel")
-        } else {
-            data?.getJSONObject("reels")?.optJSONObject(options.name)
-        }
-        var username: String? = null
-        if (data != null && !isLocOrHashtag) {
-            username = data.getJSONObject("user").getString("username")
-        }
-        val media: JSONArray? = data?.optJSONArray("items")
-        return if (media?.length() ?: 0 > 0 && media?.optJSONObject(0) != null) {
-            val mediaLen = media.length()
-            val models: MutableList<StoryModel> = ArrayList()
-            for (i in 0 until mediaLen) {
-                data = media.getJSONObject(i)
-                models.add(ResponseBodyUtils.parseStoryItem(data, isLocOrHashtag, username))
+    open suspend fun getStories(options: StoryViewerOptions): List<StoryMedia> {
+        return when (options.type) {
+            StoryViewerOptions.Type.HIGHLIGHT,
+            StoryViewerOptions.Type.STORY_ARCHIVE
+            -> {
+                val response = service.getReelsMedia(options.name)
+                val story: Story? = response.reels?.get(options.name)
+                story?.items ?: emptyList()
             }
-            models
-        } else emptyList()
+            StoryViewerOptions.Type.USER -> {
+                val response = service.getUserStories(options.id.toString())
+                response.reel?.items ?: emptyList()
+            }
+            // should not reach beyond this point
+            StoryViewerOptions.Type.LOCATION -> {
+                val response = service.getStories("locations", options.id.toString())
+                response.story?.items ?: emptyList()
+            }
+            StoryViewerOptions.Type.HASHTAG -> {
+                val response = service.getStories("tags", options.name)
+                response.story?.items ?: emptyList()
+            }
+            else -> emptyList()
+        }
     }
 
     private suspend fun respondToSticker(
@@ -102,7 +97,7 @@ open class StoriesRepository(private val service: StoriesService) {
         userId: Long,
         deviceUuid: String,
         storyId: String,
-        stickerId: String,
+        stickerId: Long,
         action: String,
         arg1: String,
         arg2: String,
@@ -125,7 +120,7 @@ open class StoriesRepository(private val service: StoriesService) {
         userId: Long,
         deviceUuid: String,
         storyId: String,
-        stickerId: String,
+        stickerId: Long,
         answer: String,
     ): StoryStickerResponse = respondToSticker(csrfToken, userId, deviceUuid, storyId, stickerId, "story_question_response", "response", answer)
 
@@ -134,7 +129,7 @@ open class StoriesRepository(private val service: StoriesService) {
         userId: Long,
         deviceUuid: String,
         storyId: String,
-        stickerId: String,
+        stickerId: Long,
         answer: Int,
     ): StoryStickerResponse {
         return respondToSticker(csrfToken, userId, deviceUuid, storyId, stickerId, "story_quiz_answer", "answer", answer.toString())
@@ -145,7 +140,7 @@ open class StoriesRepository(private val service: StoriesService) {
         userId: Long,
         deviceUuid: String,
         storyId: String,
-        stickerId: String,
+        stickerId: Long,
         answer: Int,
     ): StoryStickerResponse = respondToSticker(csrfToken, userId, deviceUuid, storyId, stickerId, "story_poll_vote", "vote", answer.toString())
 
@@ -154,7 +149,7 @@ open class StoriesRepository(private val service: StoriesService) {
         userId: Long,
         deviceUuid: String,
         storyId: String,
-        stickerId: String,
+        stickerId: Long,
         answer: Double,
     ): StoryStickerResponse = respondToSticker(csrfToken, userId, deviceUuid, storyId, stickerId, "story_slider_vote", "vote", answer.toString())
 
@@ -180,43 +175,6 @@ open class StoriesRepository(private val service: StoriesService) {
             "live_vod" to "0",
         )
         return service.seen(queryMap, signedForm)
-    }
-
-    private fun buildUrl(options: StoryViewerOptions): String? {
-        val builder = StringBuilder()
-        builder.append("https://i.instagram.com/api/v1/")
-        val type = options.type
-        var id: String? = null
-        when (type) {
-            StoryViewerOptions.Type.HASHTAG -> {
-                builder.append("tags/")
-                id = options.name
-            }
-            StoryViewerOptions.Type.LOCATION -> {
-                builder.append("locations/")
-                id = options.id.toString()
-            }
-            StoryViewerOptions.Type.USER -> {
-                builder.append("feed/user/")
-                id = options.id.toString()
-            }
-            StoryViewerOptions.Type.HIGHLIGHT, StoryViewerOptions.Type.STORY_ARCHIVE -> {
-                builder.append("feed/reels_media/?user_ids=")
-                id = options.name
-            }
-            StoryViewerOptions.Type.STORY -> {
-            }
-            else -> {
-            }
-        }
-        if (id == null) {
-            return null
-        }
-        builder.append(id)
-        if (type != StoryViewerOptions.Type.HIGHLIGHT && type != StoryViewerOptions.Type.STORY_ARCHIVE) {
-            builder.append("/story/")
-        }
-        return builder.toString()
     }
 
     private fun sort(list: List<Story>): List<Story> {

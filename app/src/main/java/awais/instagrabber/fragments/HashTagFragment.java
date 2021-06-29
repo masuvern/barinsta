@@ -548,7 +548,7 @@ public class HashTagFragment extends Fragment implements SwipeRefreshLayout.OnRe
 //    private void fetchStories() {
 //        if (!isLoggedIn) return;
 //        storiesFetching = true;
-//        storiesRepository.getUserStory(
+//        storiesRepository.getStories(
 //                StoryViewerOptions.forHashtag(hashtagModel.getName()),
 //                CoroutineUtilsKt.getContinuation((storyModels, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
 //                    if (throwable != null) {
