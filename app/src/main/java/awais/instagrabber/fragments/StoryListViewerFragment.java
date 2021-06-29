@@ -134,7 +134,11 @@ public final class StoryListViewerFragment extends Fragment implements SwipeRefr
         fragmentActivity = (AppCompatActivity) requireActivity();
         context = getContext();
         if (context == null) return;
-        setHasOptionsMenu(true);
+        final Bundle args = getArguments();
+        if (args == null) return;
+        final StoryListViewerFragmentArgs fragmentArgs = StoryListViewerFragmentArgs.fromBundle(args);
+        type = fragmentArgs.getType();
+        setHasOptionsMenu(type.equals("feed"));
         storiesRepository = StoriesRepository.Companion.getInstance();
     }
 
@@ -195,9 +199,6 @@ public final class StoryListViewerFragment extends Fragment implements SwipeRefr
 
     private void init() {
         final Context context = getContext();
-        if (getArguments() == null) return;
-        final StoryListViewerFragmentArgs fragmentArgs = StoryListViewerFragmentArgs.fromBundle(getArguments());
-        type = fragmentArgs.getType();
         binding.swipeRefreshLayout.setOnRefreshListener(this);
         final LinearLayoutManager layoutManager = new LinearLayoutManager(context);
         final ActionBar actionBar = fragmentActivity.getSupportActionBar();
