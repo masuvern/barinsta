@@ -1,16 +1,5 @@
-package awais.instagrabber.repositories.responses;
+package awais.instagrabber.repositories.responses
 
-public class HdProfilePicUrlInfo {
-    private final String url;
-    private final int width, height;
+import java.io.Serializable
 
-    public HdProfilePicUrlInfo(final String url, final int width, final int height) {
-        this.url = url;
-        this.width = width;
-        this.height = height;
-    }
-
-    public String getUrl() {
-        return url;
-    }
-}
+data class HdProfilePicUrlInfo(val url: String, private val width: Int, private val height: Int) : Serializable
