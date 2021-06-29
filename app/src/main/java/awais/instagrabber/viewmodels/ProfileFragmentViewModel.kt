@@ -8,7 +8,6 @@ import awais.instagrabber.db.entities.Favorite
 import awais.instagrabber.db.repositories.AccountRepository
 import awais.instagrabber.db.repositories.FavoriteRepository
 import awais.instagrabber.managers.DirectMessagesManager
-import awais.instagrabber.models.HighlightModel
 import awais.instagrabber.models.Resource
 import awais.instagrabber.models.StoryModel
 import awais.instagrabber.models.enums.BroadcastItemType
@@ -16,6 +15,7 @@ import awais.instagrabber.models.enums.FavoriteType
 import awais.instagrabber.repositories.requests.StoryViewerOptions
 import awais.instagrabber.repositories.responses.User
 import awais.instagrabber.repositories.responses.directmessages.RankedRecipient
+import awais.instagrabber.repositories.responses.stories.Story
 import awais.instagrabber.utils.ControlledRunner
 import awais.instagrabber.utils.extensions.TAG
 import awais.instagrabber.webservices.*
@@ -119,9 +119,9 @@ class ProfileFragmentViewModel(
         }
     }
 
-    private val highlightsFetchControlledRunner = ControlledRunner<List<HighlightModel>?>()
-    val userHighlights: LiveData<Resource<List<HighlightModel>?>> = profile.switchMap { userResource ->
-        liveData<Resource<List<HighlightModel>?>>(context = viewModelScope.coroutineContext + ioDispatcher) {
+    private val highlightsFetchControlledRunner = ControlledRunner<List<Story>?>()
+    val userHighlights: LiveData<Resource<List<Story>?>> = profile.switchMap { userResource ->
+        liveData<Resource<List<Story>?>>(context = viewModelScope.coroutineContext + ioDispatcher) {
             // don't fetch if not logged in
             if (isLoggedIn.value != true) {
                 emit(Resource.success(null))
@@ -165,7 +165,7 @@ class ProfileFragmentViewModel(
         StoryViewerOptions.forUser(fetchedUser.pk, fetchedUser.fullName)
     )
 
-    private suspend fun fetchUserHighlights(fetchedUser: User): List<HighlightModel> = storiesRepository.fetchHighlights(fetchedUser.pk)
+    private suspend fun fetchUserHighlights(fetchedUser: User): List<Story> = storiesRepository.fetchHighlights(fetchedUser.pk)
 
     private suspend fun checkAndInsertFavorite(fetchedUser: User) {
         try {

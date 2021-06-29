@@ -736,12 +736,12 @@ public class StoryViewerFragment extends Fragment {
         switch (type) {
             case HIGHLIGHT: {
                 final HighlightsViewModel highlightsViewModel = (HighlightsViewModel) viewModel;
-                final List<HighlightModel> models = highlightsViewModel.getList().getValue();
+                final List<Story> models = highlightsViewModel.getList().getValue();
                 if (models == null || models.isEmpty() || currentFeedStoryIndex >= models.size() || currentFeedStoryIndex < 0) {
                     Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show();
                     return;
                 }
-                final HighlightModel model = models.get(currentFeedStoryIndex);
+                final Story model = models.get(currentFeedStoryIndex);
                 currentStoryMediaId = model.getId();
                 fetchOptions = StoryViewerOptions.forHighlight(model.getId());
                 highlightTitle = model.getTitle();

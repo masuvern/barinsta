@@ -13,7 +13,7 @@ interface StoriesService {
     suspend fun getFeedStories(): ReelsTrayResponse
 
     @GET("/api/v1/highlights/{uid}/highlights_tray/")
-    suspend fun fetchHighlights(@Path("uid") uid: Long): String
+    suspend fun fetchHighlights(@Path("uid") uid: Long): ReelsTrayResponse
 
     @GET("/api/v1/archive/reel/day_shells/")
     suspend fun fetchArchive(@QueryMap queryParams: Map<String, String>): String

@@ -37,9 +37,11 @@ open class StoriesRepository(private val service: StoriesService) {
                         broadcast.publishedTime,
                         0L,
                         broadcast.broadcastOwner,
+                        1,
                         broadcast.muted,
                         false, // unclear
-                        1,
+                        null,
+                        null,
                         null,
                         broadcast
                     )
@@ -49,25 +51,9 @@ open class StoriesRepository(private val service: StoriesService) {
         return sort(result.toList())
     }
 
-    open suspend fun fetchHighlights(profileId: Long): List<HighlightModel> {
+    open suspend fun fetchHighlights(profileId: Long): List<Story> {
         val response = service.fetchHighlights(profileId)
-        val highlightsReel = JSONObject(response).getJSONArray("tray")
-        val length = highlightsReel.length()
-        val highlightModels: MutableList<HighlightModel> = ArrayList()
-        for (i in 0 until length) {
-            val highlightNode = highlightsReel.getJSONObject(i)
-            highlightModels.add(
-                HighlightModel(
-                    highlightNode.getString("title"),
-                    highlightNode.getString(Constants.EXTRAS_ID),
-                    highlightNode.getJSONObject("cover_media")
-                        .getJSONObject("cropped_image_version")
-                        .getString("url"),
-                    highlightNode.getLong("latest_reel_media"),
-                    highlightNode.getInt("media_count")
-                )
-            )
-        }
+        val highlightModels = response.tray ?: listOf()
         return highlightModels
     }
 

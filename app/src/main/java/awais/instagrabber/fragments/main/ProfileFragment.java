@@ -73,7 +73,6 @@ import awais.instagrabber.fragments.UserSearchFragment;
 import awais.instagrabber.fragments.UserSearchFragmentDirections;
 import awais.instagrabber.managers.DirectMessagesManager;
 import awais.instagrabber.managers.InboxManager;
-import awais.instagrabber.models.HighlightModel;
 import awais.instagrabber.models.PostsLayoutPreferences;
 import awais.instagrabber.models.enums.FavoriteType;
 import awais.instagrabber.models.enums.PostItemType;
@@ -84,6 +83,7 @@ import awais.instagrabber.repositories.responses.Media;
 import awais.instagrabber.repositories.responses.User;
 import awais.instagrabber.repositories.responses.UserProfileContextLink;
 import awais.instagrabber.repositories.responses.directmessages.RankedRecipient;
+import awais.instagrabber.repositories.responses.stories.Story;
 import awais.instagrabber.utils.AppExecutors;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.CookieUtils;
@@ -1121,7 +1121,7 @@ public class ProfileFragment extends Fragment implements SwipeRefreshLayout.OnRe
                     if (highlightModels != null) {
                         profileDetailsBinding.highlightsList.setVisibility(View.VISIBLE);
                         //noinspection unchecked
-                        highlightsViewModel.getList().postValue((List<HighlightModel>) highlightModels);
+                        highlightsViewModel.getList().postValue((List<Story>) highlightModels);
                     } else {
                         profileDetailsBinding.highlightsList.setVisibility(View.GONE);
                     }
