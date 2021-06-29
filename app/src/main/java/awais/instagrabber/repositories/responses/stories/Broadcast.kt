@@ -1,7 +1,7 @@
 package awais.instagrabber.repositories.responses.stories
 
-import java.io.Serializable
 import awais.instagrabber.repositories.responses.User
+import java.io.Serializable
 
 data class Broadcast(
     val id: String?,

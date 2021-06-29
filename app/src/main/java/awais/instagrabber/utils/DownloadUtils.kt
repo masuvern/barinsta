@@ -1,6 +1,5 @@
 package awais.instagrabber.utils
 
-import android.Manifest
 import android.content.Context
 import android.content.DialogInterface
 import android.content.UriPermission

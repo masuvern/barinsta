@@ -12,7 +12,6 @@ import android.graphics.drawable.Animatable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
-import android.provider.DocumentsContract;
 import android.text.Editable;
 import android.util.Log;
 import android.util.Pair;

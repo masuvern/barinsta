@@ -21,7 +21,6 @@ import awais.instagrabber.models.stickers.QuestionModel;
 import awais.instagrabber.models.stickers.QuizModel;
 import awais.instagrabber.models.stickers.SliderModel;
 import awais.instagrabber.models.stickers.SwipeUpModel;
-import awais.instagrabber.repositories.responses.stories.StoryMedia;
 import awais.instagrabber.repositories.responses.Caption;
 import awais.instagrabber.repositories.responses.FriendshipStatus;
 import awais.instagrabber.repositories.responses.ImageVersions2;
@@ -29,7 +28,7 @@ import awais.instagrabber.repositories.responses.Location;
 import awais.instagrabber.repositories.responses.Media;
 import awais.instagrabber.repositories.responses.MediaCandidate;
 import awais.instagrabber.repositories.responses.User;
-import awais.instagrabber.repositories.responses.MediaCandidate;
+import awais.instagrabber.repositories.responses.stories.StoryMedia;
 
 public final class ResponseBodyUtils {
     private static final String TAG = "ResponseBodyUtils";

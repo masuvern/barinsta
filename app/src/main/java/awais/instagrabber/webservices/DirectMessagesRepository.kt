@@ -1,6 +1,6 @@
 package awais.instagrabber.webservices
 
-import awais.instagrabber.repositories.DirectMessagesRepository
+import awais.instagrabber.repositories.DirectMessagesService
 import awais.instagrabber.repositories.requests.directmessages.*
 import awais.instagrabber.repositories.responses.directmessages.*
 import awais.instagrabber.repositories.responses.giphy.GiphyGif
@@ -9,8 +9,7 @@ import awais.instagrabber.utils.Utils
 import org.json.JSONArray
 import java.util.*
 
-object DirectMessagesService {
-    private val repository: DirectMessagesRepository = RetrofitFactory.retrofit.create(DirectMessagesRepository::class.java)
+open class DirectMessagesRepository(private val service: DirectMessagesService) {
 
     suspend fun fetchInbox(
         cursor: String?,
@@ -29,7 +28,7 @@ object DirectMessagesService {
         if (seqId != 0L) {
             queryMap["seq_id"] = seqId.toString()
         }
-        return repository.fetchInbox(queryMap)
+        return service.fetchInbox(queryMap)
     }
 
     suspend fun fetchThread(
@@ -44,10 +43,10 @@ object DirectMessagesService {
         if (!cursor.isNullOrBlank()) {
             queryMap["cursor"] = cursor
         }
-        return repository.fetchThread(threadId, queryMap)
+        return service.fetchThread(threadId, queryMap)
     }
 
-    suspend fun fetchUnseenCount(): DirectBadgeCount = repository.fetchUnseenCount()
+    suspend fun fetchUnseenCount(): DirectBadgeCount = service.fetchUnseenCount()
 
     suspend fun broadcastText(
         csrfToken: String,
@@ -61,7 +60,17 @@ object DirectMessagesService {
     ): DirectThreadBroadcastResponse {
         val urls = extractUrls(text)
         if (urls.isNotEmpty()) {
-            return broadcastLink(csrfToken, userId, deviceUuid, clientContext, threadIdsOrUserIds, text, urls, repliedToItemId, repliedToClientContext)
+            return broadcastLink(
+                csrfToken,
+                userId,
+                deviceUuid,
+                clientContext,
+                threadIdsOrUserIds,
+                text,
+                urls,
+                repliedToItemId,
+                repliedToClientContext
+            )
         }
         val broadcastOptions = TextBroadcastOptions(clientContext, threadIdsOrUserIds, text)
         if (!repliedToItemId.isNullOrBlank() && !repliedToClientContext.isNullOrBlank()) {
@@ -212,7 +221,7 @@ object DirectMessagesService {
         form.putAll(broadcastOptions.formMap)
         form["action"] = "send_item"
 //        val signedForm = Utils.sign(form)
-        return repository.broadcast(broadcastOptions.itemType.value, form)
+        return service.broadcast(broadcastOptions.itemType.value, form)
     }
 
     suspend fun addUsers(
@@ -226,7 +235,7 @@ object DirectMessagesService {
             "_uuid" to deviceUuid,
             "user_ids" to JSONArray(userIds).toString(),
         )
-        return repository.addUsers(threadId, form)
+        return service.addUsers(threadId, form)
     }
 
     suspend fun removeUsers(
@@ -240,7 +249,7 @@ object DirectMessagesService {
             "_uuid" to deviceUuid,
             "user_ids" to JSONArray(userIds).toString(),
         )
-        return repository.removeUsers(threadId, form)
+        return service.removeUsers(threadId, form)
     }
 
     suspend fun updateTitle(
@@ -254,7 +263,7 @@ object DirectMessagesService {
             "_uuid" to deviceUuid,
             "title" to title,
         )
-        return repository.updateTitle(threadId, form)
+        return service.updateTitle(threadId, form)
     }
 
     suspend fun addAdmins(
@@ -268,7 +277,7 @@ object DirectMessagesService {
             "_uuid" to deviceUuid,
             "user_ids" to JSONArray(userIds).toString(),
         )
-        return repository.addAdmins(threadId, form)
+        return service.addAdmins(threadId, form)
     }
 
     suspend fun removeAdmins(
@@ -282,7 +291,7 @@ object DirectMessagesService {
             "_uuid" to deviceUuid,
             "user_ids" to JSONArray(userIds).toString(),
         )
-        return repository.removeAdmins(threadId, form)
+        return service.removeAdmins(threadId, form)
     }
 
     suspend fun deleteItem(
@@ -295,7 +304,7 @@ object DirectMessagesService {
             "_csrftoken" to csrfToken,
             "_uuid" to deviceUuid,
         )
-        return repository.deleteItem(threadId, itemId, form)
+        return service.deleteItem(threadId, itemId, form)
     }
 
     suspend fun rankedRecipients(
@@ -317,7 +326,7 @@ object DirectMessagesService {
         if (showThreads != null) {
             queryMap["showThreads"] = showThreads.toString()
         }
-        return repository.rankedRecipients(queryMap)
+        return service.rankedRecipients(queryMap)
     }
 
     suspend fun forward(
@@ -333,7 +342,7 @@ object DirectMessagesService {
             "forwarded_from_thread_id" to fromThreadId,
             "forwarded_from_thread_item_id" to itemId,
         )
-        return repository.forward(form)
+        return service.forward(form)
     }
 
     suspend fun createThread(
@@ -354,7 +363,7 @@ object DirectMessagesService {
             form["thread_title"] = threadTitle
         }
         val signedForm = Utils.sign(form)
-        return repository.createThread(signedForm)
+        return service.createThread(signedForm)
     }
 
     suspend fun mute(
@@ -366,7 +375,7 @@ object DirectMessagesService {
             "_csrftoken" to csrfToken,
             "_uuid" to deviceUuid
         )
-        return repository.mute(threadId, form)
+        return service.mute(threadId, form)
     }
 
     suspend fun unmute(
@@ -378,7 +387,7 @@ object DirectMessagesService {
             "_csrftoken" to csrfToken,
             "_uuid" to deviceUuid,
         )
-        return repository.unmute(threadId, form)
+        return service.unmute(threadId, form)
     }
 
     suspend fun muteMentions(
@@ -390,7 +399,7 @@ object DirectMessagesService {
             "_csrftoken" to csrfToken,
             "_uuid" to deviceUuid,
         )
-        return repository.muteMentions(threadId, form)
+        return service.muteMentions(threadId, form)
     }
 
     suspend fun unmuteMentions(
@@ -402,7 +411,7 @@ object DirectMessagesService {
             "_csrftoken" to csrfToken,
             "_uuid" to deviceUuid,
         )
-        return repository.unmuteMentions(threadId, form)
+        return service.unmuteMentions(threadId, form)
     }
 
     suspend fun participantRequests(
@@ -410,7 +419,7 @@ object DirectMessagesService {
         pageSize: Int,
         cursor: String? = null,
     ): DirectThreadParticipantRequestsResponse {
-        return repository.participantRequests(threadId, pageSize, cursor)
+        return service.participantRequests(threadId, pageSize, cursor)
     }
 
     suspend fun approveParticipantRequests(
@@ -425,7 +434,7 @@ object DirectMessagesService {
             "user_ids" to JSONArray(userIds).toString(),
             // "share_join_chat_story" to String.valueOf(true)
         )
-        return repository.approveParticipantRequests(threadId, form)
+        return service.approveParticipantRequests(threadId, form)
     }
 
     suspend fun declineParticipantRequests(
@@ -439,7 +448,7 @@ object DirectMessagesService {
             "_uuid" to deviceUuid,
             "user_ids" to JSONArray(userIds).toString(),
         )
-        return repository.declineParticipantRequests(threadId, form)
+        return service.declineParticipantRequests(threadId, form)
     }
 
     suspend fun approvalRequired(
@@ -451,7 +460,7 @@ object DirectMessagesService {
             "_csrftoken" to csrfToken,
             "_uuid" to deviceUuid,
         )
-        return repository.approvalRequired(threadId, form)
+        return service.approvalRequired(threadId, form)
     }
 
     suspend fun approvalNotRequired(
@@ -463,7 +472,7 @@ object DirectMessagesService {
             "_csrftoken" to csrfToken,
             "_uuid" to deviceUuid,
         )
-        return repository.approvalNotRequired(threadId, form)
+        return service.approvalNotRequired(threadId, form)
     }
 
     suspend fun leave(
@@ -475,7 +484,7 @@ object DirectMessagesService {
             "_csrftoken" to csrfToken,
             "_uuid" to deviceUuid,
         )
-        return repository.leave(threadId, form)
+        return service.leave(threadId, form)
     }
 
     suspend fun end(
@@ -487,7 +496,7 @@ object DirectMessagesService {
             "_csrftoken" to csrfToken,
             "_uuid" to deviceUuid,
         )
-        return repository.end(threadId, form)
+        return service.end(threadId, form)
     }
 
     suspend fun fetchPendingInbox(cursor: String?, seqId: Long): DirectInboxResponse {
@@ -504,7 +513,7 @@ object DirectMessagesService {
         if (seqId != 0L) {
             queryMap["seq_id"] = seqId.toString()
         }
-        return repository.fetchPendingInbox(queryMap)
+        return service.fetchPendingInbox(queryMap)
     }
 
     suspend fun approveRequest(
@@ -516,7 +525,7 @@ object DirectMessagesService {
             "_csrftoken" to csrfToken,
             "_uuid" to deviceUuid,
         )
-        return repository.approveRequest(threadId, form)
+        return service.approveRequest(threadId, form)
     }
 
     suspend fun declineRequest(
@@ -528,7 +537,7 @@ object DirectMessagesService {
             "_csrftoken" to csrfToken,
             "_uuid" to deviceUuid,
         )
-        return repository.declineRequest(threadId, form)
+        return service.declineRequest(threadId, form)
     }
 
     suspend fun markAsSeen(
@@ -546,6 +555,18 @@ object DirectMessagesService {
             "thread_id" to threadId,
             "item_id" to itemId,
         )
-        return repository.markItemSeen(threadId, itemId, form)
+        return service.markItemSeen(threadId, itemId, form)
+    }
+
+    companion object {
+        @Volatile
+        private var INSTANCE: DirectMessagesRepository? = null
+
+        fun getInstance(): DirectMessagesRepository {
+            return INSTANCE ?: synchronized(this) {
+                val service: DirectMessagesService = RetrofitFactory.retrofit.create(DirectMessagesService::class.java)
+                DirectMessagesRepository(service).also { INSTANCE = it }
+            }
+        }
     }
 }

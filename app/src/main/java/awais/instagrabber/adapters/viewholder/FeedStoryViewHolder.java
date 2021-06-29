@@ -4,8 +4,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import awais.instagrabber.adapters.FeedStoriesAdapter;
 import awais.instagrabber.databinding.ItemHighlightBinding;
-import awais.instagrabber.repositories.responses.stories.Story;
 import awais.instagrabber.repositories.responses.User;
+import awais.instagrabber.repositories.responses.stories.Story;
 
 public final class FeedStoryViewHolder extends RecyclerView.ViewHolder {
 

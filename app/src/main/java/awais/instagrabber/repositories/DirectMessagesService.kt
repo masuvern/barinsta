@@ -3,7 +3,7 @@ package awais.instagrabber.repositories
 import awais.instagrabber.repositories.responses.directmessages.*
 import retrofit2.http.*
 
-interface DirectMessagesRepository {
+interface DirectMessagesService {
     @GET("/api/v1/direct_v2/inbox/")
     suspend fun fetchInbox(@QueryMap queryMap: Map<String, String>): DirectInboxResponse
 

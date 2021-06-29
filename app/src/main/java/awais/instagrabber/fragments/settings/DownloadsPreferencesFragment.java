@@ -23,7 +23,6 @@ import java.nio.charset.StandardCharsets;
 import awais.instagrabber.R;
 import awais.instagrabber.dialogs.ConfirmDialogFragment;
 import awais.instagrabber.utils.AppExecutors;
-import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.DownloadUtils;
 import awais.instagrabber.utils.TextUtils;
 import awais.instagrabber.utils.Utils;

@@ -5,10 +5,8 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import awais.instagrabber.MainCoroutineScopeRule
 import awais.instagrabber.common.*
-import awais.instagrabber.db.datasources.AccountDataSource
 import awais.instagrabber.db.datasources.FavoriteDataSource
 import awais.instagrabber.db.entities.Favorite
-import awais.instagrabber.db.repositories.AccountRepository
 import awais.instagrabber.db.repositories.FavoriteRepository
 import awais.instagrabber.getOrAwaitValue
 import awais.instagrabber.models.Resource
@@ -21,6 +19,7 @@ import awais.instagrabber.repositories.responses.stories.Story
 import awais.instagrabber.webservices.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.json.JSONException
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.jupiter.api.Assertions.*
@@ -37,30 +36,41 @@ internal class ProfileFragmentViewModelTest {
     @get:Rule
     val coroutineScope = MainCoroutineScopeRule()
 
-    private val testPublicUser = User(
-        pk = 100,
-        username = "test",
-        fullName = "Test user"
-    )
+    private lateinit var testPublicUser: User
+    private lateinit var testPublicUser1: User
 
-    private val testPublicUser1 = User(
-        pk = 101,
-        username = "test1",
-        fullName = "Test1 user1"
-    )
+    private val csrfToken = "csrfToken"
+    private val deviceUuid = "deviceUuid"
+
+    @Before
+    fun setup() {
+        testPublicUser = User(
+            pk = 100,
+            username = "test",
+            fullName = "Test user"
+        )
+        testPublicUser1 = User(
+            pk = 101,
+            username = "test1",
+            fullName = "Test1 user1"
+        )
+    }
 
     @ExperimentalCoroutinesApi
     @Test
     fun `no state username and null current user`() {
         val viewModel = ProfileFragmentViewModel(
             SavedStateHandle(),
+            null,
+            deviceUuid,
             UserRepository(UserServiceAdapter()),
             FriendshipRepository(FriendshipServiceAdapter()),
             StoriesRepository(StoriesServiceAdapter()),
             MediaRepository(MediaServiceAdapter()),
             GraphQLRepository(GraphQLServiceAdapter()),
-            AccountRepository(AccountDataSource(AccountDaoAdapter())),
             FavoriteRepository(FavoriteDataSource(FavoriteDaoAdapter())),
+            DirectMessagesRepository(DirectMessagesServiceAdapter()),
+            null,
             coroutineScope.dispatcher,
         )
         assertEquals(false, viewModel.isLoggedIn.getOrAwaitValue())
@@ -76,13 +86,16 @@ internal class ProfileFragmentViewModelTest {
     fun `no state username with current user provided`() {
         val viewModel = ProfileFragmentViewModel(
             SavedStateHandle(),
+            csrfToken,
+            deviceUuid,
             UserRepository(UserServiceAdapter()),
             FriendshipRepository(FriendshipServiceAdapter()),
             StoriesRepository(StoriesServiceAdapter()),
             MediaRepository(MediaServiceAdapter()),
             GraphQLRepository(GraphQLServiceAdapter()),
-            AccountRepository(AccountDataSource(AccountDaoAdapter())),
             FavoriteRepository(FavoriteDataSource(FavoriteDaoAdapter())),
+            DirectMessagesRepository(DirectMessagesServiceAdapter()),
+            null,
             coroutineScope.dispatcher,
         )
         assertEquals(false, viewModel.isLoggedIn.getOrAwaitValue())
@@ -128,13 +141,16 @@ internal class ProfileFragmentViewModelTest {
         }
         val viewModel = ProfileFragmentViewModel(
             state,
+            null,
+            deviceUuid,
             UserRepository(UserServiceAdapter()),
             FriendshipRepository(FriendshipServiceAdapter()),
             StoriesRepository(StoriesServiceAdapter()),
             MediaRepository(MediaServiceAdapter()),
             graphQLRepository,
-            AccountRepository(AccountDataSource(AccountDaoAdapter())),
             FavoriteRepository(FavoriteDataSource(FavoriteDaoAdapter())),
+            DirectMessagesRepository(DirectMessagesServiceAdapter()),
+            null,
             coroutineScope.dispatcher,
         )
         viewModel.setCurrentUser(Resource.success(null))
@@ -179,13 +195,16 @@ internal class ProfileFragmentViewModelTest {
         }
         val viewModel = ProfileFragmentViewModel(
             state,
+            csrfToken,
+            deviceUuid,
             userRepository,
             FriendshipRepository(FriendshipServiceAdapter()),
             StoriesRepository(StoriesServiceAdapter()),
             MediaRepository(MediaServiceAdapter()),
             GraphQLRepository(GraphQLServiceAdapter()),
-            AccountRepository(AccountDataSource(AccountDaoAdapter())),
             FavoriteRepository(FavoriteDataSource(FavoriteDaoAdapter())),
+            DirectMessagesRepository(DirectMessagesServiceAdapter()),
+            null,
             coroutineScope.dispatcher,
         )
         viewModel.setCurrentUser(Resource.success(User()))
@@ -215,13 +234,16 @@ internal class ProfileFragmentViewModelTest {
         }
         val viewModel = ProfileFragmentViewModel(
             state,
+            null,
+            deviceUuid,
             UserRepository(UserServiceAdapter()),
             FriendshipRepository(FriendshipServiceAdapter()),
             StoriesRepository(StoriesServiceAdapter()),
             MediaRepository(MediaServiceAdapter()),
             graphQLRepository,
-            AccountRepository(AccountDataSource(AccountDaoAdapter())),
             FavoriteRepository(FavoriteDataSource(FavoriteDaoAdapter())),
+            DirectMessagesRepository(DirectMessagesServiceAdapter()),
+            null,
             coroutineScope.dispatcher,
         )
         viewModel.setCurrentUser(Resource.success(null))
@@ -267,13 +289,16 @@ internal class ProfileFragmentViewModelTest {
         }))
         val viewModel = ProfileFragmentViewModel(
             state,
+            null,
+            deviceUuid,
             UserRepository(UserServiceAdapter()),
             FriendshipRepository(FriendshipServiceAdapter()),
             StoriesRepository(StoriesServiceAdapter()),
             MediaRepository(MediaServiceAdapter()),
             graphQLRepository,
-            AccountRepository(AccountDataSource(AccountDaoAdapter())),
             favoriteRepository,
+            DirectMessagesRepository(DirectMessagesServiceAdapter()),
+            null,
             coroutineScope.dispatcher,
         )
         viewModel.setCurrentUser(Resource.success(null))
@@ -302,17 +327,20 @@ internal class ProfileFragmentViewModelTest {
         }
         val storiesRepository = object : StoriesRepository(StoriesServiceAdapter()) {
             override suspend fun getUserStory(options: StoryViewerOptions): List<StoryModel> = testUserStories
-            override suspend fun fetchHighlights(profileId: Long): List<HighlightModel> = testUserHighlights
+            override suspend fun fetchHighlights(profileId: Long): List<Story> = testUserHighlights
         }
         val viewModel = ProfileFragmentViewModel(
             state,
+            csrfToken,
+            deviceUuid,
             userRepository,
             FriendshipRepository(FriendshipServiceAdapter()),
             storiesRepository,
             MediaRepository(MediaServiceAdapter()),
             GraphQLRepository(GraphQLServiceAdapter()),
-            AccountRepository(AccountDataSource(AccountDaoAdapter())),
             FavoriteRepository(FavoriteDataSource(FavoriteDaoAdapter())),
+            DirectMessagesRepository(DirectMessagesServiceAdapter()),
+            null,
             coroutineScope.dispatcher,
         )
         viewModel.setCurrentUser(Resource.success(User()))
@@ -331,5 +359,46 @@ internal class ProfileFragmentViewModelTest {
             userHighlights = viewModel.userHighlights.getOrAwaitValue()
         }
         assertEquals(testUserHighlights, userHighlights.data)
+    }
+
+    @ExperimentalCoroutinesApi
+    @Test
+    fun `should refresh correctly`() {
+        val state = SavedStateHandle(
+            mutableMapOf<String, Any?>(
+                "username" to testPublicUser.username
+            )
+        )
+        val graphQLRepository = object : GraphQLRepository(GraphQLServiceAdapter()) {
+            override suspend fun fetchUser(username: String): User = testPublicUser
+        }
+        val viewModel = ProfileFragmentViewModel(
+            state,
+            null,
+            deviceUuid,
+            UserRepository(UserServiceAdapter()),
+            FriendshipRepository(FriendshipServiceAdapter()),
+            StoriesRepository(StoriesServiceAdapter()),
+            MediaRepository(MediaServiceAdapter()),
+            graphQLRepository,
+            FavoriteRepository(FavoriteDataSource(FavoriteDaoAdapter())),
+            DirectMessagesRepository(DirectMessagesServiceAdapter()),
+            null,
+            coroutineScope.dispatcher,
+        )
+        viewModel.setCurrentUser(Resource.success(null))
+        assertEquals(false, viewModel.isLoggedIn.getOrAwaitValue())
+        var profile = viewModel.profile.getOrAwaitValue()
+        while (profile.status == Resource.Status.LOADING) {
+            profile = viewModel.profile.getOrAwaitValue()
+        }
+        assertEquals(testPublicUser, profile.data)
+        testPublicUser = testPublicUser.copy(biography = "new bio")
+        viewModel.refresh()
+        profile = viewModel.profile.getOrAwaitValue()
+        while (profile.status == Resource.Status.LOADING) {
+            profile = viewModel.profile.getOrAwaitValue()
+        }
+        assertEquals(testPublicUser, profile.data)
     }
 }

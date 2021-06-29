@@ -1,7 +1,6 @@
 package awais.instagrabber.fragments.main;
 
 import android.content.Context;
-import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -12,7 +11,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import androidx.activity.OnBackPressedCallback;
 import androidx.activity.OnBackPressedDispatcher;
@@ -45,8 +43,8 @@ import awais.instagrabber.dialogs.PostsLayoutPreferencesDialogFragment;
 import awais.instagrabber.fragments.PostViewV2Fragment;
 import awais.instagrabber.models.PostsLayoutPreferences;
 import awais.instagrabber.repositories.requests.StoryViewerOptions;
-import awais.instagrabber.repositories.responses.stories.Story;
 import awais.instagrabber.repositories.responses.Media;
+import awais.instagrabber.repositories.responses.stories.Story;
 import awais.instagrabber.utils.AppExecutors;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.CoroutineUtilsKt;

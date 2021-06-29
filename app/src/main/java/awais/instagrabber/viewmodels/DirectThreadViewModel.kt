@@ -1,6 +1,5 @@
 package awais.instagrabber.viewmodels
 
-import android.R.attr
 import android.app.Application
 import android.content.ContentResolver
 import android.net.Uri
@@ -23,7 +22,6 @@ import awais.instagrabber.utils.MediaUtils.OnInfoLoadListener
 import awais.instagrabber.utils.MediaUtils.VideoInfo
 import awais.instagrabber.utils.VoiceRecorder.VoiceRecorderCallback
 import awais.instagrabber.utils.VoiceRecorder.VoiceRecordingResult
-import java.util.*
 
 
 class DirectThreadViewModel(

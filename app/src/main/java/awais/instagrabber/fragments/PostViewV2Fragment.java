@@ -2,7 +2,6 @@ package awais.instagrabber.fragments;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.graphics.Rect;
@@ -93,8 +92,8 @@ import awais.instagrabber.models.enums.MediaItemType;
 import awais.instagrabber.repositories.responses.Caption;
 import awais.instagrabber.repositories.responses.Location;
 import awais.instagrabber.repositories.responses.Media;
-import awais.instagrabber.repositories.responses.User;
 import awais.instagrabber.repositories.responses.MediaCandidate;
+import awais.instagrabber.repositories.responses.User;
 import awais.instagrabber.repositories.responses.directmessages.RankedRecipient;
 import awais.instagrabber.utils.DownloadUtils;
 import awais.instagrabber.utils.NullSafePair;
