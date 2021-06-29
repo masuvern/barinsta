@@ -32,7 +32,6 @@ import awais.instagrabber.customviews.PrimaryActionModeCallback
 import awais.instagrabber.customviews.RamboTextViewV2
 import awais.instagrabber.customviews.RamboTextViewV2.*
 import awais.instagrabber.databinding.FragmentProfileBinding
-import awais.instagrabber.db.repositories.AccountRepository
 import awais.instagrabber.db.repositories.FavoriteRepository
 import awais.instagrabber.dialogs.ConfirmDialogFragment
 import awais.instagrabber.dialogs.ConfirmDialogFragment.ConfirmDialogFragmentCallback
@@ -312,7 +311,6 @@ class ProfileFragment : Fragment(), OnRefreshListener, ConfirmDialogFragmentCall
                 StoriesRepository.getInstance(),
                 MediaRepository.getInstance(),
                 GraphQLRepository.getInstance(),
-                AccountRepository.getInstance(requireContext()),
                 FavoriteRepository.getInstance(requireContext()),
                 DirectMessagesRepository.getInstance(),
                 if (isLoggedIn) DirectMessagesManager else null,

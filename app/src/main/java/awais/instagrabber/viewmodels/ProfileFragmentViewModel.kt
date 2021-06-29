@@ -5,7 +5,6 @@ import android.util.Log
 import androidx.lifecycle.*
 import androidx.savedstate.SavedStateRegistryOwner
 import awais.instagrabber.db.entities.Favorite
-import awais.instagrabber.db.repositories.AccountRepository
 import awais.instagrabber.db.repositories.FavoriteRepository
 import awais.instagrabber.managers.DirectMessagesManager
 import awais.instagrabber.models.Resource
@@ -601,7 +600,6 @@ class ProfileFragmentViewModelFactory(
     private val storiesRepository: StoriesRepository,
     private val mediaRepository: MediaRepository,
     private val graphQLRepository: GraphQLRepository,
-    private val accountRepository: AccountRepository,
     private val favoriteRepository: FavoriteRepository,
     private val directMessagesRepository: DirectMessagesRepository,
     private val messageManager: DirectMessagesManager?,
