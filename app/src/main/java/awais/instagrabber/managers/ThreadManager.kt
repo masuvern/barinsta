@@ -39,7 +39,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import retrofit2.Call
-import java.io.File
 import java.io.IOException
 import java.net.HttpURLConnection
 import java.util.*
@@ -365,17 +364,6 @@ class ThreadManager(
                 Log.e(TAG, "sendText: ", e)
             }
         }
-        return data
-    }
-
-    fun sendUri(entry: MediaController.MediaEntry, scope: CoroutineScope): LiveData<Resource<Any?>> {
-        val data = MutableLiveData<Resource<Any?>>()
-        val uri = Uri.fromFile(File(entry.path))
-        if (!entry.isVideo) {
-            sendPhoto(data, uri, entry.width, entry.height, scope)
-            return data
-        }
-        sendVideo(data, uri, entry.size, entry.duration, entry.width, entry.height, scope)
         return data
     }
 

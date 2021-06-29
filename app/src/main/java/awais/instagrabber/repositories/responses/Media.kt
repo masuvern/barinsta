@@ -4,7 +4,6 @@ import awais.instagrabber.models.enums.MediaItemType
 import awais.instagrabber.repositories.responses.feed.EndOfFeedDemarcator
 import awais.instagrabber.utils.TextUtils
 import java.io.Serializable
-import java.util.*
 
 data class Media(
     val pk: String? = null,
@@ -38,7 +37,8 @@ data class Media(
     var isSidecarChild: Boolean = false,
     var hasViewerSaved: Boolean = false,
     private val injected: Map<String, Any>? = null,
-    val endOfFeedDemarcator: EndOfFeedDemarcator? = null
+    val endOfFeedDemarcator: EndOfFeedDemarcator? = null,
+    val carouselShareChildMediaId: String? = null // which specific child should dm show first
 ) : Serializable {
     private var dateString: String? = null
 

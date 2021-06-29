@@ -8,6 +8,9 @@ import awais.instagrabber.models.enums.FavoriteType
 import awais.instagrabber.repositories.*
 import awais.instagrabber.repositories.responses.*
 import awais.instagrabber.repositories.responses.directmessages.*
+import awais.instagrabber.repositories.responses.stories.ArchiveResponse
+import awais.instagrabber.repositories.responses.stories.ReelsTrayResponse
+import awais.instagrabber.repositories.responses.stories.StoryStickerResponse
 
 open class UserServiceAdapter : UserService {
     override suspend fun getUserInfo(uid: Long): WrappedUser {
@@ -48,15 +51,15 @@ open class StoriesServiceAdapter : StoriesService {
         TODO("Not yet implemented")
     }
 
-    override suspend fun getFeedStories(): String {
+    override suspend fun getFeedStories(): ReelsTrayResponse? {
         TODO("Not yet implemented")
     }
 
-    override suspend fun fetchHighlights(uid: Long): String {
+    override suspend fun fetchHighlights(uid: Long): ReelsTrayResponse? {
         TODO("Not yet implemented")
     }
 
-    override suspend fun fetchArchive(queryParams: Map<String, String>): String {
+    override suspend fun fetchArchive(queryParams: Map<String, String>): ArchiveResponse? {
         TODO("Not yet implemented")
     }
 

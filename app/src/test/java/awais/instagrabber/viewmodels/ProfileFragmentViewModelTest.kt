@@ -9,13 +9,13 @@ import awais.instagrabber.db.datasources.FavoriteDataSource
 import awais.instagrabber.db.entities.Favorite
 import awais.instagrabber.db.repositories.FavoriteRepository
 import awais.instagrabber.getOrAwaitValue
-import awais.instagrabber.models.HighlightModel
 import awais.instagrabber.models.Resource
 import awais.instagrabber.models.StoryModel
 import awais.instagrabber.models.enums.FavoriteType
 import awais.instagrabber.repositories.requests.StoryViewerOptions
 import awais.instagrabber.repositories.responses.FriendshipStatus
 import awais.instagrabber.repositories.responses.User
+import awais.instagrabber.repositories.responses.stories.Story
 import awais.instagrabber.webservices.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.json.JSONException
@@ -321,13 +321,13 @@ internal class ProfileFragmentViewModelTest {
             )
         )
         val testUserStories = listOf(StoryModel())
-        val testUserHighlights = listOf(HighlightModel())
+        val testUserHighlights = listOf(Story())
         val userRepository = object : UserRepository(UserServiceAdapter()) {
             override suspend fun getUsernameInfo(username: String): User = testPublicUser
         }
         val storiesRepository = object : StoriesRepository(StoriesServiceAdapter()) {
             override suspend fun getUserStory(options: StoryViewerOptions): List<StoryModel> = testUserStories
-            override suspend fun fetchHighlights(profileId: Long): List<HighlightModel> = testUserHighlights
+            override suspend fun fetchHighlights(profileId: Long): List<Story> = testUserHighlights
         }
         val viewModel = ProfileFragmentViewModel(
             state,

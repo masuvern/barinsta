@@ -173,8 +173,9 @@ open class DirectMessagesRepository(private val service: DirectMessagesService) 
         clientContext: String,
         threadIdsOrUserIds: ThreadIdsOrUserIds,
         mediaId: String,
+        childId: String?,
     ): DirectThreadBroadcastResponse =
-        broadcast(csrfToken, userId, deviceUuid, MediaShareBroadcastOptions(clientContext, threadIdsOrUserIds, mediaId))
+        broadcast(csrfToken, userId, deviceUuid, MediaShareBroadcastOptions(clientContext, threadIdsOrUserIds, mediaId, childId))
 
     suspend fun broadcastProfile(
         csrfToken: String,

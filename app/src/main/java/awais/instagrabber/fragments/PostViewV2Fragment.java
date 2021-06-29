@@ -2,7 +2,6 @@ package awais.instagrabber.fragments;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.graphics.Rect;
@@ -93,8 +92,8 @@ import awais.instagrabber.models.enums.MediaItemType;
 import awais.instagrabber.repositories.responses.Caption;
 import awais.instagrabber.repositories.responses.Location;
 import awais.instagrabber.repositories.responses.Media;
-import awais.instagrabber.repositories.responses.User;
 import awais.instagrabber.repositories.responses.MediaCandidate;
+import awais.instagrabber.repositories.responses.User;
 import awais.instagrabber.repositories.responses.directmessages.RankedRecipient;
 import awais.instagrabber.utils.DownloadUtils;
 import awais.instagrabber.utils.NullSafePair;
@@ -152,7 +151,7 @@ public class PostViewV2Fragment extends Fragment implements EditTextDialogFragme
             if (context != null) {
                 Toast.makeText(context, R.string.sending, Toast.LENGTH_SHORT).show();
             }
-            viewModel.shareDm((RankedRecipient) result);
+            viewModel.shareDm((RankedRecipient) result, sliderPosition);
         } else if ((result instanceof Set)) {
             try {
                 // Log.d(TAG, "result: " + result);
@@ -161,7 +160,7 @@ public class PostViewV2Fragment extends Fragment implements EditTextDialogFragme
                     Toast.makeText(context, R.string.sending, Toast.LENGTH_SHORT).show();
                 }
                 //noinspection unchecked
-                viewModel.shareDm((Set<RankedRecipient>) result);
+                viewModel.shareDm((Set<RankedRecipient>) result, sliderPosition);
             } catch (Exception e) {
                 Log.e(TAG, "share: ", e);
             }
@@ -294,7 +293,7 @@ public class PostViewV2Fragment extends Fragment implements EditTextDialogFragme
             return;
         }
         final Media media = (Media) feedModelSerializable;
-        if (media.getMediaType() == MediaItemType.MEDIA_TYPE_SLIDER) {
+        if (media.getMediaType() == MediaItemType.MEDIA_TYPE_SLIDER && sliderPosition == -1) {
             sliderPosition = arguments.getInt(ARG_SLIDER_POSITION, 0);
         }
         viewModel.setMedia(media);
@@ -1039,6 +1038,7 @@ public class PostViewV2Fragment extends Fragment implements EditTextDialogFragme
         final String text = "1/" + carouselMedia.size();
         binding.mediaCounter.setText(text);
         sliderItemsAdapter.submitList(media.getCarouselMedia());
+        sliderParent.setCurrentItem(sliderPosition);
     }
 
     private void pauseSliderPlayer() {

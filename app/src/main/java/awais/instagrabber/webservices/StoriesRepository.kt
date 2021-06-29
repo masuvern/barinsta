@@ -1,19 +1,15 @@
 package awais.instagrabber.webservices
 
-import android.util.Log
 import awais.instagrabber.fragments.settings.PreferenceKeys
-import awais.instagrabber.models.FeedStoryModel
-import awais.instagrabber.models.HighlightModel
 import awais.instagrabber.models.StoryModel
 import awais.instagrabber.repositories.StoriesService
 import awais.instagrabber.repositories.requests.StoryViewerOptions
-import awais.instagrabber.repositories.responses.StoryStickerResponse
-import awais.instagrabber.repositories.responses.User
-import awais.instagrabber.utils.Constants
+import awais.instagrabber.repositories.responses.stories.ArchiveResponse
+import awais.instagrabber.repositories.responses.stories.Story
+import awais.instagrabber.repositories.responses.stories.StoryStickerResponse
 import awais.instagrabber.utils.ResponseBodyUtils
 import awais.instagrabber.utils.TextUtils.isEmpty
 import awais.instagrabber.utils.Utils
-import awais.instagrabber.utils.extensions.TAG
 import awais.instagrabber.webservices.RetrofitFactory.retrofit
 import org.json.JSONArray
 import org.json.JSONObject
@@ -27,101 +23,42 @@ open class StoriesRepository(private val service: StoriesService) {
         return ResponseBodyUtils.parseStoryItem(itemJson, false, null)
     }
 
-    suspend fun getFeedStories(): List<FeedStoryModel> {
+    suspend fun getFeedStories(): List<Story> {
         val response = service.getFeedStories()
-        return parseStoriesBody(response)
-    }
-
-    private fun parseStoriesBody(body: String): List<FeedStoryModel> {
-        val feedStoryModels: MutableList<FeedStoryModel> = ArrayList()
-        val feedStoriesReel = JSONObject(body).getJSONArray("tray")
-        for (i in 0 until feedStoriesReel.length()) {
-            val node = feedStoriesReel.getJSONObject(i)
-            if (node.optBoolean("hide_from_feed_unit") && Utils.settingsHelper.getBoolean(PreferenceKeys.HIDE_MUTED_REELS)) continue
-            val userJson = node.getJSONObject(if (node.has("user")) "user" else "owner")
-            try {
-                val user = User(
-                    userJson.getLong("pk"),
-                    userJson.getString("username"),
-                    userJson.optString("full_name"),
-                    userJson.optBoolean("is_private"),
-                    userJson.getString("profile_pic_url"),
-                    userJson.optBoolean("is_verified")
-                )
-                val timestamp = node.getLong("latest_reel_media")
-                val fullyRead = !node.isNull("seen") && node.getLong("seen") == timestamp
-                val itemJson = if (node.has("items")) node.getJSONArray("items").optJSONObject(0) else null
-                var firstStoryModel: StoryModel? = null
-                if (itemJson != null) {
-                    firstStoryModel = ResponseBodyUtils.parseStoryItem(itemJson, false, null)
-                }
-                feedStoryModels.add(
-                    FeedStoryModel(
-                        node.getString("id"),
-                        user,
-                        fullyRead,
-                        timestamp,
-                        firstStoryModel,
-                        node.getInt("media_count"),
-                        false,
-                        node.optBoolean("has_besties_media")
+        val result: MutableList<Story> = mutableListOf()
+        if (response?.broadcasts != null) {
+            val length = response.broadcasts.size
+            for (i in 0 until length) {
+                val broadcast = response.broadcasts.get(i)
+                result.add(
+                    Story(
+                        broadcast.id,
+                        broadcast.publishedTime,
+                        1,
+                        0L,
+                        broadcast.broadcastOwner,
+                        broadcast.muted,
+                        false, // unclear
+                        null,
+                        null,
+                        null,
+                        null,
+                        broadcast
                     )
                 )
-            } catch (e: Exception) {
-                Log.e(TAG, "parseStoriesBody: ", e)
-            } // to cover promotional reels with non-long user pk's
+            }
         }
-        val broadcasts = JSONObject(body).getJSONArray("broadcasts")
-        for (i in 0 until broadcasts.length()) {
-            val node = broadcasts.getJSONObject(i)
-            val userJson = node.getJSONObject("broadcast_owner")
-            val user = User(
-                userJson.getLong("pk"),
-                userJson.getString("username"),
-                userJson.optString("full_name"),
-                userJson.optBoolean("is_private"),
-                userJson.getString("profile_pic_url"),
-                userJson.optBoolean("is_verified")
-            )
-            feedStoryModels.add(
-                FeedStoryModel(
-                    node.getString("id"),
-                    user,
-                    false,
-                    node.getLong("published_time"),
-                    ResponseBodyUtils.parseBroadcastItem(node),
-                    1,
-                    isLive = true,
-                    isBestie = false
-                )
-            )
-        }
-        return sort(feedStoryModels)
+        if (response?.tray != null) result.addAll(response.tray)
+        return sort(result.toList())
     }
 
-    open suspend fun fetchHighlights(profileId: Long): List<HighlightModel> {
+    open suspend fun fetchHighlights(profileId: Long): List<Story> {
         val response = service.fetchHighlights(profileId)
-        val highlightsReel = JSONObject(response).getJSONArray("tray")
-        val length = highlightsReel.length()
-        val highlightModels: MutableList<HighlightModel> = ArrayList()
-        for (i in 0 until length) {
-            val highlightNode = highlightsReel.getJSONObject(i)
-            highlightModels.add(
-                HighlightModel(
-                    highlightNode.getString("title"),
-                    highlightNode.getString(Constants.EXTRAS_ID),
-                    highlightNode.getJSONObject("cover_media")
-                        .getJSONObject("cropped_image_version")
-                        .getString("url"),
-                    highlightNode.getLong("latest_reel_media"),
-                    highlightNode.getInt("media_count")
-                )
-            )
-        }
+        val highlightModels = response?.tray ?: listOf()
         return highlightModels
     }
 
-    suspend fun fetchArchive(maxId: String): ArchiveFetchResponse {
+    suspend fun fetchArchive(maxId: String): ArchiveResponse? {
         val form = mutableMapOf(
             "include_suggested_highlights" to "false",
             "is_in_archive_home" to "true",
@@ -130,24 +67,7 @@ open class StoriesRepository(private val service: StoriesService) {
         if (!isEmpty(maxId)) {
             form["max_id"] = maxId // NOT TESTED
         }
-        val response = service.fetchArchive(form)
-        val data = JSONObject(response)
-        val highlightsReel = data.getJSONArray("items")
-        val length = highlightsReel.length()
-        val highlightModels: MutableList<HighlightModel> = ArrayList()
-        for (i in 0 until length) {
-            val highlightNode = highlightsReel.getJSONObject(i)
-            highlightModels.add(
-                HighlightModel(
-                    null,
-                    highlightNode.getString(Constants.EXTRAS_ID),
-                    highlightNode.getJSONObject("cover_image_version").getString("url"),
-                    highlightNode.getLong("latest_reel_media"),
-                    highlightNode.getInt("media_count")
-                )
-            )
-        }
-        return ArchiveFetchResponse(highlightModels, data.getBoolean("more_available"), data.getString("max_id"))
+        return service.fetchArchive(form)
     }
 
     open suspend fun getUserStory(options: StoryViewerOptions): List<StoryModel> {
@@ -299,22 +219,17 @@ open class StoriesRepository(private val service: StoriesService) {
         return builder.toString()
     }
 
-    private fun sort(list: List<FeedStoryModel>): List<FeedStoryModel> {
+    private fun sort(list: List<Story>): List<Story> {
         val listCopy = ArrayList(list)
         listCopy.sortWith { o1, o2 ->
-            when (Utils.settingsHelper.getString(PreferenceKeys.STORY_SORT)) {
-                "1" -> return@sortWith o2.timestamp.compareTo(o1.timestamp)
-                "2" -> return@sortWith o1.timestamp.compareTo(o2.timestamp)
+            if (o1.latestReelMedia == null || o2.latestReelMedia == null) return@sortWith 0
+            else when (Utils.settingsHelper.getString(PreferenceKeys.STORY_SORT)) {
+                "1" -> return@sortWith o2.latestReelMedia.compareTo(o1.latestReelMedia)
+                "2" -> return@sortWith o1.latestReelMedia.compareTo(o2.latestReelMedia)
                 else -> return@sortWith 0
             }
         }
         return listCopy
-    }
-
-    class ArchiveFetchResponse(val result: List<HighlightModel>, val hasNextPage: Boolean, val nextCursor: String) {
-        fun hasNextPage(): Boolean {
-            return hasNextPage
-        }
     }
 
     companion object {

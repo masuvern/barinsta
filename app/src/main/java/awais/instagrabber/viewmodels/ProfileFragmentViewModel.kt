@@ -8,7 +8,6 @@ import awais.instagrabber.db.entities.Favorite
 import awais.instagrabber.db.repositories.AccountRepository
 import awais.instagrabber.db.repositories.FavoriteRepository
 import awais.instagrabber.managers.DirectMessagesManager
-import awais.instagrabber.models.HighlightModel
 import awais.instagrabber.models.Resource
 import awais.instagrabber.models.StoryModel
 import awais.instagrabber.models.enums.BroadcastItemType
@@ -18,6 +17,7 @@ import awais.instagrabber.repositories.responses.FriendshipStatus
 import awais.instagrabber.repositories.responses.User
 import awais.instagrabber.repositories.responses.UserProfileContextLink
 import awais.instagrabber.repositories.responses.directmessages.RankedRecipient
+import awais.instagrabber.repositories.responses.stories.Story
 import awais.instagrabber.utils.ControlledRunner
 import awais.instagrabber.utils.Event
 import awais.instagrabber.utils.SingleRunner
@@ -185,9 +185,9 @@ class ProfileFragmentViewModel(
         }
     }
 
-    private val highlightsFetchControlledRunner = ControlledRunner<List<HighlightModel>?>()
-    val userHighlights: LiveData<Resource<List<HighlightModel>?>> = currentUserProfileActionLiveData.switchMap { currentUserAndProfilePair ->
-        liveData<Resource<List<HighlightModel>?>>(context = viewModelScope.coroutineContext + ioDispatcher) {
+    private val highlightsFetchControlledRunner = ControlledRunner<List<Story>?>()
+    val userHighlights: LiveData<Resource<List<Story>?>> = currentUserProfileActionLiveData.switchMap { currentUserAndProfilePair ->
+        liveData<Resource<List<Story>?>>(context = viewModelScope.coroutineContext + ioDispatcher) {
             val (currentUserResource, profileResource, action) = currentUserAndProfilePair
             if (action != INIT && action != REFRESH) {
                 return@liveData
@@ -236,7 +236,7 @@ class ProfileFragmentViewModel(
         StoryViewerOptions.forUser(fetchedUser.pk, fetchedUser.fullName)
     )
 
-    private suspend fun fetchUserHighlights(fetchedUser: User): List<HighlightModel> = storiesRepository.fetchHighlights(fetchedUser.pk)
+    private suspend fun fetchUserHighlights(fetchedUser: User): List<Story> = storiesRepository.fetchHighlights(fetchedUser.pk)
 
     private suspend fun checkAndUpdateFavorite(fetchedUser: User) {
         try {
@@ -268,12 +268,12 @@ class ProfileFragmentViewModel(
 
     fun shareDm(result: RankedRecipient) {
         val mediaId = profile.value?.data?.pk ?: return
-        messageManager?.sendMedia(result, mediaId.toString(10), BroadcastItemType.PROFILE, viewModelScope)
+        messageManager?.sendMedia(result, mediaId.toString(10), null, BroadcastItemType.PROFILE, viewModelScope)
     }
 
     fun shareDm(recipients: Set<RankedRecipient>) {
         val mediaId = profile.value?.data?.pk ?: return
-        messageManager?.sendMedia(recipients, mediaId.toString(10), BroadcastItemType.PROFILE, viewModelScope)
+        messageManager?.sendMedia(recipients, mediaId.toString(10), null, BroadcastItemType.PROFILE, viewModelScope)
     }
 
     fun refresh() {

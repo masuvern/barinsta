@@ -331,19 +331,21 @@ class PostViewV2ViewModel : ViewModel() {
         return data
     }
 
-    fun shareDm(result: RankedRecipient) {
+    fun shareDm(result: RankedRecipient, child: Int) {
         if (messageManager == null) {
             messageManager = DirectMessagesManager
         }
         val mediaId = media.id ?: return
-        messageManager?.sendMedia(result, mediaId, BroadcastItemType.MEDIA_SHARE, viewModelScope)
+        val childId = if (child == -1) null else media.carouselMedia?.get(child)?.id
+        messageManager?.sendMedia(result, mediaId, childId, BroadcastItemType.MEDIA_SHARE, viewModelScope)
     }
 
-    fun shareDm(recipients: Set<RankedRecipient>) {
+    fun shareDm(recipients: Set<RankedRecipient>, child: Int) {
         if (messageManager == null) {
             messageManager = DirectMessagesManager
         }
         val mediaId = media.id ?: return
-        messageManager?.sendMedia(recipients, mediaId, BroadcastItemType.MEDIA_SHARE, viewModelScope)
+        val childId = if (child == -1) null else media.carouselMedia?.get(child)?.id
+        messageManager?.sendMedia(recipients, mediaId, childId, BroadcastItemType.MEDIA_SHARE, viewModelScope)
     }
 }

@@ -28,7 +28,7 @@ import awais.instagrabber.repositories.responses.Location;
 import awais.instagrabber.repositories.responses.Media;
 import awais.instagrabber.repositories.responses.MediaCandidate;
 import awais.instagrabber.repositories.responses.User;
-import awais.instagrabber.repositories.responses.MediaCandidate;
+import awais.instagrabber.repositories.responses.stories.StoryMedia;
 
 public final class ResponseBodyUtils {
     private static final String TAG = "ResponseBodyUtils";
@@ -271,6 +271,7 @@ public final class ResponseBodyUtils {
                 false,
                 false,
                 null,
+                null,
                 null
         );
     }
@@ -405,27 +406,38 @@ public final class ResponseBodyUtils {
         return model;
     }
 
-    public static String getThumbUrl(final Media media) {
+    public static String getThumbUrl(final Object media) {
         return getImageCandidate(media, CandidateType.THUMBNAIL);
     }
 
-    public static String getImageUrl(final Media media) {
+    public static String getImageUrl(final Object media) {
         return getImageCandidate(media, CandidateType.DOWNLOAD);
     }
 
-    private static String getImageCandidate(final Media media, final CandidateType type) {
-        if (media == null) return null;
-        final ImageVersions2 imageVersions2 = media.getImageVersions2();
+    private static String getImageCandidate(final Object rawMedia, final CandidateType type) {
+        final ImageVersions2 imageVersions2;
+        final int originalWidth, originalHeight;
+        if (rawMedia instanceof StoryMedia) {
+            imageVersions2 = ((StoryMedia) rawMedia).getImageVersions2();
+            originalWidth = ((StoryMedia) rawMedia).getOriginalWidth();
+            originalHeight = ((StoryMedia) rawMedia).getOriginalHeight();
+        }
+        else if (rawMedia instanceof Media) {
+            imageVersions2 = ((Media) rawMedia).getImageVersions2();
+            originalWidth = ((Media) rawMedia).getOriginalWidth();
+            originalHeight = ((Media) rawMedia).getOriginalHeight();
+        }
+        else return null;
         if (imageVersions2 == null) return null;
         final List<MediaCandidate> candidates = imageVersions2.getCandidates();
         if (candidates == null || candidates.isEmpty()) return null;
-        final boolean isSquare = Integer.compare(media.getOriginalWidth(), media.getOriginalHeight()) == 0;
+        final boolean isSquare = Integer.compare(originalWidth, originalHeight) == 0;
         final List<MediaCandidate> sortedCandidates = candidates.stream()
                                                                 .sorted((c1, c2) -> Integer.compare(c2.getWidth(), c1.getWidth()))
                                                                 .collect(Collectors.toList());
         final List<MediaCandidate> filteredCandidates = sortedCandidates.stream()
                                                                         .filter(c ->
-                                                                                        c.getWidth() <= media.getOriginalWidth()
+                                                                                        c.getWidth() <= originalWidth
                                                                                                 && c.getWidth() <= type.getValue()
                                                                                                 && (isSquare || Integer
                                                                                                 .compare(c.getWidth(), c.getHeight()) != 0)
