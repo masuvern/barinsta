@@ -26,8 +26,8 @@ open class StoriesRepository(private val service: StoriesService) {
 
     suspend fun getFeedStories(): List<Story> {
         val response = service.getFeedStories()
-        val result = response.tray?.toMutableList() ?: mutableListOf()
-        if (response.broadcasts != null) {
+        val result: MutableList<Story> = mutableListOf()
+        if (response?.broadcasts != null) {
             val length = response.broadcasts.size
             for (i in 0 until length) {
                 val broadcast = response.broadcasts.get(i)
@@ -49,6 +49,7 @@ open class StoriesRepository(private val service: StoriesService) {
                 )
             }
         }
+        if (response?.tray != null) result.addAll(response.tray)
         return sort(result.toList())
     }
 
