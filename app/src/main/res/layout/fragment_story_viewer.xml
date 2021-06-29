@@ -146,7 +146,7 @@
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/storiesList"
         android:layout_width="0dp"
-        android:layout_height="@dimen/story_item_height"
+        android:layout_height="wrap_content"
         android:clipToPadding="false"
         app:layout_constraintTop_toBottomOf="@id/postActions"
         app:layout_constraintBottom_toBottomOf="parent"
