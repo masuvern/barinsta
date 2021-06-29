@@ -1277,7 +1277,7 @@ public class StoryViewerFragment extends Fragment {
                     final List<Story> models = feedStoriesViewModel.getList().getValue();
                     final List<Story> modelsCopy = models == null ? new ArrayList<>() : new ArrayList<>(models);
                     modelsCopy.set(currentFeedStoryIndex, oldFeedStoryModel);
-                    feedStoriesViewModel.getList().postValue(models);
+                    feedStoriesViewModel.getList().postValue(modelsCopy);
                 }
             }
             fetching = true;
