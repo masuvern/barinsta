@@ -7,6 +7,7 @@ import awais.instagrabber.db.entities.Favorite
 import awais.instagrabber.models.enums.FavoriteType
 import awais.instagrabber.repositories.*
 import awais.instagrabber.repositories.responses.*
+import awais.instagrabber.repositories.responses.stories.StoryStickerResponse
 
 open class UserServiceAdapter : UserService {
     override suspend fun getUserInfo(uid: Long): WrappedUser {

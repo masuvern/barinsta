@@ -1,19 +1,16 @@
 package awais.instagrabber.webservices
 
-import android.util.Log
 import awais.instagrabber.fragments.settings.PreferenceKeys
-import awais.instagrabber.models.FeedStoryModel
 import awais.instagrabber.models.HighlightModel
 import awais.instagrabber.models.StoryModel
 import awais.instagrabber.repositories.StoriesService
 import awais.instagrabber.repositories.requests.StoryViewerOptions
-import awais.instagrabber.repositories.responses.StoryStickerResponse
-import awais.instagrabber.repositories.responses.User
+import awais.instagrabber.repositories.responses.stories.Story
+import awais.instagrabber.repositories.responses.stories.StoryStickerResponse
 import awais.instagrabber.utils.Constants
 import awais.instagrabber.utils.ResponseBodyUtils
 import awais.instagrabber.utils.TextUtils.isEmpty
 import awais.instagrabber.utils.Utils
-import awais.instagrabber.utils.extensions.TAG
 import awais.instagrabber.webservices.RetrofitFactory.retrofit
 import org.json.JSONArray
 import org.json.JSONObject
@@ -27,76 +24,29 @@ open class StoriesRepository(private val service: StoriesService) {
         return ResponseBodyUtils.parseStoryItem(itemJson, false, null)
     }
 
-    suspend fun getFeedStories(): List<FeedStoryModel> {
+    suspend fun getFeedStories(): List<Story> {
         val response = service.getFeedStories()
-        return parseStoriesBody(response)
-    }
-
-    private fun parseStoriesBody(body: String): List<FeedStoryModel> {
-        val feedStoryModels: MutableList<FeedStoryModel> = ArrayList()
-        val feedStoriesReel = JSONObject(body).getJSONArray("tray")
-        for (i in 0 until feedStoriesReel.length()) {
-            val node = feedStoriesReel.getJSONObject(i)
-            if (node.optBoolean("hide_from_feed_unit") && Utils.settingsHelper.getBoolean(PreferenceKeys.HIDE_MUTED_REELS)) continue
-            val userJson = node.getJSONObject(if (node.has("user")) "user" else "owner")
-            try {
-                val user = User(
-                    userJson.getLong("pk"),
-                    userJson.getString("username"),
-                    userJson.optString("full_name"),
-                    userJson.optBoolean("is_private"),
-                    userJson.getString("profile_pic_url"),
-                    userJson.optBoolean("is_verified")
-                )
-                val timestamp = node.getLong("latest_reel_media")
-                val fullyRead = !node.isNull("seen") && node.getLong("seen") == timestamp
-                val itemJson = if (node.has("items")) node.getJSONArray("items").optJSONObject(0) else null
-                var firstStoryModel: StoryModel? = null
-                if (itemJson != null) {
-                    firstStoryModel = ResponseBodyUtils.parseStoryItem(itemJson, false, null)
-                }
-                feedStoryModels.add(
-                    FeedStoryModel(
-                        node.getString("id"),
-                        user,
-                        fullyRead,
-                        timestamp,
-                        firstStoryModel,
-                        node.getInt("media_count"),
-                        false,
-                        node.optBoolean("has_besties_media")
+        val result = response.tray?.toMutableList() ?: mutableListOf()
+        if (response.broadcasts != null) {
+            val length = response.broadcasts.size
+            for (i in 0 until length) {
+                val broadcast = response.broadcasts.get(i)
+                result.add(
+                    Story(
+                        broadcast.id,
+                        broadcast.publishedTime,
+                        0L,
+                        broadcast.broadcastOwner,
+                        broadcast.muted,
+                        false, // unclear
+                        1,
+                        null,
+                        broadcast
                     )
                 )
-            } catch (e: Exception) {
-                Log.e(TAG, "parseStoriesBody: ", e)
-            } // to cover promotional reels with non-long user pk's
+            }
         }
-        val broadcasts = JSONObject(body).getJSONArray("broadcasts")
-        for (i in 0 until broadcasts.length()) {
-            val node = broadcasts.getJSONObject(i)
-            val userJson = node.getJSONObject("broadcast_owner")
-            val user = User(
-                userJson.getLong("pk"),
-                userJson.getString("username"),
-                userJson.optString("full_name"),
-                userJson.optBoolean("is_private"),
-                userJson.getString("profile_pic_url"),
-                userJson.optBoolean("is_verified")
-            )
-            feedStoryModels.add(
-                FeedStoryModel(
-                    node.getString("id"),
-                    user,
-                    false,
-                    node.getLong("published_time"),
-                    ResponseBodyUtils.parseBroadcastItem(node),
-                    1,
-                    isLive = true,
-                    isBestie = false
-                )
-            )
-        }
-        return sort(feedStoryModels)
+        return sort(result.toList())
     }
 
     open suspend fun fetchHighlights(profileId: Long): List<HighlightModel> {
@@ -299,12 +249,13 @@ open class StoriesRepository(private val service: StoriesService) {
         return builder.toString()
     }
 
-    private fun sort(list: List<FeedStoryModel>): List<FeedStoryModel> {
+    private fun sort(list: List<Story>): List<Story> {
         val listCopy = ArrayList(list)
         listCopy.sortWith { o1, o2 ->
-            when (Utils.settingsHelper.getString(PreferenceKeys.STORY_SORT)) {
-                "1" -> return@sortWith o2.timestamp.compareTo(o1.timestamp)
-                "2" -> return@sortWith o1.timestamp.compareTo(o2.timestamp)
+            if (o1.latestReelMedia == null || o2.latestReelMedia == null) return@sortWith 0
+            else when (Utils.settingsHelper.getString(PreferenceKeys.STORY_SORT)) {
+                "1" -> return@sortWith o2.latestReelMedia.compareTo(o1.latestReelMedia)
+                "2" -> return@sortWith o1.latestReelMedia.compareTo(o2.latestReelMedia)
                 else -> return@sortWith 0
             }
         }

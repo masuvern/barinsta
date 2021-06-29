@@ -75,7 +75,6 @@ import awais.instagrabber.databinding.FragmentStoryViewerBinding;
 import awais.instagrabber.fragments.main.ProfileFragmentDirections;
 import awais.instagrabber.fragments.settings.PreferenceKeys;
 import awais.instagrabber.interfaces.SwipeEvent;
-import awais.instagrabber.models.FeedStoryModel;
 import awais.instagrabber.models.HighlightModel;
 import awais.instagrabber.models.StoryModel;
 import awais.instagrabber.models.enums.MediaItemType;
@@ -87,6 +86,8 @@ import awais.instagrabber.models.stickers.SwipeUpModel;
 import awais.instagrabber.repositories.requests.StoryViewerOptions;
 import awais.instagrabber.repositories.requests.StoryViewerOptions.Type;
 import awais.instagrabber.repositories.requests.directmessages.ThreadIdsOrUserIds;
+import awais.instagrabber.repositories.responses.stories.Broadcast;
+import awais.instagrabber.repositories.responses.stories.Story;
 import awais.instagrabber.utils.AppExecutors;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.CookieUtils;
@@ -125,6 +126,7 @@ public class StoryViewerFragment extends Fragment {
     private StoriesRepository storiesRepository;
     private MediaRepository mediaRepository;
     private StoryModel currentStory;
+    private Broadcast live;
     private int slidePos;
     private int lastSlidePos;
     private String url;
@@ -717,7 +719,7 @@ public class StoryViewerFragment extends Fragment {
     private void resetView() {
         final Context context = getContext();
         if (context == null) return;
-        StoryModel live = null;
+        live = null;
         slidePos = 0;
         lastSlidePos = 0;
         if (menuDownload != null) menuDownload.setVisible(false);
@@ -747,15 +749,13 @@ public class StoryViewerFragment extends Fragment {
             }
             case FEED_STORY_POSITION: {
                 final FeedStoriesViewModel feedStoriesViewModel = (FeedStoriesViewModel) viewModel;
-                final List<FeedStoryModel> models = feedStoriesViewModel.getList().getValue();
+                final List<Story> models = feedStoriesViewModel.getList().getValue();
                 if (models == null || currentFeedStoryIndex >= models.size() || currentFeedStoryIndex < 0) return;
-                final FeedStoryModel model = models.get(currentFeedStoryIndex);
-                currentStoryMediaId = model.getStoryMediaId();
-                currentStoryUsername = model.getProfileModel().getUsername();
+                final Story model = models.get(currentFeedStoryIndex);
+                currentStoryMediaId = model.getId();
+                currentStoryUsername = model.getUser().getUsername();
                 fetchOptions = StoryViewerOptions.forUser(Long.parseLong(currentStoryMediaId), currentStoryUsername);
-                if (model.isLive()) {
-                    live = model.getFirstStoryModel();
-                }
+                live = model.getBroadcast();
                 break;
             }
             case STORY_ARCHIVE: {
@@ -803,6 +803,11 @@ public class StoryViewerFragment extends Fragment {
             return;
         }
         if (currentStoryMediaId == null) return;
+        if (live != null) {
+            currentStory = null;
+            refreshLive();
+            return;
+        }
         final ServiceCallback<List<StoryModel>> storyCallback = new ServiceCallback<List<StoryModel>>() {
             @Override
             public void onSuccess(final List<StoryModel> storyModels) {
@@ -829,10 +834,6 @@ public class StoryViewerFragment extends Fragment {
                 Log.e(TAG, "Error", t);
             }
         };
-        if (live != null) {
-            storyCallback.onSuccess(Collections.singletonList(live));
-            return;
-        }
         storiesRepository.getUserStory(
                 fetchOptions,
                 CoroutineUtilsKt.getContinuation((storyModels, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
@@ -864,6 +865,30 @@ public class StoryViewerFragment extends Fragment {
         }
     }
 
+    private synchronized void refreshLive() {
+        binding.storiesList.setVisibility(View.INVISIBLE);
+        binding.viewStoryPost.setVisibility(View.GONE);
+        binding.spotify.setVisibility(View.GONE);
+        binding.poll.setVisibility(View.GONE);
+        binding.answer.setVisibility(View.GONE);
+        binding.mention.setVisibility(View.GONE);
+        binding.quiz.setVisibility(View.GONE);
+        binding.slider.setVisibility(View.GONE);
+        lastSlidePos = slidePos;
+        releasePlayer();
+        url = live.getDashPlaybackUrl();
+        setupLive();
+        final ActionBar actionBar = fragmentActivity.getSupportActionBar();
+        actionBarSubtitle = TextUtils.epochSecondToString(live.getPublishedTime());
+        if (actionBar != null) {
+            try {
+                actionBar.setSubtitle(actionBarSubtitle);
+            } catch (Exception e) {
+                Log.e(TAG, "refreshLive: ", e);
+            }
+        }
+    }
+
     private synchronized void refreshStory() {
         if (binding.storiesList.getVisibility() == View.VISIBLE) {
             final List<StoryModel> storyModels = storiesViewModel.getList().getValue();
@@ -886,42 +911,40 @@ public class StoryViewerFragment extends Fragment {
 
         url = itemType == MediaItemType.MEDIA_TYPE_IMAGE ? currentStory.getStoryUrl() : currentStory.getVideoUrl();
 
-        if (itemType != MediaItemType.MEDIA_TYPE_LIVE) {
-            final String shortCode = currentStory.getTappableShortCode();
-            binding.viewStoryPost.setVisibility(shortCode != null ? View.VISIBLE : View.GONE);
-            binding.viewStoryPost.setTag(shortCode);
+        final String shortCode = currentStory.getTappableShortCode();
+        binding.viewStoryPost.setVisibility(shortCode != null ? View.VISIBLE : View.GONE);
+        binding.viewStoryPost.setTag(shortCode);
 
-            final String spotify = currentStory.getSpotify();
-            binding.spotify.setVisibility(spotify != null ? View.VISIBLE : View.GONE);
-            binding.spotify.setTag(spotify);
+        final String spotify = currentStory.getSpotify();
+        binding.spotify.setVisibility(spotify != null ? View.VISIBLE : View.GONE);
+        binding.spotify.setTag(spotify);
 
-            poll = currentStory.getPoll();
-            binding.poll.setVisibility(poll != null ? View.VISIBLE : View.GONE);
-            binding.poll.setTag(poll);
+        poll = currentStory.getPoll();
+        binding.poll.setVisibility(poll != null ? View.VISIBLE : View.GONE);
+        binding.poll.setTag(poll);
 
-            question = currentStory.getQuestion();
-            binding.answer.setVisibility((question != null) ? View.VISIBLE : View.GONE);
-            binding.answer.setTag(question);
+        question = currentStory.getQuestion();
+        binding.answer.setVisibility((question != null) ? View.VISIBLE : View.GONE);
+        binding.answer.setTag(question);
 
-            mentions = currentStory.getMentions();
-            binding.mention.setVisibility((mentions != null && mentions.length > 0) ? View.VISIBLE : View.GONE);
-            binding.mention.setTag(mentions);
+        mentions = currentStory.getMentions();
+        binding.mention.setVisibility((mentions != null && mentions.length > 0) ? View.VISIBLE : View.GONE);
+        binding.mention.setTag(mentions);
 
-            quiz = currentStory.getQuiz();
-            binding.quiz.setVisibility(quiz != null ? View.VISIBLE : View.GONE);
-            binding.quiz.setTag(quiz);
+        quiz = currentStory.getQuiz();
+        binding.quiz.setVisibility(quiz != null ? View.VISIBLE : View.GONE);
+        binding.quiz.setTag(quiz);
 
-            slider = currentStory.getSlider();
-            binding.slider.setVisibility(slider != null ? View.VISIBLE : View.GONE);
-            binding.slider.setTag(slider);
+        slider = currentStory.getSlider();
+        binding.slider.setVisibility(slider != null ? View.VISIBLE : View.GONE);
+        binding.slider.setTag(slider);
 
-            final SwipeUpModel swipeUp = currentStory.getSwipeUp();
-            if (swipeUp != null) {
-                binding.swipeUp.setVisibility(View.VISIBLE);
-                binding.swipeUp.setText(swipeUp.getText());
-                binding.swipeUp.setTag(swipeUp.getUrl());
-            } else binding.swipeUp.setVisibility(View.GONE);
-        }
+        final SwipeUpModel swipeUp = currentStory.getSwipeUp();
+        if (swipeUp != null) {
+            binding.swipeUp.setVisibility(View.VISIBLE);
+            binding.swipeUp.setText(swipeUp.getText());
+            binding.swipeUp.setTag(swipeUp.getUrl());
+        } else binding.swipeUp.setVisibility(View.GONE);
 
         releasePlayer();
         final Type type = options.getType();
@@ -933,7 +956,6 @@ public class StoryViewerFragment extends Fragment {
             }
         }
         if (itemType == MediaItemType.MEDIA_TYPE_VIDEO) setupVideo();
-        else if (itemType == MediaItemType.MEDIA_TYPE_LIVE) setupLive();
         else setupImage();
 
         final ActionBar actionBar = fragmentActivity.getSupportActionBar();
@@ -1205,14 +1227,14 @@ public class StoryViewerFragment extends Fragment {
                 return;
             }
             if (settingsHelper.getBoolean(MARK_AS_SEEN)
-                    && oldFeedStory instanceof FeedStoryModel
+                    && oldFeedStory instanceof Story
                     && viewModel instanceof FeedStoriesViewModel) {
                 final FeedStoriesViewModel feedStoriesViewModel = (FeedStoriesViewModel) viewModel;
-                final FeedStoryModel oldFeedStoryModel = (FeedStoryModel) oldFeedStory;
-                if (!oldFeedStoryModel.isFullyRead()) {
-                    oldFeedStoryModel.setFullyRead(true);
-                    final List<FeedStoryModel> models = feedStoriesViewModel.getList().getValue();
-                    final List<FeedStoryModel> modelsCopy = models == null ? new ArrayList<>() : new ArrayList<>(models);
+                final Story oldFeedStoryModel = (Story) oldFeedStory;
+                if (oldFeedStoryModel.getSeen() == null || !oldFeedStoryModel.getSeen().equals(oldFeedStoryModel.getLatestReelMedia())) {
+                    oldFeedStoryModel.setSeen(oldFeedStoryModel.getLatestReelMedia());
+                    final List<Story> models = feedStoriesViewModel.getList().getValue();
+                    final List<Story> modelsCopy = models == null ? new ArrayList<>() : new ArrayList<>(models);
                     modelsCopy.set(currentFeedStoryIndex, oldFeedStoryModel);
                     feedStoriesViewModel.getList().postValue(models);
                 }

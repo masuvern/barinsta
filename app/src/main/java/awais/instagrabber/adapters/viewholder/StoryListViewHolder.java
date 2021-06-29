@@ -8,8 +8,9 @@ import awais.instagrabber.R;
 import awais.instagrabber.adapters.FeedStoriesListAdapter.OnFeedStoryClickListener;
 import awais.instagrabber.adapters.HighlightStoriesListAdapter.OnHighlightStoryClickListener;
 import awais.instagrabber.databinding.ItemNotificationBinding;
-import awais.instagrabber.models.FeedStoryModel;
 import awais.instagrabber.models.HighlightModel;
+import awais.instagrabber.repositories.responses.stories.Story;
+import awais.instagrabber.utils.ResponseBodyUtils;
 
 public final class StoryListViewHolder extends RecyclerView.ViewHolder {
     private final ItemNotificationBinding binding;
@@ -19,7 +20,7 @@ public final class StoryListViewHolder extends RecyclerView.ViewHolder {
         this.binding = binding;
     }
 
-    public void bind(final FeedStoryModel model,
+    public void bind(final Story model,
                      final OnFeedStoryClickListener notificationClickListener) {
         if (model == null) return;
 
@@ -31,19 +32,20 @@ public final class StoryListViewHolder extends RecyclerView.ViewHolder {
 
         binding.tvDate.setText(model.getDateTime());
 
-        binding.tvUsername.setText(model.getProfileModel().getUsername());
-        binding.ivProfilePic.setImageURI(model.getProfileModel().getProfilePicUrl());
+        binding.tvUsername.setText(model.getUser().getUsername());
+        binding.ivProfilePic.setImageURI(model.getUser().getProfilePicUrl());
         binding.ivProfilePic.setOnClickListener(v -> {
             if (notificationClickListener == null) return;
-            notificationClickListener.onProfileClick(model.getProfileModel().getUsername());
+            notificationClickListener.onProfileClick(model.getUser().getUsername());
         });
 
-        if (model.getFirstStoryModel() != null) {
+        if (model.getItems() != null && model.getItems().size() > 0) {
             binding.ivPreviewPic.setVisibility(View.VISIBLE);
-            binding.ivPreviewPic.setImageURI(model.getFirstStoryModel().getThumbnail());
+            binding.ivPreviewPic.setImageURI(ResponseBodyUtils.getThumbUrl(model.getItems().get(0)));
         } else binding.ivPreviewPic.setVisibility(View.INVISIBLE);
 
-        float alpha = model.isFullyRead() ? 0.5F : 1.0F;
+        float alpha = model.getSeen() != null && model.getSeen().equals(model.getLatestReelMedia())
+                ? 0.5F : 1.0F;
         binding.ivProfilePic.setAlpha(alpha);
         binding.ivPreviewPic.setAlpha(alpha);
         binding.tvUsername.setAlpha(alpha);

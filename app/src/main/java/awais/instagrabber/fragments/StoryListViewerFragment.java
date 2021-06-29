@@ -38,9 +38,9 @@ import awais.instagrabber.adapters.HighlightStoriesListAdapter.OnHighlightStoryC
 import awais.instagrabber.customviews.helpers.RecyclerLazyLoader;
 import awais.instagrabber.databinding.FragmentStoryListViewerBinding;
 import awais.instagrabber.fragments.settings.MorePreferencesFragmentDirections;
-import awais.instagrabber.models.FeedStoryModel;
 import awais.instagrabber.models.HighlightModel;
 import awais.instagrabber.repositories.requests.StoryViewerOptions;
+import awais.instagrabber.repositories.responses.stories.Story;
 import awais.instagrabber.utils.AppExecutors;
 import awais.instagrabber.utils.CoroutineUtilsKt;
 import awais.instagrabber.utils.TextUtils;
@@ -69,12 +69,12 @@ public final class StoryListViewerFragment extends Fragment implements SwipeRefr
 
     private final OnFeedStoryClickListener clickListener = new OnFeedStoryClickListener() {
         @Override
-        public void onFeedStoryClick(final FeedStoryModel model) {
+        public void onFeedStoryClick(final Story model) {
             if (model == null) return;
-            final List<FeedStoryModel> feedStoryModels = feedStoriesViewModel.getList().getValue();
+            final List<Story> feedStoryModels = feedStoriesViewModel.getList().getValue();
             if (feedStoryModels == null) return;
             final int position = Iterables.indexOf(feedStoryModels, feedStoryModel -> feedStoryModel != null
-                    && Objects.equals(feedStoryModel.getStoryMediaId(), model.getStoryMediaId()));
+                    && Objects.equals(feedStoryModel.getId(), model.getId()));
             final NavDirections action = StoryListViewerFragmentDirections
                     .actionStoryListFragmentToStoryViewerFragment(StoryViewerOptions.forFeedStoryPosition(position));
             NavHostFragment.findNavController(StoryListViewerFragment.this).navigate(action);
@@ -236,7 +236,7 @@ public final class StoryListViewerFragment extends Fragment implements SwipeRefr
         binding.swipeRefreshLayout.setRefreshing(true);
         if (type.equals("feed") && firstRefresh) {
             binding.swipeRefreshLayout.setRefreshing(false);
-            final List<FeedStoryModel> value = feedStoriesViewModel.getList().getValue();
+            final List<Story> value = feedStoriesViewModel.getList().getValue();
             if (value != null) {
                 adapter.submitList(value);
             }
@@ -250,9 +250,9 @@ public final class StoryListViewerFragment extends Fragment implements SwipeRefr
                             return;
                         }
                         //noinspection unchecked
-                        feedStoriesViewModel.getList().postValue((List<FeedStoryModel>) feedStoryModels);
+                        feedStoriesViewModel.getList().postValue((List<Story>) feedStoryModels);
                         //noinspection unchecked
-                        adapter.submitList((List<FeedStoryModel>) feedStoryModels);
+                        adapter.submitList((List<Story>) feedStoryModels);
                         binding.swipeRefreshLayout.setRefreshing(false);
                     }), Dispatchers.getIO())
             );

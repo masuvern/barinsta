@@ -1,6 +1,7 @@
 package awais.instagrabber.repositories
 
-import awais.instagrabber.repositories.responses.StoryStickerResponse
+import awais.instagrabber.repositories.responses.stories.ReelsTrayResponse
+import awais.instagrabber.repositories.responses.stories.StoryStickerResponse
 import retrofit2.http.*
 
 interface StoriesService {
@@ -9,7 +10,7 @@ interface StoriesService {
     suspend fun fetch(@Path("mediaId") mediaId: Long): String
 
     @GET("/api/v1/feed/reels_tray/")
-    suspend fun getFeedStories(): String
+    suspend fun getFeedStories(): ReelsTrayResponse
 
     @GET("/api/v1/highlights/{uid}/highlights_tray/")
     suspend fun fetchHighlights(@Path("uid") uid: Long): String
