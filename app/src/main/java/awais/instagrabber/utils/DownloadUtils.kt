@@ -6,8 +6,12 @@ import android.content.UriPermission
 import android.net.Uri
 import android.provider.DocumentsContract
 import android.util.Log
+import android.view.MenuItem
+import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.view.ContextThemeWrapper
+import androidx.appcompat.widget.PopupMenu
 import androidx.core.util.Pair
 import androidx.documentfile.provider.DocumentFile
 import androidx.work.*
@@ -397,30 +401,28 @@ object DownloadUtils {
     fun showDownloadDialog(
         context: Context,
         feedModel: Media,
-        childPosition: Int
+        childPosition: Int,
+        popupLocation: View?
     ) {
-        if (childPosition >= 0) {
-            val clickListener =
-                DialogInterface.OnClickListener { dialog: DialogInterface, which: Int ->
-                    when (which) {
-                        0 -> download(context, feedModel, childPosition)
-                        1 -> download(context, feedModel)
-                        DialogInterface.BUTTON_NEGATIVE -> dialog.dismiss()
-                        else -> dialog.dismiss()
-                    }
-                }
-            val items = arrayOf(
-                context.getString(R.string.post_viewer_download_current),
-                context.getString(R.string.post_viewer_download_album)
-            )
-            AlertDialog.Builder(context)
-                .setTitle(R.string.post_viewer_download_dialog_title)
-                .setItems(items, clickListener)
-                .setNegativeButton(R.string.cancel, null)
-                .show()
+        if (childPosition == -1 || popupLocation == null) {
+            download(context, feedModel)
             return
         }
-        download(context, feedModel)
+        val themeWrapper = ContextThemeWrapper(context, R.style.popupMenuStyle)
+        val popupMenu = PopupMenu(themeWrapper, popupLocation)
+        val menu = popupMenu.menu
+        menu.add(0, R.id.download_current, 0, R.string.post_viewer_download_current)
+        menu.add(0, R.id.download_all, 1, R.string.post_viewer_download_album)
+        popupMenu.setOnMenuItemClickListener { item: MenuItem ->
+            val itemId = item.itemId
+            if (itemId == R.id.download_current) {
+                download(context, feedModel, childPosition)
+            } else if (itemId == R.id.download_all) {
+                download(context, feedModel)
+            }
+            false
+        }
+        popupMenu.show()
     }
 
     @JvmStatic
