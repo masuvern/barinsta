@@ -48,7 +48,7 @@ public class DirectItemMediaViewHolder extends DirectItemViewHolder {
                                                   .build());
         final Media media = directItemModel.getMedia();
         itemView.setOnClickListener(v -> openMedia(media, -1));
-        final MediaItemType modelMediaType = media.getMediaType();
+        final MediaItemType modelMediaType = media.getType();
         binding.typeIcon.setVisibility(modelMediaType == MediaItemType.MEDIA_TYPE_VIDEO || modelMediaType == MediaItemType.MEDIA_TYPE_SLIDER
                                        ? View.VISIBLE
                                        : View.GONE);

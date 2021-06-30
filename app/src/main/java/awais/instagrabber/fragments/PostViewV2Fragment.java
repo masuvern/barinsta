@@ -219,8 +219,8 @@ public class PostViewV2Fragment extends Fragment implements EditTextDialogFragme
         // wasPaused = true;
         if (settingsHelper.getBoolean(PreferenceKeys.PLAY_IN_BACKGROUND)) return;
         final Media media = viewModel.getMedia();
-        if (media.getMediaType() == null) return;
-        switch (media.getMediaType()) {
+        if (media.getType() == null) return;
+        switch (media.getType()) {
             case MEDIA_TYPE_VIDEO:
                 if (videoPlayerViewHelper != null) {
                     videoPlayerViewHelper.pause();
@@ -252,8 +252,8 @@ public class PostViewV2Fragment extends Fragment implements EditTextDialogFragme
         super.onDestroyView();
         showSystemUI();
         final Media media = viewModel.getMedia();
-        if (media.getMediaType() == null) return;
-        switch (media.getMediaType()) {
+        if (media.getType() == null) return;
+        switch (media.getType()) {
             case MEDIA_TYPE_VIDEO:
                 if (videoPlayerViewHelper != null) {
                     videoPlayerViewHelper.releasePlayer();
@@ -271,7 +271,7 @@ public class PostViewV2Fragment extends Fragment implements EditTextDialogFragme
     public void onSaveInstanceState(@NonNull final Bundle outState) {
         super.onSaveInstanceState(outState);
         final Media media = viewModel.getMedia();
-        if (media.getMediaType() == MediaItemType.MEDIA_TYPE_SLIDER) {
+        if (media.getType() == MediaItemType.MEDIA_TYPE_SLIDER) {
             outState.putInt(ARG_SLIDER_POSITION, sliderPosition);
         }
     }
@@ -293,7 +293,7 @@ public class PostViewV2Fragment extends Fragment implements EditTextDialogFragme
             return;
         }
         final Media media = (Media) feedModelSerializable;
-        if (media.getMediaType() == MediaItemType.MEDIA_TYPE_SLIDER && sliderPosition == -1) {
+        if (media.getType() == MediaItemType.MEDIA_TYPE_SLIDER && sliderPosition == -1) {
             sliderPosition = arguments.getInt(ARG_SLIDER_POSITION, 0);
         }
         viewModel.setMedia(media);
@@ -902,7 +902,7 @@ public class PostViewV2Fragment extends Fragment implements EditTextDialogFragme
 
         final boolean hasVideo = media.getCarouselMedia()
                                       .stream()
-                                      .anyMatch(postChild -> postChild.getMediaType() == MediaItemType.MEDIA_TYPE_VIDEO);
+                                      .anyMatch(postChild -> postChild.getType() == MediaItemType.MEDIA_TYPE_VIDEO);
         if (hasVideo) {
             final View child = sliderParent.getChildAt(0);
             if (child instanceof RecyclerView) {
@@ -918,7 +918,7 @@ public class PostViewV2Fragment extends Fragment implements EditTextDialogFragme
             @Override
             public void onItemClicked(final int position, final Media media, final View view) {
                 if (media == null
-                        || media.getMediaType() != MediaItemType.MEDIA_TYPE_IMAGE
+                        || media.getType() != MediaItemType.MEDIA_TYPE_IMAGE
                         || !(view instanceof ZoomableDraweeView)) {
                     return;
                 }
@@ -1012,7 +1012,7 @@ public class PostViewV2Fragment extends Fragment implements EditTextDialogFragme
                 // }
                 // }
                 video = false;
-                if (childMedia.getMediaType() == MediaItemType.MEDIA_TYPE_VIDEO) {
+                if (childMedia.getType() == MediaItemType.MEDIA_TYPE_VIDEO) {
                     // if (view instanceof RecyclerView) {
                     // final RecyclerView.ViewHolder viewHolder = ((RecyclerView) view).findViewHolderForAdapterPosition(position);
                     // if (viewHolder instanceof SliderVideoViewHolder) {
@@ -1409,7 +1409,7 @@ public class PostViewV2Fragment extends Fragment implements EditTextDialogFragme
             // if (wasControlsVisible) {
             //     showPlayerControls();
             // }
-            if (media.getMediaType() == MediaItemType.MEDIA_TYPE_SLIDER) {
+            if (media.getType() == MediaItemType.MEDIA_TYPE_SLIDER) {
                 binding.mediaCounter.setVisibility(View.VISIBLE);
             }
             detailsVisible = true;

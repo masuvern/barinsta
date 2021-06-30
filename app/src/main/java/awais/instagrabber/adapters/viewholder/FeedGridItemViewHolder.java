@@ -71,7 +71,7 @@ public class FeedGridItemViewHolder extends RecyclerView.ViewHolder {
         setUserDetails(media, layoutPreferences);
         String thumbnailUrl = null;
         final int typeIconRes;
-        final MediaItemType mediaType = media.getMediaType();
+        final MediaItemType mediaType = media.getType();
         if (mediaType == null) return;
         switch (mediaType) {
             case MEDIA_TYPE_IMAGE:
@@ -118,7 +118,7 @@ public class FeedGridItemViewHolder extends RecyclerView.ViewHolder {
                 return;
             }
             AppExecutors.INSTANCE.getMainThread().execute(() -> {
-                switch (media.getMediaType()) {
+                switch (media.getType()) {
                     case MEDIA_TYPE_IMAGE:
                     case MEDIA_TYPE_VIDEO:
                         binding.downloaded.setVisibility(checkList.get(0) ? View.VISIBLE : View.GONE);

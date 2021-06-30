@@ -285,10 +285,10 @@ object DownloadUtils {
             username = user.username
         }
         val userFolderPaths: List<String> = getSubPathForUserFolder(username)
-        when (media.mediaType) {
+        when (media.type) {
             MediaItemType.MEDIA_TYPE_IMAGE, MediaItemType.MEDIA_TYPE_VIDEO -> {
                 val url =
-                    if (media.mediaType == MediaItemType.MEDIA_TYPE_VIDEO) ResponseBodyUtils.getVideoUrl(
+                    if (media.type == MediaItemType.MEDIA_TYPE_VIDEO) ResponseBodyUtils.getVideoUrl(
                         media
                     ) else ResponseBodyUtils.getImageUrl(media)
                 val file = getDownloadSavePaths(ArrayList(userFolderPaths), media.code, url, "")
@@ -308,7 +308,7 @@ object DownloadUtils {
                 while (i < sliderItems!!.size) {
                     val child = sliderItems[i]
                     val url =
-                        if (child.mediaType == MediaItemType.MEDIA_TYPE_VIDEO) ResponseBodyUtils.getVideoUrl(
+                        if (child.type == MediaItemType.MEDIA_TYPE_VIDEO) ResponseBodyUtils.getVideoUrl(
                             child
                         ) else ResponseBodyUtils.getImageUrl(child)
                     val file = getDownloadChildSavePaths(
@@ -446,7 +446,7 @@ object DownloadUtils {
             val mediaUser = media.user
             val username = mediaUser?.username ?: ""
             val userFolderPaths = getSubPathForUserFolder(username)
-            when (media.mediaType) {
+            when (media.type) {
                 MediaItemType.MEDIA_TYPE_IMAGE, MediaItemType.MEDIA_TYPE_VIDEO -> {
                     val url = getUrlOfType(media)
                     var fileName = media.id
@@ -525,7 +525,7 @@ object DownloadUtils {
     }
 
     private fun getUrlOfType(media: Media): String? {
-        when (media.mediaType) {
+        when (media.type) {
             MediaItemType.MEDIA_TYPE_IMAGE -> {
                 return ResponseBodyUtils.getImageUrl(media)
             }

@@ -60,8 +60,8 @@ class PostViewV2ViewModel : ViewModel() {
         date.postValue(media.date)
         likeCount.postValue(media.likeCount)
         commentCount.postValue(media.commentCount)
-        viewCount.postValue(if (media.mediaType == MediaItemType.MEDIA_TYPE_VIDEO) media.viewCount else null)
-        type.postValue(media.mediaType)
+        viewCount.postValue(if (media.type == MediaItemType.MEDIA_TYPE_VIDEO) media.viewCount else null)
+        type.postValue(media.type)
         liked.postValue(media.hasLiked)
         saved.postValue(media.hasViewerSaved)
         initOptions()
@@ -310,7 +310,7 @@ class PostViewV2ViewModel : ViewModel() {
             return data
         }
         val mediaId = media.id
-        val mediaType = media.mediaType
+        val mediaType = media.type
         if (mediaId == null || mediaType == null) {
             data.postValue(error("media id or type is null", null))
             return data

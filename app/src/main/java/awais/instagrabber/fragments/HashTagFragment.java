@@ -522,7 +522,7 @@ public class HashTagFragment extends Fragment implements SwipeRefreshLayout.OnRe
         final SpannableStringBuilder span = new SpannableStringBuilder(getResources().getQuantityString(R.plurals.main_posts_count_inline,
                                                                                                         hashtagModel.getMediaCount() > 2000000000L
                                                                                                         ? 2000000000
-                                                                                                        : hashtagModel.getMediaCount().intValue(),
+                                                                                                        : Long.valueOf(hashtagModel.getMediaCount()).intValue(),
                                                                                                         postCount));
         span.setSpan(new RelativeSizeSpan(1.2f), 0, postCount.length(), 0);
         span.setSpan(new StyleSpan(Typeface.BOLD), 0, postCount.length(), 0);

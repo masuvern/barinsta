@@ -69,7 +69,7 @@ public class DirectItemMediaShareViewHolder extends DirectItemViewHolder {
         });
         final int index;
         final Media toDisplay;
-        final MediaItemType mediaType = media.getMediaType();
+        final MediaItemType mediaType = media.getType();
         switch (mediaType) {
             case MEDIA_TYPE_SLIDER:
                 toDisplay = media.getCarouselMedia().stream()

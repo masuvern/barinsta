@@ -921,7 +921,7 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
 
     @NonNull
     private String getMediaPreviewTextString(final Media media) {
-        final MediaItemType mediaType = media.getMediaType();
+        final MediaItemType mediaType = media.getType();
         switch (mediaType) {
             case MEDIA_TYPE_IMAGE:
                 return getString(R.string.photo);

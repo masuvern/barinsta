@@ -243,7 +243,7 @@ public final class ResponseBodyUtils {
                 imageVersions2,
                 width,
                 height,
-                mediaItemType,
+                mediaItemType.getId(),
                 false,
                 feedItem.optBoolean("comments_disabled"),
                 -1,
