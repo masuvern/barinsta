@@ -36,6 +36,7 @@ object DownloadUtils {
     private const val DIR_RECORDINGS = "Sent Recordings"
     private const val DIR_TEMP = "Temp"
     private const val DIR_BACKUPS = "Backups"
+    private val dirMap: MutableMap<String, DocumentFile?> = mutableMapOf()
     private var root: DocumentFile? = null
     @JvmStatic
     @Throws(ReselectDocumentTreeException::class)
@@ -48,18 +49,15 @@ object DownloadUtils {
         }
         val uri = Uri.parse(barinstaDirUri)
         if (!barinstaDirUri!!.startsWith("content://com.android.externalstorage.documents")) {
-            // reselect the folder in selector view
             throw ReselectDocumentTreeException(uri)
         }
         val existingPermissions = context.contentResolver.persistedUriPermissions
         if (existingPermissions.isEmpty()) {
-            // reselect the folder in selector view
             throw ReselectDocumentTreeException(uri)
         }
         val anyMatch = existingPermissions.stream()
             .anyMatch { uriPermission: UriPermission -> uriPermission.uri == uri }
         if (!anyMatch) {
-            // reselect the folder in selector view
             throw ReselectDocumentTreeException(uri)
         }
         root = DocumentFile.fromTreeUri(context, uri)
@@ -68,24 +66,59 @@ object DownloadUtils {
             throw ReselectDocumentTreeException(uri)
         }
         Utils.settingsHelper.putString(PreferenceKeys.PREF_BARINSTA_DIR_URI, uri.toString())
+        // set up directories
+        val dirKeys = listOf(DIR_DOWNLOADS, DIR_CAMERA, DIR_EDIT, DIR_RECORDINGS, DIR_TEMP, DIR_BACKUPS)
+        dirMap.putAll(checkSubDirs(context, root, dirKeys, true))
     }
 
     fun destroy() {
         root = null
+        dirMap.clear()
     }
 
-    fun getDownloadDir(vararg dirs: String?): DocumentFile? {
+    fun checkSubDirs(context: Context,
+                     parent: DocumentFile?,
+                     queries: List<String>,
+                     create: Boolean): Map<String, DocumentFile?> {
+        // first we'll find existing ones
+        val result: MutableMap<String, DocumentFile?> = mutableMapOf()
+        if (parent == null) return result.toMap()
+        val parentUri = parent.uri
+        val docId = DocumentsContract.getTreeDocumentId(parentUri)
+        val docUri = DocumentsContract.buildChildDocumentsUriUsingTree(parentUri, docId)
+        val docCursor = context.contentResolver.query(
+            docUri, arrayOf(
+                DocumentsContract.Document.COLUMN_DISPLAY_NAME,
+                DocumentsContract.Document.COLUMN_DOCUMENT_ID,
+                DocumentsContract.Document.COLUMN_MIME_TYPE
+            ), null, null, null
+        )
+        if (docCursor == null) return result.toMap()
+        while (docCursor.moveToNext()) {
+            if (!DocumentsContract.Document.MIME_TYPE_DIR.equals(docCursor.getString(2)) || !queries.contains(docCursor.getString(0)))
+                continue
+            val userFolderUri = DocumentsContract.buildDocumentUriUsingTree(parentUri, docCursor.getString(1))
+            val dir = DocumentFile.fromTreeUri(context, userFolderUri)
+            Log.d("austin_debug", userFolderUri.toString() + " " + dir!!.uri.toString())
+            result.put(docCursor.getString(0), dir)
+        }
+        docCursor.close()
+        // next we'll create inexistent ones
+        if (create) {
+            for (k in queries) {
+                if (result.get(k) == null) {
+                    result.put(k, parent.createDirectory(k))
+                }
+            }
+        }
+        return result.toMap()
+    }
+
+    fun getDownloadDir(dir: String): DocumentFile? {
         if (root == null) {
             return null
         }
-        var subDir = root
-        for (dir in dirs) {
-            if (subDir == null || isEmpty(dir)) continue
-            val subDirFile = subDir.findFile(dir!!)
-            val exists = subDirFile != null && subDirFile.exists()
-            subDir = if (exists) subDirFile else subDir.createDirectory(dir)
-        }
-        return subDir
+        return dirMap.get(dir)
     }
 
     @JvmStatic
@@ -93,23 +126,24 @@ object DownloadUtils {
         get() = getDownloadDir(DIR_DOWNLOADS)
 
     @JvmStatic
-    fun getCameraDir(): DocumentFile? {
-        return getDownloadDir(DIR_CAMERA)
+    val cameraDir: DocumentFile?
+        get() = getDownloadDir(DIR_CAMERA)
+
+    @JvmStatic
+    fun getImageEditDir(sessionId: String?, context: Context): DocumentFile? {
+        val editRoot = getDownloadDir(DIR_EDIT)
+        if (sessionId == null) return editRoot
+        val result = checkSubDirs(context, editRoot, listOf(sessionId), true)
+        return result.get(sessionId)
     }
 
     @JvmStatic
-    fun getImageEditDir(sessionId: String?): DocumentFile? {
-        return getDownloadDir(DIR_EDIT, sessionId)
-    }
-
-    fun getRecordingsDir(): DocumentFile? {
-        return getDownloadDir(DIR_RECORDINGS)
-    }
+    val recordingsDir: DocumentFile?
+        get() = getDownloadDir(DIR_RECORDINGS)
 
     @JvmStatic
-    fun getBackupsDir(): DocumentFile? {
-        return getDownloadDir(DIR_BACKUPS)
-    }
+    val backupsDir: DocumentFile?
+        get() = getDownloadDir(DIR_BACKUPS)
 
     // @Nullable
     // private static DocumentFile getDownloadDir(@NonNull final Context context, @Nullable final String username) {
