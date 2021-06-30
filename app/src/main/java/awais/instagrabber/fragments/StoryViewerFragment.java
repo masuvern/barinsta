@@ -473,11 +473,11 @@ public class StoryViewerFragment extends Fragment {
                 poll = (PollSticker) tag;
                 final List<Tally> tallies = poll.getTallies();
                 final String[] choices = tallies.stream()
-                        .map(t -> (poll.getViewerVote() == tallies.indexOf(t) ? "√ " : "")
+                        .map(t -> (poll.getViewerVote() != null && poll.getViewerVote() == tallies.indexOf(t) ? "√ " : "")
                                 + t.getText() + " (" + t.getCount() + ")" )
                         .toArray(String[]::new);
                 final ArrayAdapter adapter = new ArrayAdapter<>(context, android.R.layout.simple_list_item_1, choices);
-                if (poll.getViewerVote() > -1) {
+                if (poll.getViewerVote() != null) {
                     new AlertDialog.Builder(context)
                             .setTitle(R.string.voted_story_poll)
                             .setAdapter(adapter, null)
@@ -577,16 +577,17 @@ public class StoryViewerFragment extends Fragment {
                         .setPositiveButton(R.string.cancel, null)
                         .show();
             } else if (tag instanceof QuizSticker) {
+                quiz = (QuizSticker) tag;
                 final List<Tally> tallies = quiz.getTallies();
                 final String[] choices = tallies.stream().map(
-                        t -> (quiz.getViewerAnswer() == tallies.indexOf(t) ? "√ " : "") +
+                        t -> (quiz.getViewerAnswer() != null && quiz.getViewerAnswer() == tallies.indexOf(t) ? "√ " : "") +
                                 (quiz.getCorrectAnswer() == tallies.indexOf(t) ? "*** " : "") +
                                 t.getText() + " (" + t.getCount() + ")"
                 ).toArray(String[]::new);
                 new AlertDialog.Builder(context)
-                        .setTitle(quiz.getViewerAnswer() > -1 ? getString(R.string.story_quizzed) : quiz.getQuestion())
+                        .setTitle(quiz.getViewerAnswer() != null ? getString(R.string.story_quizzed) : quiz.getQuestion())
                         .setAdapter(new ArrayAdapter<>(context, android.R.layout.simple_list_item_1, choices), (d, w) -> {
-                            if (quiz.getViewerAnswer() == -1) {
+                            if (quiz.getViewerAnswer() == null) {
                                 sticking = true;
                                 storiesRepository.respondToQuiz(
                                         csrfToken,
@@ -901,7 +902,7 @@ public class StoryViewerFragment extends Fragment {
         }
         lastSlidePos = slidePos;
 
-        final MediaItemType itemType = currentStory.getMediaType();
+        final MediaItemType itemType = currentStory.getType();
 
         url = itemType == MediaItemType.MEDIA_TYPE_IMAGE
                 ? ResponseBodyUtils.getImageUrl(currentStory)
@@ -966,7 +967,7 @@ public class StoryViewerFragment extends Fragment {
         }
 
         if (currentStory.getStoryCta() != null) {
-            final StoryCta swipeUp = currentStory.getStoryCta().get(0).getLinks();
+            final StoryCta swipeUp = currentStory.getStoryCta().get(0).getLinks().get(0);
             binding.swipeUp.setVisibility(View.VISIBLE);
             binding.swipeUp.setText(currentStory.getLinkText());
             final String swipeUpUrl = swipeUp.getWebUri();

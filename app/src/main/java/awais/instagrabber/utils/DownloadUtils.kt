@@ -396,7 +396,7 @@ object DownloadUtils {
     ) {
         val downloadDir = getDownloadDir(context, storyModel.user?.username) ?: return
         val url =
-            if (storyModel.mediaType == MediaItemType.MEDIA_TYPE_VIDEO) ResponseBodyUtils.getVideoUrl(storyModel)
+            if (storyModel.type == MediaItemType.MEDIA_TYPE_VIDEO) ResponseBodyUtils.getVideoUrl(storyModel)
             else ResponseBodyUtils.getImageUrl(storyModel)
         val extension = getFileExtensionFromUrl(url)
         val baseFileName = (storyModel.id + "_"

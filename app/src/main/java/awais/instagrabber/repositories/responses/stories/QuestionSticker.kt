@@ -7,6 +7,6 @@ import awais.instagrabber.repositories.responses.User
 
 data class QuestionSticker(
     val questionType: String?,
-    val questionId: Long?,
-    val question: String?
+    val questionId: Long,
+    val question: String
 ) : Serializable
