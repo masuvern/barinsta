@@ -393,9 +393,10 @@ class DownloadWorker(context: Context, workerParams: WorkerParameters) : Corouti
 
         class Builder {
             private var urlToFilePathMap: MutableMap<String, String> = mutableMapOf()
-            fun setUrlToFilePathMap(urlToFilePathMap: Map<String, DocumentFile>): Builder {
+            fun setUrlToFilePathMap(urlToFilePathMap: Map<String, DocumentFile?>): Builder {
                 this.urlToFilePathMap = urlToFilePathMap
-                    .mapValues { it.value.uri.toString() }
+                    .filter{ it.value != null }
+                    .mapValues { it.value!!.uri.toString() }
                     .toMutableMap()
                 return this
             }
