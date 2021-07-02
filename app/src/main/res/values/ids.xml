@@ -6,4 +6,6 @@
     <item name="detail" type="id" />
     <item name="copy" type="id" />
     <item name="share_dm" type="id" />
+    <item name="download_current" type="id" />
+    <item name="download_all" type="id" />
 </resources>

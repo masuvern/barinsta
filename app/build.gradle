@@ -180,6 +180,7 @@ dependencies {
     implementation "androidx.constraintlayout:constraintlayout:2.0.4"
     implementation "androidx.preference:preference:1.1.1"
     implementation 'androidx.palette:palette:1.0.0'
+    implementation 'androidx.documentfile:documentfile:1.0.1'
 
     implementation 'com.google.guava:guava:27.0.1-android'
 

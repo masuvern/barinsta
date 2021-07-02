@@ -127,8 +127,8 @@ class ProfileFragment : Fragment(), OnRefreshListener, ConfirmDialogFragmentCall
             NavHostFragment.findNavController(this@ProfileFragment).navigate(commentsAction)
         }
 
-        override fun onDownloadClick(media: Media?, childPosition: Int) {
-            DownloadUtils.showDownloadDialog(context ?: return, media ?: return, childPosition)
+        override fun onDownloadClick(media: Media?, childPosition: Int, popupLocation: View) {
+            DownloadUtils.showDownloadDialog(context ?: return, media ?: return, childPosition, popupLocation)
         }
 
         override fun onEmailClick(emailId: String?) {

@@ -6,8 +6,8 @@ import awais.instagrabber.repositories.responses.Location
 import awais.instagrabber.repositories.responses.User
 
 data class PollSticker(
-    val pollId: Long?,
+    val pollId: Long,
     val question: String?,
-    val tallies: List<Tally>?,
-    var viewerVote: Int = -1
+    val tallies: List<Tally>,
+    var viewerVote: Int?
 ) : Serializable

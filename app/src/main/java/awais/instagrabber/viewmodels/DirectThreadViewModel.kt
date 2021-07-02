@@ -34,7 +34,7 @@ class DirectThreadViewModel(
 
     // private static final String ERROR_INVALID_THREAD = "Invalid thread";
     private val contentResolver: ContentResolver = application.contentResolver
-    private val recordingsDir: DocumentFile? = DownloadUtils.getRecordingsDir()
+    private val recordingsDir: DocumentFile? = DownloadUtils.recordingsDir
     private var voiceRecorder: VoiceRecorder? = null
     private lateinit var threadManager: ThreadManager
 

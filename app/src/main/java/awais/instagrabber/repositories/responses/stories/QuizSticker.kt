@@ -8,7 +8,7 @@ import awais.instagrabber.repositories.responses.User
 data class QuizSticker(
     val quizId: Long?,
     val question: String?,
-    val tallies: List<Tally>?,
-    var viewerAnswer: Int? = -1,
-    val correctAnswer: Int?
+    val tallies: List<Tally>,
+    var viewerAnswer: Int?,
+    val correctAnswer: Int
 ) : Serializable

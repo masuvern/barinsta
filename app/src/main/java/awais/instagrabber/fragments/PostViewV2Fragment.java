@@ -446,7 +446,7 @@ public class PostViewV2Fragment extends Fragment implements EditTextDialogFragme
 
     private void setupDownload() {
         bottom.download.setOnClickListener(v -> {
-            DownloadUtils.showDownloadDialog(context, viewModel.getMedia(), sliderPosition);
+            DownloadUtils.showDownloadDialog(context, viewModel.getMedia(), sliderPosition, bottom.download);
         });
         TooltipCompat.setTooltipText(bottom.download, getString(R.string.action_download));
     }
@@ -744,12 +744,6 @@ public class PostViewV2Fragment extends Fragment implements EditTextDialogFragme
             final Media media = viewModel.getMedia();
             final User profileModel = media.getUser();
             if (profileModel == null) return;
-            final boolean isPrivate = profileModel.isPrivate();
-            if (isPrivate) {
-                final Context context = getContext();
-                if (context == null) return;
-//                Toast.makeText(context, R.string.share_private_post, Toast.LENGTH_LONG).show();
-            }
             if (viewModel.isLoggedIn()) {
                 final Context context = getContext();
                 if (context == null) return;
@@ -776,7 +770,7 @@ public class PostViewV2Fragment extends Fragment implements EditTextDialogFragme
                         }
                         return true;
                     } else if (itemId == R.id.share) {
-                        shareLink(media, isPrivate);
+                        shareLink(media, profileModel.isPrivate());
                         return true;
                     }
                     return false;
@@ -784,7 +778,7 @@ public class PostViewV2Fragment extends Fragment implements EditTextDialogFragme
                 popupMenu.show();
                 return;
             }
-            shareLink(media, isPrivate);
+            shareLink(media, false);
         });
     }
 
