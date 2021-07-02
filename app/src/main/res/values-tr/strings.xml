@@ -40,8 +40,6 @@
     <string name="save_to_folder">Şu klasöre kaydet:</string>
     <string name="select_folder">Klasörü seçin</string>
     <string name="theme_settings">Tema</string>
-    <string name="login_settings">Sadece giriş yapılmış hesapları etkiler:</string>
-    <string name="anonymous_settings">Sadece anonim hesapları etkiler:</string>
     <string name="select_language">Dil</string>
     <plurals name="main_posts_count">
         <item quantity="one">%s\nGönderi</item>
@@ -109,10 +107,7 @@
     <string name="saved">Kaydedilenler</string>
     <string name="tagged">Etiketlenilenler</string>
     <string name="dm_person">Mesaj</string>
-    <string name="like_without_count">Beğen</string>
-    <string name="unlike_without_count">Beğenmekten Vazgeç</string>
     <string name="bookmark">Yer İşareti Koy</string>
-    <string name="unbookmark">Yer İşaretini Kaldır</string>
     <string name="follow">Takip Et</string>
     <string name="unfollow">Takipten Çık</string>
     <string name="favorite_short" comment="Adjective, not verb">Favorilere Ekle</string>
@@ -140,7 +135,6 @@
     <string name="dialog_export_failed">Dışa aktarılamadı!</string>
     <string name="refresh">Yenile</string>
     <string name="get_cookies">Çerezleri al</string>
-    <string name="desktop_2fa">Masaüstü Modu</string>
     <string name="time_settings_title_custom">Özel biçim kullan</string>
     <string name="time_settings_title_separator">Ayırıcı</string>
     <string name="time_settings_title_time_format">Zaman Biçimi</string>
@@ -207,14 +201,8 @@
     <string name="downloader_error_creating_folder">Klasör oluşturma hatası!</string>
     <string name="downloader_error_download_file">Dosya indirme hatası</string>
     <string name="downloader_too_many">Tek seferde en fazla 100 gönderi indirebilirsin, açgözlü olma!</string>
-    <string name="comment_viewer_copy_comment">Yorumu kopyala</string>
-    <string name="comment_viewer_see_likers">Yorumu beğenenleri gör</string>
-    <string name="comment_viewer_reply_comment">Yoruma cevap ver</string>
-    <string name="comment_viewer_like_comment">Yorumu beğen</string>
-    <string name="comment_viewer_unlike_comment">Yorum beğenisini geri al</string>
     <string name="comment_viewer_translate_comment">Yorumu çevir</string>
     <string name="comment_viewer_delete_comment">Delete comment</string>
-    <string name="comment_send_empty_comment">Boş yorum yapılamaz!</string>
     <string name="comment_view_mention_user_search">Kullanıcı adını aratmak istiyor musun?</string>
     <string name="comment_view_mention_hash_search">Etiketi aratmak istiyor musun?</string>
     <string name="followers_type_followers">Takipçiler</string>

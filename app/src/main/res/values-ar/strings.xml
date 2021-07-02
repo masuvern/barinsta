@@ -40,8 +40,6 @@
     <string name="save_to_folder">حفظ في مجلد مخصص</string>
     <string name="select_folder">تحديد مجلد</string>
     <string name="theme_settings">السمة</string>
-    <string name="login_settings">فقط يؤثر على المستخدمين المسجلين:</string>
-    <string name="anonymous_settings">يؤثر فقط على مستخدمين مجهولين:</string>
     <string name="select_language">اللغة</string>
     <plurals name="main_posts_count">
         <item quantity="zero">%s\nPosts</item>
@@ -125,10 +123,7 @@
     <string name="saved">تم الحفظ</string>
     <string name="tagged">مشار إليها</string>
     <string name="dm_person">الرسالة</string>
-    <string name="like_without_count">اعجاب</string>
-    <string name="unlike_without_count">إلغاء الإعجاب</string>
     <string name="bookmark">Bookmark</string>
-    <string name="unbookmark">Unbookmark</string>
     <string name="follow">Follow</string>
     <string name="unfollow">Unfollow</string>
     <string name="favorite_short" comment="Adjective, not verb">Favorite</string>
@@ -156,7 +151,6 @@
     <string name="dialog_export_failed">Failed to export!</string>
     <string name="refresh">Refresh</string>
     <string name="get_cookies">Get cookies</string>
-    <string name="desktop_2fa">Desktop Mode</string>
     <string name="time_settings_title_custom">Use custom format</string>
     <string name="time_settings_title_separator">Separator</string>
     <string name="time_settings_title_time_format">Time Format</string>
@@ -223,14 +217,8 @@
     <string name="downloader_error_creating_folder">Error creating folder!</string>
     <string name="downloader_error_download_file">Error downloading file</string>
     <string name="downloader_too_many">You can only download 100 posts at a time. Don\'t be too greedy!</string>
-    <string name="comment_viewer_copy_comment">Copy comment</string>
-    <string name="comment_viewer_see_likers">View comment likers</string>
-    <string name="comment_viewer_reply_comment">Reply to comment</string>
-    <string name="comment_viewer_like_comment">Like comment</string>
-    <string name="comment_viewer_unlike_comment">Unlike comment</string>
     <string name="comment_viewer_translate_comment">Translate comment</string>
     <string name="comment_viewer_delete_comment">Delete comment</string>
-    <string name="comment_send_empty_comment">No empty comments!</string>
     <string name="comment_view_mention_user_search">Do you want to search the username?</string>
     <string name="comment_view_mention_hash_search">Do you want to search the hashtag?</string>
     <string name="followers_type_followers">Followers</string>
