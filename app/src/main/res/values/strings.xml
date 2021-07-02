@@ -205,6 +205,7 @@
     <string name="direct_download_desc">Downloads posts directly to the phone!</string>
     <string name="direct_download_loading">Fetching post(s)</string>
     <string name="downloader_complete">Download completed</string>
+    <string name="downloader_preparing">Preparing to download…</string>
     <string name="downloader_downloading_post">Downloading post…</string>
     <string name="downloader_downloading_media">Downloading media</string>
     <string name="downloader_downloading_pfp">Downloading profile picture</string>

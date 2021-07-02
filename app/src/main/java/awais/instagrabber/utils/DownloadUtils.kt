@@ -9,6 +9,8 @@ import android.view.MenuItem
 import android.view.View
 import androidx.appcompat.view.ContextThemeWrapper
 import androidx.appcompat.widget.PopupMenu
+import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
 import androidx.documentfile.provider.DocumentFile
 import androidx.work.*
 import awais.instagrabber.R
@@ -16,6 +18,7 @@ import awais.instagrabber.fragments.settings.PreferenceKeys
 import awais.instagrabber.models.enums.MediaItemType
 import awais.instagrabber.repositories.responses.Media
 import awais.instagrabber.repositories.responses.stories.StoryMedia
+import awais.instagrabber.utils.AppExecutors.tasksThread
 import awais.instagrabber.utils.TextUtils.isEmpty
 import awais.instagrabber.workers.DownloadWorker
 import com.google.gson.Gson
@@ -24,6 +27,7 @@ import java.io.IOException
 import java.io.OutputStreamWriter
 import java.util.*
 import java.util.regex.Pattern
+import kotlin.math.abs
 
 
 object DownloadUtils {
@@ -211,7 +215,6 @@ object DownloadUtils {
         return Pair(fileName, mimeType!!)
     }
 
-    // can't convert to checkFiles() due to lack of Context
     fun getTempFile(fileName: String?, extension: String): DocumentFile? {
         val dir = tempDir
         var name = fileName
@@ -382,12 +385,28 @@ object DownloadUtils {
         download(context, listOf(feedModel), position)
     }
 
+    // this must be used for bulk download, but ONLY bulk download
     @JvmStatic
     fun download(
         context: Context,
         feedModels: List<Media>
     ) {
-        download(context, feedModels, -1)
+        val builder = NotificationCompat.Builder(context, Constants.DOWNLOAD_CHANNEL_ID)
+            .setCategory(NotificationCompat.CATEGORY_PROGRESS)
+            .setSmallIcon(R.drawable.ic_download)
+            .setOngoing(true)
+            .setProgress(1, 0, true)
+            .setAutoCancel(false)
+            .setOnlyAlertOnce(true)
+            .setContentTitle(context.getString(R.string.downloader_preparing))
+        val notification = builder.build()
+        val nid = abs(UUID.randomUUID().hashCode())
+        val nManager = NotificationManagerCompat.from(context.applicationContext)
+        nManager.notify(nid, notification)
+        tasksThread.execute {
+            download(context, feedModels, -1)
+            nManager.cancel(nid)
+        }
     }
 
     private fun download(
@@ -438,9 +457,7 @@ object DownloadUtils {
                         val url = getUrlOfType(child)
                         val usernamePrepend =
                             if (Utils.settingsHelper.getBoolean(PreferenceKeys.DOWNLOAD_PREPEND_USER_NAME) && mediaUser != null) mediaUser.username else ""
-                        val pair = getDownloadChildSavePaths(
-                            media.code, i + 1, url, usernamePrepend
-                        )
+                        val pair = getDownloadChildSavePaths(media.code, i + 1, url, usernamePrepend)
                         map[url!!] = pair
                         i++
                     }
