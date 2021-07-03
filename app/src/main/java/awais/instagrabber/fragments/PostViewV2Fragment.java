@@ -116,7 +116,7 @@ public class PostViewV2Fragment extends Fragment implements EditTextDialogFragme
     private DialogPostViewBinding binding;
     private Context context;
     private boolean detailsVisible = true;
-    private boolean video;
+//    private boolean video;
     private VideoPlayerViewHelper videoPlayerViewHelper;
     private SliderItemsAdapter sliderItemsAdapter;
     private int sliderPosition = -1;
@@ -996,30 +996,13 @@ public class PostViewV2Fragment extends Fragment implements EditTextDialogFragme
                 final String text = (position + 1) + "/" + size;
                 binding.mediaCounter.setText(text);
                 final Media childMedia = media.getCarouselMedia().get(position);
-                // final View view = binding.sliderParent.getChildAt(0);
-                // if (prevPosition != -1) {
-                // if (view instanceof RecyclerView) {
-                // final RecyclerView.ViewHolder viewHolder = ((RecyclerView) view).findViewHolderForAdapterPosition(prevPosition);
-                // if (viewHolder instanceof SliderVideoViewHolder) {
-                //     ((SliderVideoViewHolder) viewHolder).removeCallbacks();
-                // }
-                // }
-                // }
-                video = false;
-                if (childMedia.getType() == MediaItemType.MEDIA_TYPE_VIDEO) {
-                    // if (view instanceof RecyclerView) {
-                    // final RecyclerView.ViewHolder viewHolder = ((RecyclerView) view).findViewHolderForAdapterPosition(position);
-                    // if (viewHolder instanceof SliderVideoViewHolder) {
-                    //     ((SliderVideoViewHolder) viewHolder).resetPlayerTimeline();
-                    // }
-                    // }
-                    // enablePlayerControls(true);
-                    video = true;
-                    viewModel.setViewCount(childMedia.getViewCount());
-                    return;
-                }
-                viewModel.setViewCount(null);
-                // enablePlayerControls(false);
+//                video = false;
+//                if (childMedia.getType() == MediaItemType.MEDIA_TYPE_VIDEO) {
+//                    video = true;
+//                    viewModel.setViewCount(childMedia.getViewCount());
+//                    return;
+//                }
+//                viewModel.setViewCount(null);
             }
 
             private void pausePlayerAtPosition(final int position, final RecyclerView view) {
@@ -1058,7 +1041,7 @@ public class PostViewV2Fragment extends Fragment implements EditTextDialogFragme
     }
 
     private void setupVideo() {
-        video = true;
+//        video = true;
         final Media media = viewModel.getMedia();
         binding.mediaCounter.setVisibility(View.GONE);
         final Context context = getContext();
@@ -1396,7 +1379,8 @@ public class PostViewV2Fragment extends Fragment implements EditTextDialogFragme
                 bottom.like.setVisibility(View.VISIBLE);
                 bottom.save.setVisibility(View.VISIBLE);
             }
-            if (video) {
+            // if (video) {
+            if (media.getType() == MediaItemType.MEDIA_TYPE_VIDEO) {
                 // binding.playerControlsToggle.setVisibility(View.VISIBLE);
                 bottom.viewsCount.setVisibility(View.VISIBLE);
             }
