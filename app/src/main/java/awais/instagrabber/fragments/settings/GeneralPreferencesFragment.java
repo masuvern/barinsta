@@ -34,6 +34,7 @@ public class GeneralPreferencesFragment extends BasePreferencesFragment implemen
             screen.addPreference(getDefaultTabPreference(context));
             screen.addPreference(getTabOrderPreference(context));
         }
+        screen.addPreference(getDisableScreenTransitionsPreference(context));
         screen.addPreference(getUpdateCheckPreference(context));
         screen.addPreference(getFlagSecurePreference(context));
         screen.addPreference(getSearchFocusPreference(context));
@@ -79,6 +80,14 @@ public class GeneralPreferencesFragment extends BasePreferencesFragment implemen
             dialogFragment.show(getChildFragmentManager(), "tab_order_dialog");
             return true;
         });
+        return preference;
+    }
+
+    private Preference getDisableScreenTransitionsPreference(@NonNull final Context context) {
+        final SwitchPreferenceCompat preference = new SwitchPreferenceCompat(context);
+        preference.setKey(PreferenceKeys.PREF_DISABLE_SCREEN_TRANSITIONS);
+        preference.setTitle(R.string.disable_screen_transitions);
+        preference.setIconSpaceReserved(false);
         return preference;
     }
 
