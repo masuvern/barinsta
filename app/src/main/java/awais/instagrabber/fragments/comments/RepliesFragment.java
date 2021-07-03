@@ -83,8 +83,13 @@ public class RepliesFragment extends Fragment {
 
     @Override
     public Animation onCreateAnimation(int transit, boolean enter, int nextAnim) {
-        if (!enter || nextAnim == 0) {
-            return super.onCreateAnimation(transit, enter, nextAnim);
+        if (!enter) {
+            return super.onCreateAnimation(transit, false, nextAnim);
+        }
+        if (nextAnim == 0) {
+            setupList();
+            setupObservers();
+            return super.onCreateAnimation(transit, true, nextAnim);
         }
         final Animation animation = AnimationUtils.loadAnimation(getContext(), nextAnim);
         animation.setAnimationListener(new Animation.AnimationListener() {
