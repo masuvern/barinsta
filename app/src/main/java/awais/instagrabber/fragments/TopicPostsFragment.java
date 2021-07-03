@@ -2,7 +2,6 @@ package awais.instagrabber.fragments;
 
 import android.animation.ArgbEvaluator;
 import android.content.Context;
-import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Animatable;
@@ -26,7 +25,6 @@ import androidx.annotation.Nullable;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.core.graphics.ColorUtils;
 import androidx.fragment.app.Fragment;
-import androidx.navigation.NavController;
 import androidx.navigation.NavDirections;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
@@ -49,9 +47,10 @@ import awais.instagrabber.asyncs.DiscoverPostFetchService;
 import awais.instagrabber.customviews.PrimaryActionModeCallback;
 import awais.instagrabber.databinding.FragmentTopicPostsBinding;
 import awais.instagrabber.dialogs.PostsLayoutPreferencesDialogFragment;
-import awais.instagrabber.fragments.main.DiscoverFragmentDirections;
 import awais.instagrabber.models.PostsLayoutPreferences;
+import awais.instagrabber.repositories.responses.Location;
 import awais.instagrabber.repositories.responses.Media;
+import awais.instagrabber.repositories.responses.User;
 import awais.instagrabber.repositories.responses.discover.TopicCluster;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.DownloadUtils;
@@ -101,20 +100,22 @@ public class TopicPostsFragment extends Fragment implements SwipeRefreshLayout.O
     private final FeedAdapterV2.FeedItemCallback feedItemCallback = new FeedAdapterV2.FeedItemCallback() {
         @Override
         public void onPostClick(final Media feedModel, final View profilePicView, final View mainPostImage) {
-            openPostDialog(feedModel, profilePicView, mainPostImage, -1);
+            openPostDialog(feedModel, -1);
         }
 
         @Override
         public void onSliderClick(final Media feedModel, final int position) {
-            openPostDialog(feedModel, null, null, position);
+            openPostDialog(feedModel, position);
         }
 
         @Override
         public void onCommentsClick(final Media feedModel) {
-            final NavDirections commentsAction = DiscoverFragmentDirections.actionGlobalCommentsViewerFragment(
+            final User user = feedModel.getUser();
+            if (user == null) return;
+            final NavDirections commentsAction = TopicPostsFragmentDirections.actionToComments(
                     feedModel.getCode(),
                     feedModel.getPk(),
-                    feedModel.getUser().getPk()
+                    user.getPk()
             );
             NavHostFragment.findNavController(TopicPostsFragment.this).navigate(commentsAction);
         }
@@ -128,13 +129,15 @@ public class TopicPostsFragment extends Fragment implements SwipeRefreshLayout.O
 
         @Override
         public void onHashtagClick(final String hashtag) {
-            final NavDirections action = DiscoverFragmentDirections.actionGlobalHashTagFragment(hashtag);
+            final NavDirections action = TopicPostsFragmentDirections.actionToHashtag(hashtag);
             NavHostFragment.findNavController(TopicPostsFragment.this).navigate(action);
         }
 
         @Override
         public void onLocationClick(final Media feedModel) {
-            final NavDirections action = DiscoverFragmentDirections.actionGlobalLocationFragment(feedModel.getLocation().getPk());
+            final Location location = feedModel.getLocation();
+            if (location == null) return;
+            final NavDirections action = TopicPostsFragmentDirections.actionToLocation(location.getPk());
             NavHostFragment.findNavController(TopicPostsFragment.this).navigate(action);
         }
 
@@ -150,7 +153,9 @@ public class TopicPostsFragment extends Fragment implements SwipeRefreshLayout.O
 
         @Override
         public void onProfilePicClick(final Media feedModel, final View profilePicView) {
-            navigateToProfile("@" + feedModel.getUser().getUsername());
+            final User user = feedModel.getUser();
+            if (user == null) return;
+            navigateToProfile("@" + user.getUsername());
         }
 
         @Override
@@ -163,16 +168,10 @@ public class TopicPostsFragment extends Fragment implements SwipeRefreshLayout.O
             Utils.openEmailAddress(getContext(), emailId);
         }
 
-        private void openPostDialog(final Media feedModel,
-                                    final View profilePicView,
-                                    final View mainPostImage,
-                                    final int position) {
-            final NavController navController = NavHostFragment.findNavController(TopicPostsFragment.this);
-            final Bundle bundle = new Bundle();
-            bundle.putSerializable(PostViewV2Fragment.ARG_MEDIA, feedModel);
-            bundle.putInt(PostViewV2Fragment.ARG_SLIDER_POSITION, position);
+        private void openPostDialog(final Media feedModel, final int position) {
             try {
-                navController.navigate(R.id.action_global_post_view, bundle);
+                final NavDirections action = TopicPostsFragmentDirections.actionGlobalPost(feedModel, position);
+                NavHostFragment.findNavController(TopicPostsFragment.this).navigate(action);
             } catch (Exception e) {
                 Log.e(TAG, "openPostDialog: ", e);
             }
@@ -218,11 +217,14 @@ public class TopicPostsFragment extends Fragment implements SwipeRefreshLayout.O
     public void onCreate(@Nullable final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         fragmentActivity = (MainActivity) requireActivity();
-        final TransitionSet transitionSet = new TransitionSet();
-        transitionSet.addTransition(new ChangeBounds())
-                     .addTransition(TransitionInflater.from(getContext()).inflateTransition(android.R.transition.move))
-                     .setDuration(200);
-        setSharedElementEnterTransition(transitionSet);
+        final Context context = getContext();
+        if (context != null) {
+            final TransitionSet transitionSet = new TransitionSet();
+            transitionSet.addTransition(new ChangeBounds())
+                         .addTransition(TransitionInflater.from(context).inflateTransition(android.R.transition.move))
+                         .setDuration(200);
+            setSharedElementEnterTransition(transitionSet);
+        }
         postponeEnterTransition();
         setHasOptionsMenu(true);
     }
@@ -379,10 +381,12 @@ public class TopicPostsFragment extends Fragment implements SwipeRefreshLayout.O
     }
 
     private void navigateToProfile(final String username) {
-        final NavController navController = NavHostFragment.findNavController(this);
-        final Bundle bundle = new Bundle();
-        bundle.putString("username", username);
-        navController.navigate(R.id.action_global_profileFragment, bundle);
+        try {
+            final NavDirections action = TopicPostsFragmentDirections.actionToProfile().setUsername(username);
+            NavHostFragment.findNavController(this).navigate(action);
+        } catch (Exception e) {
+            Log.e(TAG, "navigateToProfile: ", e);
+        }
     }
 
     private void showPostsLayoutPreferences() {

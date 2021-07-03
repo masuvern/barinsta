@@ -163,7 +163,6 @@ configurations.all {
 dependencies {
     coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:1.1.5'
 
-    def nav_version = '2.3.5'
     def exoplayer_version = '2.14.1'
 
     implementation 'com.google.android.material:material:1.4.0-rc01'
@@ -175,8 +174,6 @@ dependencies {
     implementation "androidx.recyclerview:recyclerview:1.2.1"
     implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
     implementation "androidx.viewpager2:viewpager2:1.0.0"
-    implementation "androidx.navigation:navigation-fragment:$nav_version"
-    implementation "androidx.navigation:navigation-ui:$nav_version"
     implementation "androidx.constraintlayout:constraintlayout:2.0.4"
     implementation "androidx.preference:preference:1.1.1"
     implementation 'androidx.palette:palette:1.0.0'
@@ -194,6 +191,10 @@ dependencies {
     implementation "androidx.lifecycle:lifecycle-extensions:2.2.0"
     implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:2.3.1"
     implementation "androidx.lifecycle:lifecycle-livedata-ktx:2.3.1"
+
+    // Navigation
+    implementation "androidx.navigation:navigation-fragment-ktx:$rootProject.nav_version"
+    implementation "androidx.navigation:navigation-ui-ktx:$rootProject.nav_version"
 
     // Room
     def room_version = "2.3.0"

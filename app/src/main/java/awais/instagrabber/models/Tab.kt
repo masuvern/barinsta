@@ -2,23 +2,11 @@ package awais.instagrabber.models
 
 import androidx.annotation.DrawableRes
 import androidx.annotation.IdRes
-import androidx.annotation.NavigationRes
 
 data class Tab(
     @param:DrawableRes val iconResId: Int,
     val title: String,
     val isRemovable: Boolean,
-
-    /**
-     * This is name part of the navigation resource
-     * eg: @navigation/ **graphName**
-     */
-    val graphName: String,
-
-    /**
-     * This is the actual resource id of the navigation resource (R.navigation.graphName = navigationResId)
-     */
-    @param:NavigationRes val navigationResId: Int,
 
     /**
      * This is the resource id of the root navigation tag of the navigation resource.

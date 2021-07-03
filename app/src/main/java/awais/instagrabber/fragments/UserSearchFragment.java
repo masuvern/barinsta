@@ -309,20 +309,4 @@ public class UserSearchFragment extends Fragment {
         }
         return null;
     }
-
-    public enum SearchMode {
-        USER_SEARCH("user_name"),
-        RAVEN("raven"),
-        RESHARE("reshare");
-
-        private final String name;
-
-        SearchMode(final String name) {
-            this.name = name;
-        }
-
-        public String getName() {
-            return name;
-        }
-    }
 }

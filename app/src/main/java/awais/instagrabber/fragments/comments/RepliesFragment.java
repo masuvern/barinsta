@@ -185,18 +185,22 @@ public class RepliesFragment extends Fragment {
     private void setupAdapter(final long currentUserId) {
         final Context context = getContext();
         if (context == null) return;
-        commentsAdapter = new CommentsAdapter(currentUserId,
-                                              true,
-                                              Helper.getCommentCallback(context,
-                                                      getViewLifecycleOwner(),
-                                                      getNavController(),
-                                                      viewModel,
-                                                      (comment, focusInput) -> {
-                                                           viewModel.setReplyTo(comment);
-                                                           binding.commentText.setText(String.format("@%s ", comment.getUser().getUsername()));
-                                                           if (focusInput) Utils.showKeyboard(binding.commentText);
-                                                           return null;
-                                                      }));
+        commentsAdapter = new CommentsAdapter(
+                currentUserId,
+                true,
+                Helper.getCommentCallback(
+                        context,
+                        getViewLifecycleOwner(),
+                        getNavController(),
+                        viewModel,
+                        (comment, focusInput) -> {
+                            viewModel.setReplyTo(comment);
+                            binding.commentText.setText(String.format("@%s ", comment.getUser().getUsername()));
+                            if (focusInput) Utils.showKeyboard(binding.commentText);
+                            return null;
+                        }
+                )
+        );
         binding.comments.setAdapter(commentsAdapter);
         final Resource<List<Comment>> listResource = viewModel.getReplyList().getValue();
         commentsAdapter.submitList(listResource != null ? listResource.data : Collections.emptyList());

@@ -1,7 +1,6 @@
 package awais.instagrabber.fragments.settings;
 
 import android.content.Context;
-import android.util.Pair;
 
 import androidx.annotation.NonNull;
 import androidx.preference.ListPreference;
@@ -17,8 +16,9 @@ import awais.instagrabber.dialogs.TabOrderPreferenceDialogFragment;
 import awais.instagrabber.models.Tab;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.CookieUtils;
+import awais.instagrabber.utils.NavigationHelperKt;
 import awais.instagrabber.utils.TextUtils;
-import awais.instagrabber.utils.Utils;
+import kotlin.Pair;
 
 import static awais.instagrabber.utils.Utils.settingsHelper;
 
@@ -37,27 +37,28 @@ public class GeneralPreferencesFragment extends BasePreferencesFragment implemen
         screen.addPreference(getUpdateCheckPreference(context));
         screen.addPreference(getFlagSecurePreference(context));
         screen.addPreference(getSearchFocusPreference(context));
-        final List<Preference> preferences = FlavorSettings.getInstance()
-                                                           .getPreferences(context,
-                                                                           getChildFragmentManager(),
-                                                                           SettingCategory.GENERAL);
-        if (preferences != null) {
-            for (final Preference preference : preferences) {
-                screen.addPreference(preference);
-            }
+        final List<Preference> preferences = FlavorSettings
+                .getInstance()
+                .getPreferences(
+                        context,
+                        getChildFragmentManager(),
+                        SettingCategory.GENERAL
+                );
+        for (final Preference preference : preferences) {
+            screen.addPreference(preference);
         }
     }
 
     private Preference getDefaultTabPreference(@NonNull final Context context) {
         final ListPreference preference = new ListPreference(context);
         preference.setSummaryProvider(ListPreference.SimpleSummaryProvider.getInstance());
-        final Pair<List<Tab>, List<Tab>> listPair = Utils.getNavTabList(context);
-        final List<Tab> tabs = listPair.first;
+        final Pair<List<Tab>, List<Tab>> listPair = NavigationHelperKt.getLoggedInNavTabs(context);
+        final List<Tab> tabs = listPair.getFirst();
         final String[] titles = tabs.stream()
                                     .map(Tab::getTitle)
                                     .toArray(String[]::new);
         final String[] navGraphFileNames = tabs.stream()
-                                               .map(Tab::getGraphName)
+                                               .map(tab -> NavigationHelperKt.geNavGraphNameForNavRootId(tab.getNavigationRootId()))
                                                .toArray(String[]::new);
         preference.setKey(Constants.DEFAULT_TAB);
         preference.setTitle(R.string.pref_start_screen);

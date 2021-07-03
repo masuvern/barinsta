@@ -205,7 +205,7 @@ public final class CommentsViewerFragment extends BottomSheetDialogFragment {
                 viewModel,
                 (comment, focusInput) -> {
                     if (comment == null) return null;
-                    final RepliesFragment repliesFragment = RepliesFragment.newInstance(comment, focusInput == null ? false : focusInput);
+                    final RepliesFragment repliesFragment = RepliesFragment.newInstance(comment, focusInput != null && focusInput);
                     getChildFragmentManager().beginTransaction()
                                              .setCustomAnimations(R.anim.slide_left, R.anim.slide_right, 0, R.anim.slide_right)
                                              .add(R.id.replies_container_view, repliesFragment)

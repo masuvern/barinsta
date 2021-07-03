@@ -18,6 +18,7 @@ import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
 import androidx.fragment.app.Fragment;
+import androidx.navigation.NavDirections;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
@@ -209,10 +210,12 @@ public final class FollowViewerFragment extends Fragment implements SwipeRefresh
             final Object tag = v.getTag();
             if (tag instanceof FollowModel) {
                 model = (FollowModel) tag;
-                final FollowViewerFragmentDirections.ActionFollowViewerFragmentToProfileFragment action = FollowViewerFragmentDirections
-                        .actionFollowViewerFragmentToProfileFragment();
-                action.setUsername("@" + model.getUsername());
-                NavHostFragment.findNavController(this).navigate(action);
+                try {
+                    final NavDirections action = FollowViewerFragmentDirections.actionToProfile().setUsername(model.getUsername());
+                    NavHostFragment.findNavController(this).navigate(action);
+                } catch (Exception e) {
+                    Log.e(TAG, "init: ", e);
+                }
             }
         };
         binding.swipeRefreshLayout.setOnRefreshListener(this);

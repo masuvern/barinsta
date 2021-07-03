@@ -3,7 +3,6 @@ package awais.instagrabber.fragments;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -25,7 +24,6 @@ import androidx.appcompat.app.ActionBar;
 import androidx.constraintlayout.motion.widget.MotionLayout;
 import androidx.constraintlayout.motion.widget.MotionScene;
 import androidx.fragment.app.Fragment;
-import androidx.navigation.NavController;
 import androidx.navigation.NavDirections;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.recyclerview.widget.RecyclerView;
@@ -50,7 +48,6 @@ import awais.instagrabber.db.repositories.FavoriteRepository;
 import awais.instagrabber.dialogs.PostsLayoutPreferencesDialogFragment;
 import awais.instagrabber.models.PostsLayoutPreferences;
 import awais.instagrabber.models.enums.FavoriteType;
-import awais.instagrabber.repositories.requests.StoryViewerOptions;
 import awais.instagrabber.repositories.responses.Location;
 import awais.instagrabber.repositories.responses.Media;
 import awais.instagrabber.repositories.responses.User;
@@ -76,7 +73,7 @@ public class LocationFragment extends Fragment implements SwipeRefreshLayout.OnR
     private FragmentLocationBinding binding;
     private MotionLayout root;
     private boolean shouldRefresh = true;
-//    private boolean hasStories = false;
+    //    private boolean hasStories = false;
     private boolean opening = false;
     private long locationId;
     private Location locationModel;
@@ -130,12 +127,18 @@ public class LocationFragment extends Fragment implements SwipeRefreshLayout.OnR
 
         @Override
         public void onCommentsClick(final Media feedModel) {
-            final NavDirections commentsAction = LocationFragmentDirections.actionGlobalCommentsViewerFragment(
-                    feedModel.getCode(),
-                    feedModel.getPk(),
-                    feedModel.getUser().getPk()
-            );
-            NavHostFragment.findNavController(LocationFragment.this).navigate(commentsAction);
+            final User user = feedModel.getUser();
+            if (user == null) return;
+            try {
+                final NavDirections commentsAction = LocationFragmentDirections.actionToComments(
+                        feedModel.getCode(),
+                        feedModel.getPk(),
+                        user.getPk()
+                );
+                NavHostFragment.findNavController(LocationFragment.this).navigate(commentsAction);
+            } catch (Exception e) {
+                Log.e(TAG, "onCommentsClick: ", e);
+            }
         }
 
         @Override
@@ -147,13 +150,19 @@ public class LocationFragment extends Fragment implements SwipeRefreshLayout.OnR
 
         @Override
         public void onHashtagClick(final String hashtag) {
-            final NavDirections action = LocationFragmentDirections.actionGlobalHashTagFragment(hashtag);
-            NavHostFragment.findNavController(LocationFragment.this).navigate(action);
+            try {
+                final NavDirections action = LocationFragmentDirections.actionToHashtag(hashtag);
+                NavHostFragment.findNavController(LocationFragment.this).navigate(action);
+            } catch (Exception e) {
+                Log.e(TAG, "onHashtagClick: ", e);
+            }
         }
 
         @Override
         public void onLocationClick(final Media feedModel) {
-            final NavDirections action = LocationFragmentDirections.actionGlobalLocationFragment(feedModel.getLocation().getPk());
+            final Location location = feedModel.getLocation();
+            if (location == null) return;
+            final NavDirections action = LocationFragmentDirections.actionToLocation(location.getPk());
             NavHostFragment.findNavController(LocationFragment.this).navigate(action);
         }
 
@@ -206,12 +215,9 @@ public class LocationFragment extends Fragment implements SwipeRefreshLayout.OnR
                 return;
             }
             opening = true;
-            final NavController navController = NavHostFragment.findNavController(LocationFragment.this);
-            final Bundle bundle = new Bundle();
-            bundle.putSerializable(PostViewV2Fragment.ARG_MEDIA, feedModel);
-            bundle.putInt(PostViewV2Fragment.ARG_SLIDER_POSITION, position);
             try {
-                navController.navigate(R.id.action_global_post_view, bundle);
+                final NavDirections action = LocationFragmentDirections.actionToPost(feedModel, position);
+                NavHostFragment.findNavController(LocationFragment.this).navigate(action);
             } catch (Exception e) {
                 Log.e(TAG, "openPostDialog: ", e);
             }
@@ -305,7 +311,7 @@ public class LocationFragment extends Fragment implements SwipeRefreshLayout.OnR
     @Override
     public void onRefresh() {
         binding.posts.refresh();
-//        fetchStories();
+        //        fetchStories();
     }
 
     @Override
@@ -386,7 +392,7 @@ public class LocationFragment extends Fragment implements SwipeRefreshLayout.OnR
         }
         setTitle();
         setupPosts();
-//        fetchStories();
+        //        fetchStories();
         final long locationId = locationModel.getPk();
         // binding.swipeRefreshLayout.setRefreshing(true);
         locationDetailsBinding.mainLocationImage.setImageURI("res:/" + R.drawable.ic_location);
@@ -531,14 +537,14 @@ public class LocationFragment extends Fragment implements SwipeRefreshLayout.OnR
                     );
                 }), Dispatchers.getIO())
         ));
-//        locationDetailsBinding.mainLocationImage.setOnClickListener(v -> {
-//            if (hasStories) {
-//                // show stories
-//                final NavDirections action = LocationFragmentDirections
-//                        .actionLocationFragmentToStoryViewerFragment(StoryViewerOptions.forLocation(locationId, locationModel.getName()));
-//                NavHostFragment.findNavController(this).navigate(action);
-//            }
-//        });
+        //        locationDetailsBinding.mainLocationImage.setOnClickListener(v -> {
+        //            if (hasStories) {
+        //                // show stories
+        //                final NavDirections action = LocationFragmentDirections
+        //                        .actionLocationFragmentToStoryViewerFragment(StoryViewerOptions.forLocation(locationId, locationModel.getName()));
+        //                NavHostFragment.findNavController(this).navigate(action);
+        //            }
+        //        });
     }
 
     private void showSnackbar(final String message) {
@@ -549,26 +555,26 @@ public class LocationFragment extends Fragment implements SwipeRefreshLayout.OnR
                 .show();
     }
 
-//    private void fetchStories() {
-//        if (isLoggedIn) {
-//            storiesFetching = true;
-//            storiesRepository.getStories(
-//                    StoryViewerOptions.forLocation(locationId, locationModel.getName()),
-//                    CoroutineUtilsKt.getContinuation((storyModels, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
-//                        if (throwable != null) {
-//                            Log.e(TAG, "Error", throwable);
-//                            storiesFetching = false;
-//                            return;
-//                        }
-//                        if (storyModels != null && !storyModels.isEmpty()) {
-//                            locationDetailsBinding.mainLocationImage.setStoriesBorder(1);
-//                            hasStories = true;
-//                        }
-//                        storiesFetching = false;
-//                    }), Dispatchers.getIO())
-//            );
-//        }
-//    }
+    //    private void fetchStories() {
+    //        if (isLoggedIn) {
+    //            storiesFetching = true;
+    //            storiesRepository.getStories(
+    //                    StoryViewerOptions.forLocation(locationId, locationModel.getName()),
+    //                    CoroutineUtilsKt.getContinuation((storyModels, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
+    //                        if (throwable != null) {
+    //                            Log.e(TAG, "Error", throwable);
+    //                            storiesFetching = false;
+    //                            return;
+    //                        }
+    //                        if (storyModels != null && !storyModels.isEmpty()) {
+    //                            locationDetailsBinding.mainLocationImage.setStoriesBorder(1);
+    //                            hasStories = true;
+    //                        }
+    //                        storiesFetching = false;
+    //                    }), Dispatchers.getIO())
+    //            );
+    //        }
+    //    }
 
     private void setTitle() {
         final ActionBar actionBar = fragmentActivity.getSupportActionBar();
@@ -582,10 +588,12 @@ public class LocationFragment extends Fragment implements SwipeRefreshLayout.OnR
     }
 
     private void navigateToProfile(final String username) {
-        final NavController navController = NavHostFragment.findNavController(this);
-        final Bundle bundle = new Bundle();
-        bundle.putString("username", username);
-        navController.navigate(R.id.action_global_profileFragment, bundle);
+        try {
+            final NavDirections action = LocationFragmentDirections.actionToProfile().setUsername(username);
+            NavHostFragment.findNavController(this).navigate(action);
+        } catch (Exception e) {
+            Log.e(TAG, "navigateToProfile: ", e);
+        }
     }
 
     private void showPostsLayoutPreferences() {

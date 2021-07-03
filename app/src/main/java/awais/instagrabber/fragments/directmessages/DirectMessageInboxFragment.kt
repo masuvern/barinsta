@@ -11,7 +11,7 @@ import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
-import androidx.navigation.fragment.NavHostFragment
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout.OnRefreshListener
 import awais.instagrabber.R
@@ -103,9 +103,9 @@ class DirectMessageInboxFragment : Fragment(), OnRefreshListener {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if (item.itemId == R.id.pending_requests) {
-            val directions = DirectMessageInboxFragmentDirections.actionInboxToPendingInbox()
             try {
-                NavHostFragment.findNavController(this).navigate(directions)
+                val directions = DirectMessageInboxFragmentDirections.actionToPendingInbox()
+                findNavController().navigate(directions)
             } catch (e: Exception) {
                 Log.e(TAG, "onOptionsItemSelected: ", e)
             }
@@ -210,9 +210,9 @@ class DirectMessageInboxFragment : Fragment(), OnRefreshListener {
             if (navigating || threadId.isNullOrBlank() || threadTitle.isNullOrBlank()) return@DirectMessageInboxAdapter
             navigating = true
             if (isAdded) {
-                val directions = DirectMessageInboxFragmentDirections.actionInboxToThread(threadId, threadTitle)
                 try {
-                    NavHostFragment.findNavController(this).navigate(directions)
+                    val directions = DirectMessageInboxFragmentDirections.actionToThread(threadId, threadTitle)
+                    findNavController().navigate(directions)
                 } catch (e: Exception) {
                     Log.e(TAG, "init: ", e)
                 }

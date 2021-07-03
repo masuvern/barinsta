@@ -58,13 +58,13 @@ import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 
 import java.io.IOException;
 import java.text.NumberFormat;
-import java.util.Arrays;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
-import java.util.stream.Collectors;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import awais.instagrabber.BuildConfig;
 import awais.instagrabber.R;
@@ -78,7 +78,16 @@ import awais.instagrabber.models.enums.MediaItemType;
 import awais.instagrabber.repositories.requests.StoryViewerOptions;
 import awais.instagrabber.repositories.requests.StoryViewerOptions.Type;
 import awais.instagrabber.repositories.requests.directmessages.ThreadIdsOrUserIds;
-import awais.instagrabber.repositories.responses.stories.*;
+import awais.instagrabber.repositories.responses.stories.Broadcast;
+import awais.instagrabber.repositories.responses.stories.PollSticker;
+import awais.instagrabber.repositories.responses.stories.QuestionSticker;
+import awais.instagrabber.repositories.responses.stories.QuizSticker;
+import awais.instagrabber.repositories.responses.stories.SliderSticker;
+import awais.instagrabber.repositories.responses.stories.Story;
+import awais.instagrabber.repositories.responses.stories.StoryAppAttribution;
+import awais.instagrabber.repositories.responses.stories.StoryCta;
+import awais.instagrabber.repositories.responses.stories.StoryMedia;
+import awais.instagrabber.repositories.responses.stories.Tally;
 import awais.instagrabber.utils.AppExecutors;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.CookieUtils;
@@ -459,7 +468,8 @@ public class StoryViewerFragment extends Fragment {
                         final Bundle bundle = new Bundle();
                         bundle.putSerializable(PostViewV2Fragment.ARG_MEDIA, media);
                         try {
-                            navController.navigate(R.id.action_global_post_view, bundle);
+                            final NavDirections action = StoryViewerFragmentDirections.actionToPost(media, 0);
+                            navController.navigate(action);
                             alertDialog.dismiss();
                         } catch (Exception e) {
                             Log.e(TAG, "openPostDialog: ", e);
@@ -1243,14 +1253,13 @@ public class StoryViewerFragment extends Fragment {
         }
         final char t = username.charAt(0);
         if (t == '@') {
-            final NavDirections action = HashTagFragmentDirections.actionGlobalProfileFragment(username);
+            final NavDirections action = HashTagFragmentDirections.actionToProfile().setUsername(username);
             NavHostFragment.findNavController(this).navigate(action);
         } else if (t == '#') {
-            final NavDirections action = HashTagFragmentDirections.actionGlobalHashTagFragment(username.substring(1));
+            final NavDirections action = HashTagFragmentDirections.actionToHashtag(username.substring(1));
             NavHostFragment.findNavController(this).navigate(action);
         } else {
-            final NavDirections action = ProfileFragmentDirections
-                    .actionGlobalLocationFragment(Long.parseLong(username.split(" \\(")[1].replace(")", "")));
+            final NavDirections action = ProfileFragmentDirections.actionToLocation(Long.parseLong(username.split(" \\(")[1].replace(")", "")));
             NavHostFragment.findNavController(this).navigate(action);
         }
     }
