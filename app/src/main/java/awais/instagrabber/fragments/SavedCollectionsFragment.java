@@ -52,12 +52,14 @@ public class SavedCollectionsFragment extends Fragment implements SwipeRefreshLa
     private boolean shouldRefresh = true;
     private boolean isSaving;
     private ProfileService profileService;
+    private SavedCollectionsAdapter adapter;
 
     @Override
     public void onCreate(@Nullable final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         fragmentActivity = (MainActivity) requireActivity();
         profileService = ProfileService.getInstance();
+        savedCollectionsViewModel = new ViewModelProvider(fragmentActivity).get(SavedCollectionsViewModel.class);
         setHasOptionsMenu(true);
     }
 
@@ -76,6 +78,7 @@ public class SavedCollectionsFragment extends Fragment implements SwipeRefreshLa
 
     @Override
     public void onViewCreated(@NonNull final View view, @Nullable final Bundle savedInstanceState) {
+        setupObservers();
         if (!shouldRefresh) return;
         binding.swipeRefreshLayout.setOnRefreshListener(this);
         init();
@@ -141,9 +144,8 @@ public class SavedCollectionsFragment extends Fragment implements SwipeRefreshLa
     }
 
     public void setupTopics() {
-        savedCollectionsViewModel = new ViewModelProvider(fragmentActivity).get(SavedCollectionsViewModel.class);
         binding.topicsRecyclerView.addItemDecoration(new GridSpacingItemDecoration(Utils.convertDpToPx(2)));
-        final SavedCollectionsAdapter adapter = new SavedCollectionsAdapter((topicCluster, root, cover, title, titleColor, backgroundColor) -> {
+        adapter = new SavedCollectionsAdapter((topicCluster, root, cover, title, titleColor, backgroundColor) -> {
             final NavController navController = NavHostFragment.findNavController(this);
             if (isSaving) {
                 setNavControllerResult(navController, topicCluster.getCollectionId());
@@ -161,7 +163,13 @@ public class SavedCollectionsFragment extends Fragment implements SwipeRefreshLa
             }
         });
         binding.topicsRecyclerView.setAdapter(adapter);
-        savedCollectionsViewModel.getList().observe(getViewLifecycleOwner(), adapter::submitList);
+    }
+
+    private void setupObservers() {
+        savedCollectionsViewModel.getList().observe(getViewLifecycleOwner(), list -> {
+            if (adapter == null) return;
+            adapter.submitList(list);
+        });
     }
 
     private void fetchTopics(final String maxId) {
