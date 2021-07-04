@@ -19,7 +19,7 @@ fun getLoggedInNavTabs(context: Context): Pair<List<Tab>, List<Tab>> {
 
 fun getAnonNavTabs(context: Context): List<Tab> {
     val navRootIds = getArrayResIds(context.resources, R.array.anon_nav_root_ids)
-    val (tabs, _) = getTabs(context, navRootIds)
+    val (tabs, _) = getTabs(context, navRootIds, true)
     return tabs
 }
 
