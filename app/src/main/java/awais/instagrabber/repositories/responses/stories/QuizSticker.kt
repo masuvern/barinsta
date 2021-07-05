@@ -6,8 +6,8 @@ import awais.instagrabber.repositories.responses.Location
 import awais.instagrabber.repositories.responses.User
 
 data class QuizSticker(
-    val quizId: Long?,
-    val question: String?,
+    val quizId: Long,
+    val question: String,
     val tallies: List<Tally>,
     var viewerAnswer: Int?,
     val correctAnswer: Int
