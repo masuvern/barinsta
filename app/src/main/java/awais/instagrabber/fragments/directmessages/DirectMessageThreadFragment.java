@@ -586,7 +586,6 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
         if (getArguments() == null) return;
         actionBar = fragmentActivity.getSupportActionBar();
         setupList();
-        root.post(this::setupInput);
     }
 
     private void setupList() {
@@ -642,10 +641,11 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
         inputModeLiveData.observe(getViewLifecycleOwner(), inputMode -> {
             final Boolean isPending = viewModel.isPending().getValue();
             if (isPending != null && isPending || inputMode == null) return;
-            if (inputMode != 1) {
+            setupInput(inputMode);
+            if (inputMode == 0) {
                 setupTouchHelper();
+                return;
             }
-            if (inputMode == 0) return;
             if (inputMode == 1) {
                 hideInput();
             }
@@ -1052,8 +1052,7 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
         });
     }
 
-    private void setupInput() {
-        final Integer inputMode = viewModel.getInputMode().getValue();
+    private void setupInput(@Nullable final Integer inputMode) {
         if (inputMode != null && inputMode == 1) return;
         final Context context = getContext();
         if (context == null) return;
