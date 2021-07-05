@@ -167,6 +167,7 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
     private EmojiPickerInsetsAnimationCallback emojiPickerAnimationCallback;
     private boolean hasKbOpenedOnce;
     private boolean wasToggled;
+    private SwipeAndRestoreItemTouchHelperCallback touchHelperCallback;
 
     private final AppExecutors appExecutors = AppExecutors.INSTANCE;
     private final Animatable2Compat.AnimationCallback micToSendAnimationCallback = new Animatable2Compat.AnimationCallback() {
@@ -613,20 +614,6 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
             }
         });
         binding.chats.addItemDecoration(headerItemDecoration);
-        final SwipeAndRestoreItemTouchHelperCallback touchHelperCallback = new SwipeAndRestoreItemTouchHelperCallback(
-                context,
-                (adapterPosition, viewHolder) -> {
-                    if (itemsAdapter == null) return;
-                    final DirectItemOrHeader directItemOrHeader = itemsAdapter.getList().get(adapterPosition);
-                    if (directItemOrHeader.isHeader()) return;
-                    viewModel.setReplyToItem(directItemOrHeader.item);
-                }
-        );
-        final Integer inputMode = viewModel.getInputMode().getValue();
-        if (inputMode != null && inputMode != 1) {
-            itemTouchHelper = new ItemTouchHelper(touchHelperCallback);
-            itemTouchHelper.attachToRecyclerView(binding.chats);
-        }
     }
 
     private void setObservers() {
@@ -654,8 +641,11 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
         inputModeLiveData = viewModel.getInputMode();
         inputModeLiveData.observe(getViewLifecycleOwner(), inputMode -> {
             final Boolean isPending = viewModel.isPending().getValue();
-            if (isPending != null && isPending) return;
-            if (inputMode == null || inputMode == 0) return;
+            if (isPending != null && isPending || inputMode == null) return;
+            if (inputMode != 1) {
+                setupTouchHelper();
+            }
+            if (inputMode == 0) return;
             if (inputMode == 1) {
                 hideInput();
             }
@@ -753,6 +743,22 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
             final User user = users.get(0);
             binding.acceptPendingRequestQuestion.setText(getString(R.string.accept_request_from_user, user.getUsername(), user.getFullName()));
         });
+    }
+
+    private void setupTouchHelper() {
+        final Context context = getContext();
+        if (context == null) return;
+        touchHelperCallback = new SwipeAndRestoreItemTouchHelperCallback(
+                context,
+                (adapterPosition, viewHolder) -> {
+                    if (itemsAdapter == null) return;
+                    final DirectItemOrHeader directItemOrHeader = itemsAdapter.getList().get(adapterPosition);
+                    if (directItemOrHeader.isHeader()) return;
+                    viewModel.setReplyToItem(directItemOrHeader.item);
+                }
+        );
+        itemTouchHelper = new ItemTouchHelper(touchHelperCallback);
+        itemTouchHelper.attachToRecyclerView(binding.chats);
     }
 
     private void removeObservers() {
