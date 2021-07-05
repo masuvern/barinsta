@@ -49,6 +49,8 @@ class ProfileFragmentViewModel(
     private val profileAction = MutableLiveData(INIT)
     private val _eventLiveData = MutableLiveData<Event<ProfileEvent>?>()
 
+    private var previousUsername: String? = null
+
     enum class ProfileAction {
         INIT,
         REFRESH,
@@ -98,8 +100,9 @@ class ProfileFragmentViewModel(
     val profile: LiveData<Resource<User?>> = currentUserStateUsernameActionLiveData.switchMap {
         val (currentUserResource, stateUsernameResource, action) = it
         liveData<Resource<User?>>(context = viewModelScope.coroutineContext + ioDispatcher) {
+            if (action == INIT && previousUsername != null && stateUsernameResource.data == previousUsername) return@liveData
             if (currentUserResource.status == Resource.Status.LOADING || stateUsernameResource.status == Resource.Status.LOADING) {
-                emit(Resource.loading(null))
+                emit(Resource.loading(profileCopy.value?.data))
                 return@liveData
             }
             val currentUser = currentUserResource.data
@@ -111,6 +114,7 @@ class ProfileFragmentViewModel(
             try {
                 when (action) {
                     INIT, REFRESH -> {
+                        previousUsername = stateUsername
                         val fetchedUser = profileFetchControlledRunner.cancelPreviousThenRun { fetchUser(currentUser, stateUsername) }
                         emit(Resource.success(fetchedUser))
                         if (fetchedUser != null) {
