@@ -304,15 +304,7 @@ class ProfileFragment : Fragment(), OnRefreshListener, ConfirmDialogFragmentCall
         viewModel = ViewModelProvider(
             this,
             ProfileFragmentViewModelFactory(
-                csrfToken,
-                deviceUuid,
-                UserRepository.getInstance(),
-                FriendshipRepository.getInstance(),
-                StoriesRepository.getInstance(),
-                MediaRepository.getInstance(),
-                GraphQLRepository.getInstance(),
                 FavoriteRepository.getInstance(requireContext()),
-                DirectMessagesRepository.getInstance(),
                 if (isLoggedIn) DirectMessagesManager else null,
                 this,
                 arguments
