@@ -31,7 +31,6 @@ import awais.instagrabber.R
 import awais.instagrabber.adapters.StoriesAdapter
 import awais.instagrabber.customviews.helpers.SwipeGestureListener
 import awais.instagrabber.databinding.FragmentStoryViewerBinding
-import awais.instagrabber.fragments.main.ProfileFragment
 import awais.instagrabber.fragments.settings.PreferenceKeys
 import awais.instagrabber.interfaces.SwipeEvent
 import awais.instagrabber.models.Resource
@@ -641,20 +640,19 @@ class StoryViewerFragment : Fragment() {
             actionBar.title = null
             actionBar.subtitle = null
         }
-        when (data.second) {
+        val action = when (data.second) {
             FavoriteType.USER -> {
-                bundle.putString("username", data.first)
-                navController.navigate(R.id.action_global_profileFragment, bundle)
+                StoryViewerFragmentDirections.actionToProfile().apply { this.username = data.first!! }
             }
             FavoriteType.HASHTAG -> {
-                bundle.putString("hashtag", data.first)
-                navController.navigate(R.id.action_global_hashTagFragment, bundle)
+                StoryViewerFragmentDirections.actionToHashtag(data.first!!)
             }
             FavoriteType.LOCATION -> {
-                bundle.putLong("locationId", data.first!!.toLong())
-                navController.navigate(R.id.action_global_locationFragment, bundle)
+                StoryViewerFragmentDirections.actionToLocation(data.first!!.toLong())
             }
+            else -> null
         }
+        navController.navigate(action!!)
     }
 
     private fun releasePlayer() {
@@ -799,12 +797,12 @@ class StoryViewerFragment : Fragment() {
     }
 
     private fun shareStoryViaDm() {
-        val actionGlobalUserSearch = UserSearchFragmentDirections.actionGlobalUserSearch().apply {
+        val actionGlobalUserSearch = StoryViewerFragmentDirections.actionToUserSearch().apply {
             title = getString(R.string.share)
-            setActionLabel(getString(R.string.send))
+            actionLabel = getString(R.string.send)
             showGroups = true
             multiple = true
-            setSearchMode(UserSearchFragment.SearchMode.RAVEN)
+            searchMode = UserSearchMode.RAVEN
         }
         try {
             val navController = NavHostFragment.findNavController(this@StoryViewerFragment)
@@ -871,7 +869,7 @@ class StoryViewerFragment : Fragment() {
                                 val bundle = Bundle()
                                 bundle.putSerializable(PostViewV2Fragment.ARG_MEDIA, it.data)
                                 try {
-                                    navController.navigate(R.id.action_global_post_view, bundle)
+                                    navController.navigate(StoryViewerFragmentDirections.actionToPost(it.data, 0))
                                 } catch (e: Exception) {
                                     Log.e(TAG, "openPostDialog: ", e)
                                 }

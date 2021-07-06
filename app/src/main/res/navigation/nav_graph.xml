@@ -93,6 +93,10 @@
         <action
             android:id="@+id/action_to_location"
             app:destination="@id/locationFragment" />
+
+        <action
+            android:id="@+id/action_to_user_search"
+            app:destination="@id/user_search" />
     </fragment>
 
     <fragment
