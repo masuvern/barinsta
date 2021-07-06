@@ -16,3 +16,8 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           issue-number: ${{ github.event.issue.number }}
           labels: 'bug'
+      - name: Remove runs
+        uses: GongT/cancel-previous-workflows@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+		      DELETE: true
