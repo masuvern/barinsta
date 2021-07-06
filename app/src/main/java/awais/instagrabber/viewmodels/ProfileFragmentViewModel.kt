@@ -16,7 +16,6 @@ import awais.instagrabber.repositories.responses.User
 import awais.instagrabber.repositories.responses.UserProfileContextLink
 import awais.instagrabber.repositories.responses.directmessages.RankedRecipient
 import awais.instagrabber.repositories.responses.stories.Story
-import awais.instagrabber.repositories.responses.stories.StoryMedia
 import awais.instagrabber.utils.ControlledRunner
 import awais.instagrabber.utils.Event
 import awais.instagrabber.utils.SingleRunner
@@ -153,9 +152,9 @@ class ProfileFragmentViewModel(
             }
         }
 
-    private val storyFetchControlledRunner = ControlledRunner<List<StoryMedia>?>()
-    val userStories: LiveData<Resource<List<StoryMedia>?>> = currentUserProfileActionLiveData.switchMap { currentUserAndProfilePair ->
-        liveData<Resource<List<StoryMedia>?>>(context = viewModelScope.coroutineContext + ioDispatcher) {
+    private val storyFetchControlledRunner = ControlledRunner<Story?>()
+    val userStories: LiveData<Resource<Story?>> = currentUserProfileActionLiveData.switchMap { currentUserAndProfilePair ->
+        liveData<Resource<Story?>>(context = viewModelScope.coroutineContext + ioDispatcher) {
             val (currentUserResource, profileResource, action) = currentUserAndProfilePair
             if (action != INIT && action != REFRESH) {
                 return@liveData
@@ -231,7 +230,7 @@ class ProfileFragmentViewModel(
         return graphQLRepository.fetchUser(stateUsername)
     }
 
-    private suspend fun fetchUserStory(fetchedUser: User): List<StoryMedia> = storiesRepository.getStories(
+    private suspend fun fetchUserStory(fetchedUser: User): Story? = storiesRepository.getStories(
         StoryViewerOptions.forUser(fetchedUser.pk, fetchedUser.fullName)
     )
 

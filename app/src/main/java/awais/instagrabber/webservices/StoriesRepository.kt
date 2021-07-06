@@ -7,7 +7,6 @@ import awais.instagrabber.repositories.responses.stories.ArchiveResponse
 import awais.instagrabber.repositories.responses.stories.Story
 import awais.instagrabber.repositories.responses.stories.StoryMedia
 import awais.instagrabber.repositories.responses.stories.StoryStickerResponse
-import awais.instagrabber.utils.TextUtils.isEmpty
 import awais.instagrabber.utils.Utils
 import awais.instagrabber.webservices.RetrofitFactory.retrofit
 import java.util.UUID
@@ -60,35 +59,34 @@ open class StoriesRepository(private val service: StoriesService) {
             "is_in_archive_home" to "true",
             "include_cover" to "1",
         )
-        if (!isEmpty(maxId)) {
+        if (!maxId.isNullOrEmpty()) {
             form["max_id"] = maxId // NOT TESTED
         }
         return service.fetchArchive(form)
     }
 
-    open suspend fun getStories(options: StoryViewerOptions): List<StoryMedia> {
+    open suspend fun getStories(options: StoryViewerOptions): Story? {
         return when (options.type) {
             StoryViewerOptions.Type.HIGHLIGHT,
             StoryViewerOptions.Type.STORY_ARCHIVE
             -> {
                 val response = service.getReelsMedia(options.name)
-                val story: Story? = response.reels?.get(options.name)
-                story?.items ?: emptyList()
+                response.reels?.get(options.name)
             }
             StoryViewerOptions.Type.USER -> {
                 val response = service.getUserStories(options.id.toString())
-                response.reel?.items ?: emptyList()
+                response.reel
             }
             // should not reach beyond this point
             StoryViewerOptions.Type.LOCATION -> {
                 val response = service.getStories("locations", options.id.toString())
-                response.story?.items ?: emptyList()
+                response.story
             }
             StoryViewerOptions.Type.HASHTAG -> {
                 val response = service.getStories("tags", options.name)
-                response.story?.items ?: emptyList()
+                response.story
             }
-            else -> emptyList()
+            else -> null
         }
     }
 
@@ -96,7 +94,7 @@ open class StoriesRepository(private val service: StoriesService) {
         csrfToken: String,
         userId: Long,
         deviceUuid: String,
-        storyId: String,
+        storyId: Long,
         stickerId: Long,
         action: String,
         arg1: String,
@@ -119,7 +117,7 @@ open class StoriesRepository(private val service: StoriesService) {
         csrfToken: String,
         userId: Long,
         deviceUuid: String,
-        storyId: String,
+        storyId: Long,
         stickerId: Long,
         answer: String,
     ): StoryStickerResponse = respondToSticker(csrfToken, userId, deviceUuid, storyId, stickerId, "story_question_response", "response", answer)
@@ -128,7 +126,7 @@ open class StoriesRepository(private val service: StoriesService) {
         csrfToken: String,
         userId: Long,
         deviceUuid: String,
-        storyId: String,
+        storyId: Long,
         stickerId: Long,
         answer: Int,
     ): StoryStickerResponse {
@@ -139,7 +137,7 @@ open class StoriesRepository(private val service: StoriesService) {
         csrfToken: String,
         userId: Long,
         deviceUuid: String,
-        storyId: String,
+        storyId: Long,
         stickerId: Long,
         answer: Int,
     ): StoryStickerResponse = respondToSticker(csrfToken, userId, deviceUuid, storyId, stickerId, "story_poll_vote", "vote", answer.toString())
@@ -148,7 +146,7 @@ open class StoriesRepository(private val service: StoriesService) {
         csrfToken: String,
         userId: Long,
         deviceUuid: String,
-        storyId: String,
+        storyId: Long,
         stickerId: Long,
         answer: Double,
     ): StoryStickerResponse = respondToSticker(csrfToken, userId, deviceUuid, storyId, stickerId, "story_slider_vote", "vote", answer.toString())

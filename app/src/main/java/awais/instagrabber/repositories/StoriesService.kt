@@ -34,7 +34,7 @@ interface StoriesService {
     @FormUrlEncoded
     @POST("/api/v1/media/{storyId}/{stickerId}/{action}/")
     suspend fun respondToSticker(
-        @Path("storyId") storyId: String,
+        @Path("storyId") storyId: Long,
         @Path("stickerId") stickerId: Long,
         @Path("action") action: String,  // story_poll_vote, story_question_response, story_slider_vote, story_quiz_answer
         @FieldMap form: Map<String, String>,

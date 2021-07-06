@@ -199,7 +199,7 @@ class ProfileFragment : Fragment(), OnRefreshListener, ConfirmDialogFragmentCall
         }
     }
     private val onProfilePicClickListener = View.OnClickListener {
-        val hasStories = viewModel.userStories.value?.data?.isNotEmpty() ?: false
+        val hasStories = viewModel.userStories.value?.data != null
         if (!hasStories) {
             showProfilePicDialog()
             return@OnClickListener
@@ -514,7 +514,7 @@ class ProfileFragment : Fragment(), OnRefreshListener, ConfirmDialogFragmentCall
             highlightsAdapter?.submitList(it.data)
         }
         viewModel.userStories.observe(viewLifecycleOwner) {
-            binding.header.mainProfileImage.setStoriesBorder(if (it.data.isNullOrEmpty()) 0 else 1)
+            binding.header.mainProfileImage.setStoriesBorder(if (it.data == null) 0 else 1)
         }
         viewModel.eventLiveData.observe(viewLifecycleOwner) {
             val event = it?.getContentIfNotHandled() ?: return@observe

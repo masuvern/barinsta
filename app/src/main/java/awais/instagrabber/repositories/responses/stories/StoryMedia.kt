@@ -10,8 +10,8 @@ import java.io.Serializable
 
 data class StoryMedia(
         // inherited from Media
-    val pk: String? = null,
-    val id: String? = null,
+    val pk: Long = -1,
+    val id: String = "",
     val takenAt: Long = -1,
     val user: User? = null,
     val canReshare: Boolean = false,
