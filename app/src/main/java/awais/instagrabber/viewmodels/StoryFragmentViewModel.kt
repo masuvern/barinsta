@@ -28,7 +28,7 @@ import kotlinx.coroutines.launch
 
 class StoryFragmentViewModel : ViewModel() {
     // large data
-    private val currentStory = MutableLiveData<Story>()
+    private val currentStory = MutableLiveData<Story?>()
     private val currentMedia = MutableLiveData<StoryMedia>()
 
     // small data
@@ -181,7 +181,7 @@ class StoryFragmentViewModel : ViewModel() {
 
     /* get functions */
 
-    fun getCurrentStory(): LiveData<Story> {
+    fun getCurrentStory(): LiveData<Story?> {
         return currentStory
     }
 

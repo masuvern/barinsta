@@ -135,6 +135,7 @@ class SettingsHelper(context: Context) {
         PreferenceKeys.PLAY_IN_BACKGROUND,
         PreferenceKeys.PREF_SHOWN_COUNT_TOOLTIP,
         PreferenceKeys.PREF_SEARCH_FOCUS_KEYBOARD,
+        PreferenceKeys.PREF_STORY_SHOW_LIST,
         PreferenceKeys.PREF_AUTO_BACKUP_ENABLED
     )
     annotation class BooleanSettings

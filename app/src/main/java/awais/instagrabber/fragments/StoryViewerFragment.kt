@@ -240,6 +240,15 @@ class StoryViewerFragment : Fragment() {
                 storyMedias.set(0, newItem)
                 storiesAdapter!!.submitList(storyMedias)
                 storiesViewModel.setMedia(0)
+                binding.listToggle.setEnabled(true)
+                binding.storiesList.setVisibility(
+                    if (Utils.settingsHelper.getBoolean(PreferenceKeys.PREF_STORY_SHOW_LIST)) View.VISIBLE
+                    else View.GONE
+                )
+            }
+            else {
+                binding.listToggle.setEnabled(false)
+                binding.storiesList.setVisibility(View.GONE)
             }
         })
         storiesViewModel.getDate().observe(fragmentActivity, {
@@ -268,6 +277,12 @@ class StoryViewerFragment : Fragment() {
         binding.btnShare.setOnClickListener({ _ -> shareStoryViaDm() })
         binding.btnReply.setOnClickListener({ _ -> createReplyDialog(null) })
         binding.stickers.setOnClickListener({ _ -> showStickerMenu() })
+        binding.listToggle.setOnClickListener({ _ ->
+            binding.storiesList.setVisibility(
+                if (binding.storiesList.visibility == View.GONE) View.VISIBLE
+                else View.GONE
+            )
+        })
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -297,10 +312,22 @@ class StoryViewerFragment : Fragment() {
             if (models != null) {
                 when (it) {
                     StoryPaginationType.FORWARD -> {
-                        paginateStories(false, currentFeedStoryIndex == models.size - 2)
+                        if (currentFeedStoryIndex == models.size - 1)
+                            Toast.makeText(
+                                context,
+                                R.string.no_more_stories,
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        else paginateStories(false, currentFeedStoryIndex == models.size - 2)
                     }
                     StoryPaginationType.BACKWARD -> {
-                        paginateStories(true, false)
+                        if (currentFeedStoryIndex == 0)
+                            Toast.makeText(
+                                context,
+                                R.string.no_more_stories,
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        else paginateStories(true, false)
                     }
                     StoryPaginationType.ERROR -> {
                         Toast.makeText(
@@ -356,7 +383,6 @@ class StoryViewerFragment : Fragment() {
         val context = context ?: return
         live = null
         if (menuProfile != null) menuProfile!!.isVisible = false
-        profileVisible = false
         binding.imageViewer.controller = null
         releasePlayer()
         val type = options!!.type
@@ -434,6 +460,9 @@ class StoryViewerFragment : Fragment() {
                   else ResponseBodyUtils.getVideoUrl(currentStory)
 
         releasePlayer()
+
+        profileVisible = currentStory.user?.username != null
+        if (menuProfile != null) menuProfile!!.isVisible = profileVisible
 
         binding.btnDownload.isEnabled = false
         binding.btnShare.isEnabled = currentStory.canReshare
@@ -544,10 +573,6 @@ class StoryViewerFragment : Fragment() {
                 wasCanceled: Boolean
             ) {
                 binding.btnDownload.isEnabled = false
-                if (menuProfile != null) {
-                    profileVisible = false
-                    menuProfile!!.isVisible = false
-                }
                 binding.progressView.visibility = View.GONE
             }
         })
