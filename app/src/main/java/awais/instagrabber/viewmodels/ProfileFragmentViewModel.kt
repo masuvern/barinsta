@@ -218,6 +218,7 @@ class ProfileFragmentViewModel(
             }
         }
     }
+    val highlights: LiveData<List<Story>?> = userHighlights.map { it.data }
 
     private suspend fun fetchUser(
         currentUser: User?,
@@ -326,7 +327,7 @@ class ProfileFragmentViewModel(
                     val currentUserId = currentUser.value?.data?.pk ?: return@afterPrevious
                     val targetUserId = profile.value?.data?.pk ?: return@afterPrevious
                     val csrfToken = csrfToken ?: return@afterPrevious
-                    val deviceUuid = deviceUuid ?: return@afterPrevious
+                    val deviceUuid = deviceUuid
                     if (following) {
                         if (!confirmed) {
                             _eventLiveData.postValue(Event(ShowConfirmUnfollowDialog))
@@ -365,7 +366,7 @@ class ProfileFragmentViewModel(
                     val currentUserId = currentUser.value?.data?.pk ?: return@afterPrevious
                     val targetUserId = profile.value?.data?.pk ?: return@afterPrevious
                     val csrfToken = csrfToken ?: return@afterPrevious
-                    val deviceUuid = deviceUuid ?: return@afterPrevious
+                    val deviceUuid = deviceUuid
                     val username = profile.value?.data?.username ?: return@afterPrevious
                     val thread = directMessagesRepository.createThread(
                         csrfToken,
@@ -399,7 +400,7 @@ class ProfileFragmentViewModel(
                     val profile = profile.value?.data ?: return@afterPrevious
                     friendshipRepository.toggleRestrict(
                         csrfToken ?: return@afterPrevious,
-                        deviceUuid ?: return@afterPrevious,
+                        deviceUuid,
                         profile.pk,
                         !(profile.friendshipStatus?.isRestricted ?: false),
                     )
@@ -421,7 +422,7 @@ class ProfileFragmentViewModel(
                     friendshipRepository.changeBlock(
                         csrfToken ?: return@afterPrevious,
                         currentUser.value?.data?.pk ?: return@afterPrevious,
-                        deviceUuid ?: return@afterPrevious,
+                        deviceUuid,
                         profile.friendshipStatus?.blocking ?: return@afterPrevious,
                         profile.pk
                     )
@@ -443,7 +444,7 @@ class ProfileFragmentViewModel(
                     friendshipRepository.changeMute(
                         csrfToken ?: return@afterPrevious,
                         currentUser.value?.data?.pk ?: return@afterPrevious,
-                        deviceUuid ?: return@afterPrevious,
+                        deviceUuid,
                         profile.friendshipStatus?.isMutingReel ?: return@afterPrevious,
                         profile.pk,
                         true
@@ -466,7 +467,7 @@ class ProfileFragmentViewModel(
                     friendshipRepository.changeMute(
                         csrfToken ?: return@afterPrevious,
                         currentUser.value?.data?.pk ?: return@afterPrevious,
-                        deviceUuid ?: return@afterPrevious,
+                        deviceUuid,
                         profile.friendshipStatus?.muting ?: return@afterPrevious,
                         profile.pk,
                         false
@@ -488,7 +489,7 @@ class ProfileFragmentViewModel(
                     friendshipRepository.removeFollower(
                         csrfToken ?: return@afterPrevious,
                         currentUser.value?.data?.pk ?: return@afterPrevious,
-                        deviceUuid ?: return@afterPrevious,
+                        deviceUuid,
                         profile.value?.data?.pk ?: return@afterPrevious
                     )
                     profileAction.postValue(REFRESH_FRIENDSHIP)

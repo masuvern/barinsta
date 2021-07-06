@@ -843,7 +843,7 @@ class ProfileFragment : Fragment(), OnRefreshListener, ConfirmDialogFragmentCall
     private fun setupHighlights() {
         val context = context ?: return
         highlightsAdapter = HighlightsAdapter { model, position ->
-            val options = StoryViewerOptions.forHighlight(model.title)
+            val options = StoryViewerOptions.forHighlight(model.user?.username)
             options.currentFeedStoryIndex = position
             val action = ProfileFragmentDirections.actionProfileFragmentToStoryViewerFragment(options)
             NavHostFragment.findNavController(this).navigate(action)
