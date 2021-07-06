@@ -19,6 +19,7 @@
     <string name="title_favorites">Favoritos</string>
     <string name="title_discover">Descobrir</string>
     <string name="title_comments">Comentários</string>
+    <string name="title_replies">Respostas</string>
     <string name="title_notifications">Atividade</string>
     <string name="update_check">Verificar se há atualizações ao iniciar</string>
     <string name="flag_secure">Bloquear capturas de tela e a pré-visualização do aplicativo</string>
@@ -67,8 +68,7 @@
     <string name="be_patient">Tenha paciência!</string>
     <string name="view_story_post">Ver Publicação</string>
     <string name="view_post">Ver Publicação</string>
-    <string name="spotify">Spotify</string>
-    <string name="vote_story_poll">Votar</string>
+    <string name="story_poll">Enquete</string>
     <string name="votef_story_poll">Voto enviado!</string>
     <string name="voted_story_poll">Você já votou!</string>
     <string name="respond_story">Responder</string>
@@ -85,8 +85,10 @@
     <string name="story_slider">Deslizante</string>
     <string name="story_quizzed">Você já respondeu!</string>
     <string name="story_mentions">Menções</string>
+    <string name="story_question">Pergunta</string>
     <string name="priv_acc">Esta conta é privada</string>
     <string name="priv_acc_confirm">Você não será capaz de acessar as publicações após deixar de seguir! Tem certeza?</string>
+    <string name="are_you_sure">Tem certeza?</string>
     <string name="no_acc">Você pode fazer login em Mais -&gt; Conta no canto inferior direito ou você pode ver as contas públicas sem fazer login!</string>
     <string name="empty_acc">Esta conta não tem publicações</string>
     <string name="empty_list">Não há publicações!</string>
@@ -101,7 +103,7 @@
     <string name="delete_collection">Excluir coleção</string>
     <string name="delete_collection_confirm">Tem certeza que quer excluir essa coleção?</string>
     <string name="delete_collection_note">Toda a mídia contida permanecerá em outras coleções.</string>
-    <string name="add_to_collection">Adicionar à coleção...</string>
+    <string name="add_to_collection">Adicionar à coleção…</string>
     <string name="remove_from_collection">Remover da coleção</string>
     <string name="liked">Curtiu</string>
     <string name="saved">Salvo</string>
@@ -180,9 +182,9 @@
     <string name="dms_inbox_raven_media_screenshot">Capturado</string>
     <string name="dms_inbox_raven_media_cant_deliver">Não pode ser entregue</string>
     <string name="dms_inbox_error_null_count">Resposta do contador de não lidas é nula!</string>
-    <string name="dms_thread_message_hint">Mensagem...</string>
+    <string name="dms_thread_message_hint">Mensagem…</string>
     <string name="dms_thread_audio_hint">Aperte e segure para gravar um áudio</string>
-    <string name="dms_thread_updating">Atualizando...</string>
+    <string name="dms_thread_updating">Atualizando…</string>
     <string name="dms_action_leave">Sair da conversa</string>
     <string name="dms_action_leave_question">Sair deste chat?</string>
     <string name="dms_action_kick">Expulsar</string>
@@ -194,6 +196,7 @@
     <string name="direct_download_desc">Baixar as publicações diretamente no telefone!</string>
     <string name="direct_download_loading">Buscando publicação(ões)</string>
     <string name="downloader_complete">Download concluído</string>
+    <string name="downloader_preparing">Preparando o download…</string>
     <string name="downloader_downloading_post">Baixando publicação…</string>
     <string name="downloader_downloading_media">Baixando mídia</string>
     <string name="downloader_downloading_pfp">Baixando foto do perfil</string>
@@ -318,7 +321,7 @@
     <string name="comment">Comentar</string>
     <string name="layout">Visualização</string>
     <string name="feed_stories">Feed de stories</string>
-    <string name="opening_post">Abrindo publicação...</string>
+    <string name="opening_post">Abrindo publicação…</string>
     <string name="share">Compartilhar</string>
     <string name="layout_style">Estilo do layout</string>
     <string name="column_count">Número de colunas</string>
@@ -486,7 +489,7 @@
     <string name="dir_select_folder_not_exist">A pasta selecionada anteriormente não existe agora:</string>
     <string name="dir_select_message2">Selecione novamente o diretório ou selecione um novo diretório clicando no botão abaixo.</string>
     <string name="select_a_folder">Nenhuma pasta selecionada!</string>
-    <string name="dir_select_no_download_folder">Please choose a directory from your storage, not a category on the sidebar.</string>
+    <string name="dir_select_no_download_folder">Por favor, escolha um diretório do seu armazenamento, não uma categoria na barra lateral.\n(%s)</string>
     <string name="dir_select_success_message">Sucesso! Por favor, aguarde. Iniciando o aplicativo…</string>
     <string name="barinsta_folder">Pasta Barinsta</string>
     <string name="top">Início</string>
@@ -496,7 +499,7 @@
     <string name="click_to_show_full">Clique para mostrar a contagem completa de curtidas</string>
     <string name="no_profile_pic_found">Nenhuma foto de perfil encontrada!</string>
     <string name="swipe_up_confirmation">Tem certeza que quer abrir este link?</string>
-    <string name="sending">Enviando...</string>
+    <string name="sending">Enviando…</string>
     <string name="share_via_dm">Compartilhar via DM</string>
     <string name="share_link">Compartilhar link…</string>
     <string name="slide_to_cancel">Deslize para Cancelar</string>

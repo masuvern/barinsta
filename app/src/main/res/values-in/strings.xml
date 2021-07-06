@@ -19,6 +19,7 @@
     <string name="title_favorites">Favorit</string>
     <string name="title_discover">Temukan</string>
     <string name="title_comments">Komentar</string>
+    <string name="title_replies">Replies</string>
     <string name="title_notifications">Aktivitas</string>
     <string name="update_check">Cek pembaruan saat memulai</string>
     <string name="flag_secure">Block screenshots &amp; app preview</string>
@@ -64,8 +65,7 @@
     <string name="be_patient">Mohon bersabar!</string>
     <string name="view_story_post">Lihat Kiriman</string>
     <string name="view_post">Lihat Kiriman</string>
-    <string name="spotify">Spotify</string>
-    <string name="vote_story_poll">Pilih</string>
+    <string name="story_poll">Poll</string>
     <string name="votef_story_poll">Berhasil memilih!</string>
     <string name="voted_story_poll">Anda sudah memilih!</string>
     <string name="respond_story">Tanggapi</string>
@@ -81,8 +81,10 @@
     <string name="story_slider">Slider</string>
     <string name="story_quizzed">Anda sudah menjawab!</string>
     <string name="story_mentions">Sebutan</string>
+    <string name="story_question">Question</string>
     <string name="priv_acc">Akun Ini Bersifat Pribadi</string>
     <string name="priv_acc_confirm">Anda tidak akan dapat mengakses kiriman setelah berhenti mengikuti! Anda yakin?</string>
+    <string name="are_you_sure">Are you sure?</string>
     <string name="no_acc">Anda bisa masuk melalui Lebih-&gt; Akun di pojok kanan bawah. Atau anda dapat melihat akun publik tanpa masuk!</string>
     <string name="empty_acc">Akun ini tidak memiliki kiriman</string>
     <string name="empty_list">Kiriman tidak ditemukan!</string>
@@ -97,7 +99,7 @@
     <string name="delete_collection">Hapus koleksi</string>
     <string name="delete_collection_confirm">Apakah Anda yakin Anda ingin menghapus koleksi ini?</string>
     <string name="delete_collection_note">Seluruh media akan tetap berada dalam koleksi-koleksi lain.</string>
-    <string name="add_to_collection">Tambah ke koleksi...</string>
+    <string name="add_to_collection">Add to collection…</string>
     <string name="remove_from_collection">Hapus dari koleksi</string>
     <string name="liked">Disuka</string>
     <string name="saved">Tersimpan</string>
@@ -176,9 +178,9 @@
     <string name="dms_inbox_raven_media_screenshot">Layar tertangkap</string>
     <string name="dms_inbox_raven_media_cant_deliver">Tidak dapat mengirim</string>
     <string name="dms_inbox_error_null_count">Unseen count response is null!</string>
-    <string name="dms_thread_message_hint">Pesan...</string>
+    <string name="dms_thread_message_hint">Message…</string>
     <string name="dms_thread_audio_hint">Tekan dan tahan untuk merekam</string>
-    <string name="dms_thread_updating">Memperbarui...</string>
+    <string name="dms_thread_updating">Updating…</string>
     <string name="dms_action_leave">Tinggalkan obrolan</string>
     <string name="dms_action_leave_question">Tinggalkan obrolan ini?</string>
     <string name="dms_action_kick">Keluarkan</string>
@@ -190,6 +192,7 @@
     <string name="direct_download_desc">Langsung unduh kiriman ke ponsel!</string>
     <string name="direct_download_loading">Mendapatkan kiriman…</string>
     <string name="downloader_complete">Unduhan selesai</string>
+    <string name="downloader_preparing">Preparing to download…</string>
     <string name="downloader_downloading_post">Mengunduh kiriman…</string>
     <string name="downloader_downloading_media">Mengunduh media</string>
     <string name="downloader_downloading_pfp">Mengunduh foto profil</string>
@@ -314,7 +317,7 @@
     <string name="comment">Komentar</string>
     <string name="layout">Tata letak</string>
     <string name="feed_stories">Umpan cerita</string>
-    <string name="opening_post">Membuka kiriman...</string>
+    <string name="opening_post">Opening post…</string>
     <string name="share">Bagikan</string>
     <string name="layout_style">Gaya tata letak</string>
     <string name="column_count">Jumlah kolom</string>
@@ -477,7 +480,7 @@
     <string name="dir_select_folder_not_exist">The previously selected folder does not exist now:</string>
     <string name="dir_select_message2">Re-select the directory or select a new directory by clicking the button below.</string>
     <string name="select_a_folder">No folder selected!</string>
-    <string name="dir_select_no_download_folder">Please choose a directory from your storage, not a category on the sidebar.</string>
+    <string name="dir_select_no_download_folder">Please choose a directory from your storage, not a category on the sidebar.\n(%s)</string>
     <string name="dir_select_success_message">Success! Please wait. Starting app…</string>
     <string name="barinsta_folder">Barinsta folder</string>
     <string name="top">Top</string>
@@ -487,7 +490,7 @@
     <string name="click_to_show_full">Click to show full like count</string>
     <string name="no_profile_pic_found">No profile pic found!</string>
     <string name="swipe_up_confirmation">Are you sure you want to open this link?</string>
-    <string name="sending">Sending...</string>
+    <string name="sending">Sending…</string>
     <string name="share_via_dm">Share via DM</string>
     <string name="share_link">Share link…</string>
     <string name="slide_to_cancel">Slide to Cancel</string>

@@ -19,6 +19,7 @@
     <string name="title_favorites">Favoriten</string>
     <string name="title_discover">Entdecken</string>
     <string name="title_comments">Kommentare</string>
+    <string name="title_replies">Antworten</string>
     <string name="title_notifications">Aktivität</string>
     <string name="update_check">Beim Start auf Updates prüfen</string>
     <string name="flag_secure">Bildschirmfotos &amp; App-Vorschau verhindern</string>
@@ -67,8 +68,7 @@
     <string name="be_patient">Sei etwas geduldig!</string>
     <string name="view_story_post">Beitrag anzeigen</string>
     <string name="view_post">Beitrag anzeigen</string>
-    <string name="spotify">Spotify</string>
-    <string name="vote_story_poll">Abstimmung</string>
+    <string name="story_poll">Poll</string>
     <string name="votef_story_poll">Abstimmung erfolgreich!</string>
     <string name="voted_story_poll">Du hast bereits abgestimmt!</string>
     <string name="respond_story">Antworten</string>
@@ -85,8 +85,10 @@
     <string name="story_slider">Schieberegler</string>
     <string name="story_quizzed">Du hast bereits geantwortet!</string>
     <string name="story_mentions">Erwähnungen</string>
+    <string name="story_question">Question</string>
     <string name="priv_acc">Dieser Account ist privat</string>
     <string name="priv_acc_confirm">Du wirst nicht mehr auf Beiträge zugreifen können, wenn du entfolgst! Bist du sicher?</string>
+    <string name="are_you_sure">Bist du sicher?</string>
     <string name="no_acc">Du kannst dich unten rechts über Mehr -&gt; anmelden, oder öffentliche Konten ohne Anmeldung ansehen!</string>
     <string name="empty_acc">Dieses Konto hat keine Beiträge</string>
     <string name="empty_list">Keine derartigen Posts!</string>
@@ -101,7 +103,7 @@
     <string name="delete_collection">Sammlung löschen</string>
     <string name="delete_collection_confirm">Bist du sicher, dass du diese Sammlung löschen möchtest?</string>
     <string name="delete_collection_note">Alle enthaltenen Medien werden in anderen Sammlungen verbleiben.</string>
-    <string name="add_to_collection">Zu Sammlung hinzufügen...</string>
+    <string name="add_to_collection">Add to collection…</string>
     <string name="remove_from_collection">Aus Sammlung entfernen</string>
     <string name="liked">Gefällt mir</string>
     <string name="saved">Gespeichert</string>
@@ -180,9 +182,9 @@
     <string name="dms_inbox_raven_media_screenshot">Screenshot erstellt</string>
     <string name="dms_inbox_raven_media_cant_deliver">Kann nicht zugestellt werden</string>
     <string name="dms_inbox_error_null_count">Ungelesen-Zähler Antwort ist null!</string>
-    <string name="dms_thread_message_hint">Nachricht...</string>
+    <string name="dms_thread_message_hint">Message…</string>
     <string name="dms_thread_audio_hint">Für Audioaufnahme drücken und halten</string>
-    <string name="dms_thread_updating">Aktualisieren...</string>
+    <string name="dms_thread_updating">Updating…</string>
     <string name="dms_action_leave">Chat verlassen</string>
     <string name="dms_action_leave_question">Chat verlassen?</string>
     <string name="dms_action_kick">Entfernen</string>
@@ -194,6 +196,7 @@
     <string name="direct_download_desc">Lade Posts direkt auf das Handy herunter!</string>
     <string name="direct_download_loading">Beiträgen abrufen</string>
     <string name="downloader_complete">Download abgeschlossen</string>
+    <string name="downloader_preparing">Download wird vorbereitet…</string>
     <string name="downloader_downloading_post">Beitrag wird heruntergeladen…</string>
     <string name="downloader_downloading_media">Medien herunterladen</string>
     <string name="downloader_downloading_pfp">Profilbild wird heruntergeladen</string>
@@ -318,7 +321,7 @@
     <string name="comment">Kommentar</string>
     <string name="layout">Layout</string>
     <string name="feed_stories">Storyfeed</string>
-    <string name="opening_post">Öffne Beitrag...</string>
+    <string name="opening_post">Opening post…</string>
     <string name="share">Teilen</string>
     <string name="layout_style">Layoutstil</string>
     <string name="column_count">Spaltenanzahl</string>
@@ -486,7 +489,7 @@
     <string name="dir_select_folder_not_exist">Der zuvor ausgewählte Ordner existiert nicht mehr:</string>
     <string name="dir_select_message2">Wähle das Verzeichnis erneut aus oder wähle ein neues Verzeichnis, indem du unten auf die Schaltfläche klickst.</string>
     <string name="select_a_folder">Kein Ordner ausgewählt!</string>
-    <string name="dir_select_no_download_folder">Please choose a directory from your storage, not a category on the sidebar.</string>
+    <string name="dir_select_no_download_folder">Bitte wähle ein Verzeichnis aus deinem Speicher, nicht eine Kategorie in der Seitenleiste.\n(%s)</string>
     <string name="dir_select_success_message">Erfolg! Bitte warten. App wird gestartet…</string>
     <string name="barinsta_folder">Barinsta-Ordner</string>
     <string name="top">Anfang</string>
@@ -496,7 +499,7 @@
     <string name="click_to_show_full">Klicken, um die gesamte Anzahl der Likes anzuzeigen</string>
     <string name="no_profile_pic_found">Kein Profilbild gefunden!</string>
     <string name="swipe_up_confirmation">Bist du sicher, dass du diesen Link öffnen möchtest?</string>
-    <string name="sending">Wird gesendet...</string>
+    <string name="sending">Sending…</string>
     <string name="share_via_dm">Über PN teilen</string>
     <string name="share_link">Link teilen…</string>
     <string name="slide_to_cancel">Zum Abbrechen wischen</string>

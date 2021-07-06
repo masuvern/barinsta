@@ -19,6 +19,7 @@
     <string name="title_favorites">Favoris</string>
     <string name="title_discover">Découvrir</string>
     <string name="title_comments">Commentaires</string>
+    <string name="title_replies">Replies</string>
     <string name="title_notifications">Activité</string>
     <string name="update_check">Rechercher les mises à jours au démarrage</string>
     <string name="flag_secure">Bloquer les captures d\'écran &amp; l\'aperçu de l\'application</string>
@@ -67,8 +68,7 @@
     <string name="be_patient">Soyez patient(e)!</string>
     <string name="view_story_post">Aperçu</string>
     <string name="view_post">Aperçu</string>
-    <string name="spotify">Spotify</string>
-    <string name="vote_story_poll">Vote</string>
+    <string name="story_poll">Poll</string>
     <string name="votef_story_poll">Vote réussi !</string>
     <string name="voted_story_poll">Vous avez déjà voté !</string>
     <string name="respond_story">Répondre</string>
@@ -85,8 +85,10 @@
     <string name="story_slider">Curseur</string>
     <string name="story_quizzed">Vous avez déjà répondu !</string>
     <string name="story_mentions">Mentions</string>
+    <string name="story_question">Question</string>
     <string name="priv_acc">Compte privé</string>
     <string name="priv_acc_confirm">Vous ne pourrez plus accéder aux messages après avoir été désabonné! Êtes-vous sûr(e) ?</string>
+    <string name="are_you_sure">Are you sure?</string>
     <string name="no_acc">Vous pouvez vous connecter via Plus -&gt; de Compte en bas à droite ou vous pouvez consulter les comptes publics sans vous connecter !</string>
     <string name="empty_acc">Ce compte ne contient pas de posts</string>
     <string name="empty_list">Aucun post de ce genre !</string>
@@ -101,7 +103,7 @@
     <string name="delete_collection">Supprimer la collection</string>
     <string name="delete_collection_confirm">Êtes vous sûr·e de vouloir supprimer cette collection ?</string>
     <string name="delete_collection_note">Tous les médias contenus resteront dans d\'autres collections.</string>
-    <string name="add_to_collection">Ajouter à la collection...</string>
+    <string name="add_to_collection">Add to collection…</string>
     <string name="remove_from_collection">Retirer de la collection</string>
     <string name="liked">Aimé</string>
     <string name="saved">Sauvegardé</string>
@@ -180,9 +182,9 @@
     <string name="dms_inbox_raven_media_screenshot">Capture d\'écran effectuée</string>
     <string name="dms_inbox_raven_media_cant_deliver">Impossible de livrer</string>
     <string name="dms_inbox_error_null_count">La réponse du comptage invisible est nulle !</string>
-    <string name="dms_thread_message_hint">Message...</string>
+    <string name="dms_thread_message_hint">Message…</string>
     <string name="dms_thread_audio_hint">Appuyer de manière prolongée pour enregistrer un audio</string>
-    <string name="dms_thread_updating">Mise à jour en cours...</string>
+    <string name="dms_thread_updating">Updating…</string>
     <string name="dms_action_leave">Quitter la conversation</string>
     <string name="dms_action_leave_question">Quitter cette conversation ?</string>
     <string name="dms_action_kick">Éjecter</string>
@@ -194,6 +196,7 @@
     <string name="direct_download_desc">Téléchargez les posts directement sur le téléphone !</string>
     <string name="direct_download_loading">Téléchargement de(s) post(s)</string>
     <string name="downloader_complete">Téléchargement terminé</string>
+    <string name="downloader_preparing">Preparing to download…</string>
     <string name="downloader_downloading_post">Entrain de télécharger la publications…</string>
     <string name="downloader_downloading_media">Téléchargement du média en cours</string>
     <string name="downloader_downloading_pfp">Téléchargement de la photo de profil</string>
@@ -230,7 +233,7 @@
     <string name="crash_title">L\'application a planté</string>
     <string name="crash_descr">Oups.. l\'application a planté, mais ne vous inquiétez pas, vous pouvez envoyer un rapport d\'erreur au développeur pour l\'aider à résoudre le problème :)</string>
     <string name="action_notif">Activité</string>
-    <string name="action_archive">Archive du story</string>
+    <string name="action_archive">Archive des story</string>
     <string name="action_ayml">Utilisateurs suggérés</string>
     <string name="select_picture">Sélectionnez une image</string>
     <string name="uploading">Envoi en cours…</string>
@@ -318,7 +321,7 @@
     <string name="comment">Commentaire</string>
     <string name="layout">Disposition</string>
     <string name="feed_stories">Flux de stories</string>
-    <string name="opening_post">Entrain d\'ouvrir la publication...</string>
+    <string name="opening_post">Opening post…</string>
     <string name="share">Partager</string>
     <string name="layout_style">Style du modèle</string>
     <string name="column_count">Nombre de colonnes</string>
@@ -486,7 +489,7 @@
     <string name="dir_select_folder_not_exist">Le dossier sélectionné précédemment n\'existe pas :</string>
     <string name="dir_select_message2">Ré-sélectionnez le répertoire ou sélectionnez un nouveau répertoire en cliquant sur le bouton ci-dessous.</string>
     <string name="select_a_folder">Aucun dossier sélectionné!</string>
-    <string name="dir_select_no_download_folder">Veuillez choisir un répertoire dans votre espace de stockage, et non une catégorie dans la barre latérale.</string>
+    <string name="dir_select_no_download_folder">Please choose a directory from your storage, not a category on the sidebar.\n(%s)</string>
     <string name="dir_select_success_message">Succès ! Veuillez patienter. Démarrage de l\'application…</string>
     <string name="barinsta_folder">Dossier Barinsta</string>
     <string name="top">Retour vers le haut</string>
@@ -496,7 +499,7 @@
     <string name="click_to_show_full">Cliquez pour voir le compte complet de j\'aimes</string>
     <string name="no_profile_pic_found">Aucune photo de profil trouvée !</string>
     <string name="swipe_up_confirmation">Êtes-vous sûr de vouloir ouvrir ce lien ?</string>
-    <string name="sending">En cours d\'envoi...</string>
+    <string name="sending">Sending…</string>
     <string name="share_via_dm">Partager via MP</string>
     <string name="share_link">Partager le lien…</string>
     <string name="slide_to_cancel">Glisser pour annuler</string>
