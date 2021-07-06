@@ -187,6 +187,7 @@ class ProfileFragmentViewModel(
             }
         }
     }
+    val stories: LiveData<List<Story>?> = userStories.map { if (it.data == null) listOf() else listOf(it.data) }
 
     private val highlightsFetchControlledRunner = ControlledRunner<List<Story>?>()
     val userHighlights: LiveData<Resource<List<Story>?>> = currentUserProfileActionLiveData.switchMap { currentUserAndProfilePair ->

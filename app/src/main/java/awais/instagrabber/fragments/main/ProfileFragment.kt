@@ -932,7 +932,7 @@ class ProfileFragment : Fragment(), OnRefreshListener, ConfirmDialogFragmentCall
                     val action = ProfileFragmentDirections.actionProfileFragmentToStoryViewerFragment(
                         StoryViewerOptions.forUser(
                             viewModel.profile.value?.data?.pk ?: return,
-                            viewModel.profile.value?.data?.fullName ?: return,
+                            viewModel.profile.value?.data?.username ?: return,
                         )
                     )
                     NavHostFragment.findNavController(this).navigate(action)

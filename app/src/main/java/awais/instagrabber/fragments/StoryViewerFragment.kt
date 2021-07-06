@@ -199,7 +199,7 @@ class StoryViewerFragment : Fragment() {
         val type = options!!.type
         if (currentFeedStoryIndex >= 0) {
             listViewModel = when (type) {
-                StoryViewerOptions.Type.HIGHLIGHT -> {
+                StoryViewerOptions.Type.HIGHLIGHT, StoryViewerOptions.Type.USER -> {
                     val pArgs = Bundle()
                     pArgs.putString("username", options!!.name)
                     ViewModelProvider(
@@ -288,6 +288,15 @@ class StoryViewerFragment : Fragment() {
                     profileFragmentViewModel.userHighlights.observe(viewLifecycleOwner) {}
                     liveModels = profileFragmentViewModel.highlights
                 }
+                StoryViewerOptions.Type.USER -> {
+                    val profileFragmentViewModel = listViewModel as ProfileFragmentViewModel?
+                    appStateViewModel.currentUserLiveData.observe(
+                        viewLifecycleOwner, profileFragmentViewModel!!::setCurrentUser
+                    )
+                    profileFragmentViewModel.currentUserProfileActionLiveData.observe(viewLifecycleOwner) {}
+                    profileFragmentViewModel.userStories.observe(viewLifecycleOwner) {}
+                    liveModels = profileFragmentViewModel.stories
+                }
                 StoryViewerOptions.Type.FEED_STORY_POSITION -> {
                     val feedStoriesViewModel = listViewModel as FeedStoriesViewModel?
                     liveModels = feedStoriesViewModel!!.list
@@ -299,7 +308,6 @@ class StoryViewerFragment : Fragment() {
             }
         }
         if (liveModels != null) liveModels.observe(viewLifecycleOwner, { models ->
-            Log.d("austin_debug", "models (observer): " + models)
             storiesViewModel.getPagination().observe(fragmentActivity, {
                 if (models != null) {
                     when (it) {
@@ -381,7 +389,6 @@ class StoryViewerFragment : Fragment() {
             StoryViewerOptions.Type.HIGHLIGHT -> {
                 val profileFragmentViewModel = listViewModel as ProfileFragmentViewModel?
                 val models = profileFragmentViewModel!!.highlights.value
-                Log.d("austin_debug", "models (resetView): " + models)
                 if (models == null || models.isEmpty() || currentFeedStoryIndex >= models.size || currentFeedStoryIndex < 0) {
                     Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show()
                     return
