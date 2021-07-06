@@ -119,7 +119,7 @@ class SettingsHelper(context: Context) {
         PreferenceKeys.DOWNLOAD_PREPEND_USER_NAME,
         PreferenceKeys.AUTOPLAY_VIDEOS_STORIES,
         PreferenceKeys.MUTED_VIDEOS,
-        PreferenceKeys.SHOW_CAPTIONS,
+//        PreferenceKeys.SHOW_CAPTIONS,
         PreferenceKeys.CUSTOM_DATE_TIME_FORMAT_ENABLED,
         PreferenceKeys.MARK_AS_SEEN,
         PreferenceKeys.DM_MARK_AS_SEEN,

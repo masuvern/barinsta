@@ -32,7 +32,7 @@ object PreferenceKeys {
     const val PLAY_IN_BACKGROUND = "play_in_background"
     const val AUTOPLAY_VIDEOS_STORIES = "autoplay_videos"
     const val MUTED_VIDEOS = "muted_videos"
-    const val SHOW_CAPTIONS = "show_captions"
+//    const val SHOW_CAPTIONS = "show_captions"
     const val CUSTOM_DATE_TIME_FORMAT_ENABLED = "data_time_custom_enabled"
     const val SWAP_DATE_TIME_FORMAT_ENABLED = "swap_date_time_enabled"
     const val MARK_AS_SEEN = "mark_as_seen"
