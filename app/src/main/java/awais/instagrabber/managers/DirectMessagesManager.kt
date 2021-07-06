@@ -102,8 +102,8 @@ object DirectMessagesManager {
         data.postValue(loading(null))
         scope.launch(Dispatchers.IO) {
             try {
-                if (itemType == BroadcastItemType.MEDIA_SHARE)
-                    directMessagesRepository.broadcastMediaShare(
+                when (itemType) {
+                    BroadcastItemType.MEDIA_SHARE -> directMessagesRepository.broadcastMediaShare(
                         csrfToken,
                         viewerId,
                         deviceUuid,
@@ -112,8 +112,7 @@ object DirectMessagesManager {
                         mediaId,
                         secondId
                     )
-                if (itemType == BroadcastItemType.PROFILE)
-                    directMessagesRepository.broadcastProfile(
+                    BroadcastItemType.PROFILE -> directMessagesRepository.broadcastProfile(
                         csrfToken,
                         viewerId,
                         deviceUuid,
@@ -121,12 +120,58 @@ object DirectMessagesManager {
                         ThreadIdsOrUserIds(threadIds, userIds),
                         mediaId
                     )
+                    BroadcastItemType.STORY -> directMessagesRepository.broadcastStory(
+                        csrfToken,
+                        viewerId,
+                        deviceUuid,
+                        UUID.randomUUID().toString(),
+                        ThreadIdsOrUserIds(threadIds, userIds),
+                        mediaId,
+                        secondId!!
+                    )
+                }
                 data.postValue(success(Any()))
                 callback?.invoke()
             } catch (e: Exception) {
                 Log.e(TAG, "sendMedia: ", e)
                 data.postValue(error(e.message, null))
                 callback?.invoke()
+            }
+        }
+        return data
+    }
+
+    fun replyToStory(
+        recipientId: Long?,
+        reelId: String?,
+        mediaId: String?,
+        text: String,
+        scope: CoroutineScope
+    ): LiveData<Resource<Any?>> {
+        Log.d("austin_debug", "replying")
+        val data = MutableLiveData<Resource<Any?>>()
+        data.postValue(loading(null))
+        if (recipientId == null || reelId == null || mediaId == null) {
+            data.postValue(error("arguments are null", null))
+            return data
+        }
+        scope.launch(Dispatchers.IO) {
+            try {
+                directMessagesRepository.broadcastStoryReply(
+                    csrfToken,
+                    viewerId,
+                    deviceUuid,
+                    ThreadIdsOrUserIds.Companion.ofOneUser(recipientId.toString(10)),
+                    text,
+                    mediaId,
+                    reelId
+                )
+                inboxManager.refresh(scope)
+                data.postValue(success(null))
+            }
+            catch (e: Exception) {
+                Log.e(TAG, "story reply: ", e)
+                data.postValue(error(e.message, null))
             }
         }
         return data

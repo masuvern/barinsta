@@ -29,12 +29,12 @@ interface StoriesService {
     suspend fun getStories(@Path("type") type: String, @Path("id") id: String): ReelsResponse
 
     @GET("/api/v1/feed/user/{id}/story/")
-    suspend fun getUserStories(@Path("id") id: String): ReelsResponse
+    suspend fun getUserStories(@Path("id") id: Long): ReelsResponse
 
     @FormUrlEncoded
     @POST("/api/v1/media/{storyId}/{stickerId}/{action}/")
     suspend fun respondToSticker(
-        @Path("storyId") storyId: String,
+        @Path("storyId") storyId: Long,
         @Path("stickerId") stickerId: Long,
         @Path("action") action: String,  // story_poll_vote, story_question_response, story_slider_vote, story_quiz_answer
         @FieldMap form: Map<String, String>,

@@ -209,9 +209,7 @@ object DownloadUtils {
         val extension = getFileExtensionFromUrl(displayUrl)
         val usernamePrepend = if (isEmpty(username)) "" else username + "_"
         val fileName = usernamePrepend + postId + sliderPostfix + extension
-        val mimeType = Utils.mimeTypeMap.getMimeTypeFromExtension(
-            if (extension.startsWith(".")) extension.substring(1) else extension
-        )
+        val mimeType = Utils.mimeTypeMap.getMimeTypeFromExtension(extension)
         return Pair(fileName, mimeType!!)
     }
 
@@ -269,7 +267,7 @@ object DownloadUtils {
             ) {
                 val dotPos = filename.lastIndexOf('.')
                 if (0 <= dotPos) {
-                    return filename.substring(dotPos)
+                    return filename.substring(dotPos + 1)
                 }
             }
         }

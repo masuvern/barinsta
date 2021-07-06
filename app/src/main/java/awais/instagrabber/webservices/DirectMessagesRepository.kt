@@ -187,6 +187,17 @@ open class DirectMessagesRepository(private val service: DirectMessagesService) 
     ): DirectThreadBroadcastResponse =
         broadcast(csrfToken, userId, deviceUuid, ProfileBroadcastOptions(clientContext, threadIdsOrUserIds, profileId))
 
+    suspend fun broadcastStory(
+        csrfToken: String,
+        userId: Long,
+        deviceUuid: String,
+        clientContext: String,
+        threadIdsOrUserIds: ThreadIdsOrUserIds,
+        mediaId: String,
+        reelId: String,
+    ): DirectThreadBroadcastResponse =
+        broadcast(csrfToken, userId, deviceUuid, StoryBroadcastOptions(clientContext, threadIdsOrUserIds, mediaId, reelId))
+
     private suspend fun broadcast(
         csrfToken: String,
         userId: Long,

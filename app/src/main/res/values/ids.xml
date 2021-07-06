@@ -19,4 +19,14 @@
     <item name="discover_nav_graph" type="id" />
     <item name="favorites_nav_graph" type="id" />
     <item name="more_nav_graph" type="id" />
+    
+    <!-- story stickers -->
+    <item name="mentions" type="id" />
+    <item name="spotify" type="id" />
+    <item name="poll" type="id" />
+    <item name="question" type="id" />
+    <item name="quiz" type="id" />
+    <item name="slider" type="id" />
+    <item name="viewStoryPost" type="id" />
+    <item name="swipeUp" type="id" />
 </resources>

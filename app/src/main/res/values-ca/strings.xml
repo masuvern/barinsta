@@ -19,6 +19,7 @@
     <string name="title_favorites">Preferits</string>
     <string name="title_discover">Descobrir</string>
     <string name="title_comments">Comentaris</string>
+    <string name="title_replies">Replies</string>
     <string name="title_notifications">Activitat</string>
     <string name="update_check">Cerca actualitzacions a l\'inici</string>
     <string name="flag_secure">Bloca les captures de pantalla &amp; previsualització de l\'aplicació</string>
@@ -67,8 +68,7 @@
     <string name="be_patient">Sigues pacient!</string>
     <string name="view_story_post">Mostrar l\'entrada</string>
     <string name="view_post">Mostrar l\'entrada</string>
-    <string name="spotify">Spotify</string>
-    <string name="vote_story_poll">Votar</string>
+    <string name="story_poll">Poll</string>
     <string name="votef_story_poll">Has votat amb èxit!</string>
     <string name="voted_story_poll">Ja has votat!</string>
     <string name="respond_story">Contestar</string>
@@ -85,8 +85,10 @@
     <string name="story_slider">Desplaçador</string>
     <string name="story_quizzed">Ja has contestat!</string>
     <string name="story_mentions">Mencions</string>
+    <string name="story_question">Question</string>
     <string name="priv_acc">Aquest compte és privat</string>
     <string name="priv_acc_confirm">Després de deixar de seguir, no podràs accedir a les publicacions. Estàs segur?</string>
+    <string name="are_you_sure">Are you sure?</string>
     <string name="no_acc">Pots iniciar la sessió a través de Més -&gt;; El teu compte és a l\'extrem inferior dret o pots veure comptes públics sense iniciar una sessió!</string>
     <string name="empty_acc">Aquest compte no té publicacions</string>
     <string name="empty_list">No existeixen publicacions d\'aquest tipus!</string>
@@ -101,7 +103,7 @@
     <string name="delete_collection">Suprimeix la col·lecció</string>
     <string name="delete_collection_confirm">Estàs segur de voler suprimir aquesta col·lecció?</string>
     <string name="delete_collection_note">Tots els mitjans continguts romandran en altres col·leccions.</string>
-    <string name="add_to_collection">Afegir a la coŀlecció...</string>
+    <string name="add_to_collection">Add to collection…</string>
     <string name="remove_from_collection">Eliminar de la coŀlecció</string>
     <string name="liked">M\'agrada</string>
     <string name="saved">Desat</string>
@@ -180,9 +182,9 @@
     <string name="dms_inbox_raven_media_screenshot">Captura de pantalla feta</string>
     <string name="dms_inbox_raven_media_cant_deliver">No es pot lliurar</string>
     <string name="dms_inbox_error_null_count">La resposta de recompte no vista és nul·la!</string>
-    <string name="dms_thread_message_hint">Missatge...</string>
+    <string name="dms_thread_message_hint">Message…</string>
     <string name="dms_thread_audio_hint">Premeu i mantingueu premut per enregistrar l\'àudio</string>
-    <string name="dms_thread_updating">S\'està actualitzant...</string>
+    <string name="dms_thread_updating">Updating…</string>
     <string name="dms_action_leave">Deixar el xat</string>
     <string name="dms_action_leave_question">Vols sortir d\'aquest xat?</string>
     <string name="dms_action_kick">Expulsar</string>
@@ -194,6 +196,7 @@
     <string name="direct_download_desc">Descarregar publicacions directament al telèfon!</string>
     <string name="direct_download_loading">S\'estan recuperant les noves publicacions</string>
     <string name="downloader_complete">S\'ha completat la descàrrega</string>
+    <string name="downloader_preparing">Preparing to download…</string>
     <string name="downloader_downloading_post">Descarregant publicació…</string>
     <string name="downloader_downloading_media">Descarregant multimèdia</string>
     <string name="downloader_downloading_pfp">Descarregant la imatge de perfil</string>
@@ -318,7 +321,7 @@
     <string name="comment">Comentar</string>
     <string name="layout">Disposició</string>
     <string name="feed_stories">Fil d\'històries</string>
-    <string name="opening_post">Obrint publicació...</string>
+    <string name="opening_post">Opening post…</string>
     <string name="share">Compartir</string>
     <string name="layout_style">Estil de disposició</string>
     <string name="column_count">Nombre de columnes</string>
@@ -486,7 +489,7 @@
     <string name="dir_select_folder_not_exist">The previously selected folder does not exist now:</string>
     <string name="dir_select_message2">Re-select the directory or select a new directory by clicking the button below.</string>
     <string name="select_a_folder">No folder selected!</string>
-    <string name="dir_select_no_download_folder">Please choose a directory from your storage, not a category on the sidebar.</string>
+    <string name="dir_select_no_download_folder">Please choose a directory from your storage, not a category on the sidebar.\n(%s)</string>
     <string name="dir_select_success_message">Success! Please wait. Starting app…</string>
     <string name="barinsta_folder">Barinsta folder</string>
     <string name="top">Part superior</string>
@@ -496,7 +499,7 @@
     <string name="click_to_show_full">Feu clic per mostrar el recompte complet de m\'agrada</string>
     <string name="no_profile_pic_found">No s\'ha trobat cap imatge de perfil!</string>
     <string name="swipe_up_confirmation">Esteu segur que voleu obrir aquest enllaç?</string>
-    <string name="sending">Enviant...</string>
+    <string name="sending">Sending…</string>
     <string name="share_via_dm">Comparteix via MD</string>
     <string name="share_link">Comparteix l\'enllaç...</string>
     <string name="slide_to_cancel">Slide to Cancel</string>

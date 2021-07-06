@@ -209,7 +209,7 @@ class ProfileFragment : Fragment(), OnRefreshListener, ConfirmDialogFragmentCall
         }
     }
     private val onProfilePicClickListener = View.OnClickListener {
-        val hasStories = viewModel.userStories.value?.data?.isNotEmpty() ?: false
+        val hasStories = viewModel.userStories.value?.data != null
         if (!hasStories) {
             showProfilePicDialog()
             return@OnClickListener
@@ -309,15 +309,7 @@ class ProfileFragment : Fragment(), OnRefreshListener, ConfirmDialogFragmentCall
         viewModel = ViewModelProvider(
             this,
             ProfileFragmentViewModelFactory(
-                csrfToken,
-                deviceUuid,
-                UserRepository.getInstance(),
-                FriendshipRepository.getInstance(),
-                StoriesRepository.getInstance(),
-                MediaRepository.getInstance(),
-                GraphQLRepository.getInstance(),
                 FavoriteRepository.getInstance(requireContext()),
-                DirectMessagesRepository.getInstance(),
                 if (isLoggedIn) DirectMessagesManager else null,
                 this,
                 arguments
@@ -518,7 +510,7 @@ class ProfileFragment : Fragment(), OnRefreshListener, ConfirmDialogFragmentCall
             highlightsAdapter?.submitList(it.data)
         }
         viewModel.userStories.observe(viewLifecycleOwner) {
-            binding.header.mainProfileImage.setStoriesBorder(if (it.data.isNullOrEmpty()) 0 else 1)
+            binding.header.mainProfileImage.setStoriesBorder(if (it.data == null) 0 else 1)
         }
         viewModel.eventLiveData.observe(viewLifecycleOwner) {
             val event = it?.getContentIfNotHandled() ?: return@observe
@@ -855,7 +847,7 @@ class ProfileFragment : Fragment(), OnRefreshListener, ConfirmDialogFragmentCall
     private fun setupHighlights() {
         val context = context ?: return
         highlightsAdapter = HighlightsAdapter { model, position ->
-            val options = StoryViewerOptions.forHighlight(model.title).apply { currentFeedStoryIndex = position }
+            val options = StoryViewerOptions.forHighlight(model.user!!.pk, "").apply { currentFeedStoryIndex = position }
             val action = ProfileFragmentDirections.actionToStory(options)
             NavHostFragment.findNavController(this).navigate(action)
         }
@@ -942,7 +934,7 @@ class ProfileFragment : Fragment(), OnRefreshListener, ConfirmDialogFragmentCall
                     val action = ProfileFragmentDirections.actionToStory(
                         StoryViewerOptions.forUser(
                             viewModel.profile.value?.data?.pk ?: return,
-                            viewModel.profile.value?.data?.fullName ?: return,
+                            viewModel.profile.value?.data?.username ?: return,
                         )
                     )
                     findNavController().navigate(action)

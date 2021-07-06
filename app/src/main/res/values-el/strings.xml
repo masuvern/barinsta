@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="action_about">Σχετικά με</string>
-    <string name="action_dms">Απευθείας Μηνύματα</string>
+    <string name="action_dms">Μηνύματα</string>
     <string name="action_settings">Ρυθμίσεις</string>
     <string name="action_download">Λήψη</string>
     <string name="action_search">Αναζήτηση ονόματος χρήστη…</string>
@@ -19,6 +19,7 @@
     <string name="title_favorites">Αγαπημένα</string>
     <string name="title_discover">Ανακαλύψτε</string>
     <string name="title_comments">Σχόλια</string>
+    <string name="title_replies">Απαντήσεις</string>
     <string name="title_notifications">Δραστηριότητα</string>
     <string name="update_check">Έλεγχος για ενημερώσεις κατά την εκκίνηση</string>
     <string name="flag_secure">Παρεμπόδιση στιγμιοτύπων οθόνης &amp; προεπισκόπησης εφαρμογής</string>
@@ -29,7 +30,7 @@
     <string name="hide_muted_reels_setting">Απόκρυψη ιστοριών που βρίσκονται σε σίγαση από τη ροή</string>
     <string name="dm_mark_as_seen_setting">Επισήμανση μηνυμάτων ως αναγνωσμένων μετά την προβολή</string>
     <string name="dm_mark_as_seen_setting_summary">Τα υπόλοιπα μέλη θα γνωρίζουν ότι προβλήθηκε</string>
-    <string name="autoplay_stories_setting">Autoplay video stories</string>
+    <string name="autoplay_stories_setting">Αυτόματη αναπαραγωγή ιστοριών με βίντεο</string>
     <string name="activity_setting">Ενεργοποίηση ειδοποιήσεων δραστηριότητας</string>
     <string name="story_sort_setting">Ταξινόμηση ροής ιστορίων</string>
     <string name="error_loading_profile">Σφάλμα κατά τη φόρτωση προφίλ! Είναι το όνομα χρήστη έγκυρο; Αν ναι, μπορεί να είστε περιορισμένος.</string>
@@ -67,8 +68,7 @@
     <string name="be_patient">Κάντε υπομονή!</string>
     <string name="view_story_post">Προβολή Δημοσίευσης</string>
     <string name="view_post">Προβολή Δημοσίευσης</string>
-    <string name="spotify">Spotify</string>
-    <string name="vote_story_poll">Ψηφίστε</string>
+    <string name="story_poll">Δημοσκόπηση</string>
     <string name="votef_story_poll">Η ψήφος ήταν επιτυχής!</string>
     <string name="voted_story_poll">Έχετε ήδη ψηφίσει!</string>
     <string name="respond_story">Απάντηση</string>
@@ -85,8 +85,10 @@
     <string name="story_slider">Slider</string>
     <string name="story_quizzed">Έχετε ήδη απαντήσει!</string>
     <string name="story_mentions">Αναφορές</string>
+    <string name="story_question">Ερώτηση</string>
     <string name="priv_acc">Ιδιωτικός λογαριασμός</string>
     <string name="priv_acc_confirm">Δε θα έχετε πρόσβαση στις δημοσιεύσεις μετά την άρση ακολούθησης! Είστε βέβαιος;</string>
+    <string name="are_you_sure">Είστε σίγουρος;</string>
     <string name="no_acc">Μπορείτε να συνδεθείτε μέσω του Περισσότερα-&gt; Λογαριασμός στην κάτω δεξιά γωνία ή μπορείτε να δείτε δημόσιους λογαριασμούς χωρίς σύνδεση!</string>
     <string name="empty_acc">Αυτός ο λογαριασμός δεν έχει δημοσιεύσεις</string>
     <string name="empty_list">Δεν Υπάρχουν Τέτοιες Δημοσιεύσεις!</string>
@@ -101,7 +103,7 @@
     <string name="delete_collection">Διαγραφή συλλογής</string>
     <string name="delete_collection_confirm">Είστε βέβαιοι ότι θέλετε να διαγράψετε αυτή τη συλλογή;</string>
     <string name="delete_collection_note">Όλα τα πολυμέσα που περιέχονται θα παραμείνουν σε άλλες συλλογές.</string>
-    <string name="add_to_collection">Προσθήκη στη συλλογή...</string>
+    <string name="add_to_collection">Προσθήκη στη συλλογή…</string>
     <string name="remove_from_collection">Αφαίρεση από τη συλλογή</string>
     <string name="liked">Μ\'αρέσουν</string>
     <string name="saved">Αποθηκευμένα</string>
@@ -180,9 +182,9 @@
     <string name="dms_inbox_raven_media_screenshot">Λήφθηκε στιγμιότυπο οθόνης</string>
     <string name="dms_inbox_raven_media_cant_deliver">Αδυναμία παράδοσης</string>
     <string name="dms_inbox_error_null_count">Η απόκριση καταμέτρησης μη προβληθέντων είναι άκυρη!</string>
-    <string name="dms_thread_message_hint">Μήνυμα...</string>
+    <string name="dms_thread_message_hint">Μήνυμα…</string>
     <string name="dms_thread_audio_hint">Πατήστε παρατεταμένα για εγγραφή ήχου</string>
-    <string name="dms_thread_updating">Ενημέρωση...</string>
+    <string name="dms_thread_updating">Ενημέρωση…</string>
     <string name="dms_action_leave">Αποχώρηση από τη συνομιλία</string>
     <string name="dms_action_leave_question">Αποχώρηση από αυτήν τη συνομιλία;</string>
     <string name="dms_action_kick">Διώξιμο</string>
@@ -194,6 +196,7 @@
     <string name="direct_download_desc">Γίνεται λήψη των δημοσιεύσεων απευθείας στο τηλέφωνο!</string>
     <string name="direct_download_loading">Ανάκτηση δημοσίευσης/-εων</string>
     <string name="downloader_complete">Η λήψη ολοκληρώθηκε</string>
+    <string name="downloader_preparing">Προετοιμασία για λήψη…</string>
     <string name="downloader_downloading_post">Γίνεται λήψη της δημοσίευσης…</string>
     <string name="downloader_downloading_media">Γίνεται λήψη πολυμέσων</string>
     <string name="downloader_downloading_pfp">Γίνεται λήψη εικόνας προφίλ</string>
@@ -285,11 +288,11 @@
     <string name="unknown">Άγνωστο</string>
     <string name="removed_from_favs">Αφαίρεση από τα αγαπημένα!</string>
     <string name="backup_and_restore">Αντίγραφα ασφαλείας &amp; Επαναφορά</string>
-    <string name="auto_backup">Auto Backup</string>
-    <string name="auto_backup_summary">Starting from Android 6, Android\'s Auto Backup feature will upload all app settings, account login data, and favorites onto your Google Drive, which can be restored by reinstalling the app after uninstallation.</string>
-    <string name="auto_backup_warning">This preference has no effect if Google Play Services is not present, or if Auto Backup is disabled from your device settings. Disabling here does not erase existing backups.</string>
-    <string name="auto_backup_setting">Enable Auto Backup</string>
-    <string name="manual_backup">Manual Backup</string>
+    <string name="auto_backup">Αυτόματη δημιουργία αντιγράφων ασφαλείας</string>
+    <string name="auto_backup_summary">Από το Android 6 κι έπειτα, το χαρακτηριστικό αυτόματης δημιουργίας αντιγράφων ασφαλείας του Android, θα αναφορτώνει όλες τις ρυθμίσεις της εφαρμογής, τα δεδομένα σύνδεσης του λογαριασμού και τα αγαπημένα στο Google Drive σας. Έτσι, θα μπορούν να επαναφερθούν με την επανεγκατάσταση της εφαρμογής μετά την απεγκατάσταση.</string>
+    <string name="auto_backup_warning">Αυτή η προτίμηση δεν έχει καμία επίδραση εάν οι υπηρεσίες Google Play δεν είναι παρούσες, ή εάν το αυτόματο αντίγραφο ασφαλείας είναι απενεργοποιημένο από τις ρυθμίσεις της συσκευής σας. Η απενεργοποίηση εδώ δεν διαγράφει τα υπάρχοντα αντίγραφα.</string>
+    <string name="auto_backup_setting">Ενεργοποίηση Αυτόματης Δημιουργίας Αντιγράφων Ασφαλείας</string>
+    <string name="manual_backup">Μη αυτόματη δημιουργία αντιγράφων ασφαλείας</string>
     <string name="backup_summary">Δημιουργία αντιγράφου ασφαλείας των ρυθμίσεων της εφαρμογής, των δεδομένων σύνδεσης του λογαριασμού και/ή των αγαπημένων, σε ακρυπτογράφητο ή κρυπτογραφημένο αρχείο για μεταγενέστερη επαναφορά.</string>
     <string name="backup_warning">Αν δημιουργείτε αντίγραφα ασφαλείας των δεδομένων σύνδεσης λογαριασμού, αντιμετωπίστε το αρχείο ως απόρρητο και κρατήστε το σε ασφαλές μέρος!</string>
     <string name="create_backup">Δημιουργία νέου αρχείου αντιγράφου ασφαλείας</string>
@@ -318,7 +321,7 @@
     <string name="comment">Σχόλιο</string>
     <string name="layout">Διάταξη</string>
     <string name="feed_stories">Ροή ιστοριών</string>
-    <string name="opening_post">Άνοιγμα δημοσίευσης...</string>
+    <string name="opening_post">Άνοιγμα δημοσίευσης…</string>
     <string name="share">Κοινοποίηση</string>
     <string name="layout_style">Τρόπος διάταξης</string>
     <string name="column_count">Πλήθος στηλών</string>
@@ -480,13 +483,13 @@
     <string name="copy_reply">Αντιγραφή απάντησης</string>
     <string name="restore">Ανάκτηση</string>
     <string name="backup">Αντίγραφο ασφαλείας</string>
-    <string name="dir_select_default_message">Select a folder where Barinsta can store downloads and temporary files.\n\nYou can change this later in More &gt; Settings &gt; Downloads.</string>
+    <string name="dir_select_default_message">Επιλέξτε έναν φάκελο όπου εκεί θα αποθηκεύονται οι λήψεις και τα προσωρινά αρχεία του Barinsta.\n\nΗ επιλογή σας μπορεί να αλλαχθεί στο Λοιπά&gt; Ρυθμίσεις&gt; Λήψεις.</string>
     <string name="dir_select_reselect_message">Το Android έχει αλλάξει τον τρόπο με τον οποίο οι εφαρμογές μπορούν να έχουν πρόσβαση σε αρχεία και καταλόγους στον αποθηκευτικό χώρο. Αυτή τη στιγμή η Barinsta δεν έχει άδεια πρόσβασης στον ακόλουθο φάκελο:</string>
-    <string name="dir_select_permission_revoked_message">Permissions for the previously selected folder were revoked by the system:</string>
-    <string name="dir_select_folder_not_exist">The previously selected folder does not exist now:</string>
-    <string name="dir_select_message2">Re-select the directory or select a new directory by clicking the button below.</string>
+    <string name="dir_select_permission_revoked_message">Τα δικαιώματα για τον προηγουμένως επιλεγμένο φάκελο ανακλήθηκαν από το σύστημα:</string>
+    <string name="dir_select_folder_not_exist">Ο προηγουμένως επιλεγμένος φάκελος δεν υπάρχει τώρα:</string>
+    <string name="dir_select_message2">Επιλέξτε ξανά τον φάκελο ή επιλέξτε ένα νέο φάκελο κάνοντας κλικ στο παρακάτω κουμπί.</string>
     <string name="select_a_folder">Δεν επιλέχθηκε φάκελος!</string>
-    <string name="dir_select_no_download_folder">Please choose a directory from your storage, not a category on the sidebar.</string>
+    <string name="dir_select_no_download_folder">Παρακαλώ επιλέξτε έναν φάκελο από τον αποθηκευτικό σας χώρο, όχι μια κατηγορία στην πλαϊνή μπάρα.\n(%s)</string>
     <string name="dir_select_success_message">Επιτυχία! Παρακαλώ περιμένετε. Εκκίνηση εφαρμογής…</string>
     <string name="barinsta_folder">Φάκελος Barinsta</string>
     <string name="top">Κορυφή</string>
@@ -496,8 +499,8 @@
     <string name="click_to_show_full">Σε πόσους ακριβώς αρέσει</string>
     <string name="no_profile_pic_found">Δε βρέθηκε εικόνα προφίλ!</string>
     <string name="swipe_up_confirmation">Είστε βέβαιος για το άνοιγμα αυτού του συνδέσμου;</string>
-    <string name="sending">Γίνεται αποστολή...</string>
-    <string name="share_via_dm">Κοινοποίηση μέσω</string>
+    <string name="sending">Αποστολή…</string>
+    <string name="share_via_dm">Κοινοποίηση μέσω μηνύματος</string>
     <string name="share_link">Κοινοποίηση συνδέσμου…</string>
-    <string name="slide_to_cancel">Slide to Cancel</string>
+    <string name="slide_to_cancel">Σύρετε για ακύρωση</string>
 </resources>

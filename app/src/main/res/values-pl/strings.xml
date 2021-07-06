@@ -19,6 +19,7 @@
     <string name="title_favorites">Ulubione</string>
     <string name="title_discover">Odkrywaj</string>
     <string name="title_comments">Komentarze</string>
+    <string name="title_replies">Odpowiedzi</string>
     <string name="title_notifications">Aktywność</string>
     <string name="update_check">Sprawdź aktualizacje przy starcie</string>
     <string name="flag_secure">Blokuj zrzuty ekranu &amp; podgląd aplikacji</string>
@@ -29,7 +30,7 @@
     <string name="hide_muted_reels_setting">Ukryj wyciszone relacje z kanału</string>
     <string name="dm_mark_as_seen_setting">Oznacz wiadomość jako przeczytaną</string>
     <string name="dm_mark_as_seen_setting_summary">Inni użytkownicy będą wiedzieli, że to wyświetliłeś</string>
-    <string name="autoplay_stories_setting">Autoplay video stories</string>
+    <string name="autoplay_stories_setting">Automatyczne odtwarzanie plików wideo</string>
     <string name="activity_setting">Włącz powiadomienia o aktywności</string>
     <string name="story_sort_setting">Sortowanie relacji</string>
     <string name="error_loading_profile">Błąd ładowania profilu! Czy nazwa użytkownika jest prawidłowa? Jeśli tak, możesz być ograniczony.</string>
@@ -73,8 +74,7 @@
     <string name="be_patient">Bądź cierpliwy!</string>
     <string name="view_story_post">Zobacz post</string>
     <string name="view_post">Zobacz post</string>
-    <string name="spotify">Spotify</string>
-    <string name="vote_story_poll">Głosuj</string>
+    <string name="story_poll">Poll</string>
     <string name="votef_story_poll">Zagłosowano pomyślnie!</string>
     <string name="voted_story_poll">Już głosowałeś!</string>
     <string name="respond_story">Odpowiedz</string>
@@ -93,8 +93,10 @@
     <string name="story_slider">Suwak</string>
     <string name="story_quizzed">Już odpowiedziałeś!</string>
     <string name="story_mentions">Wzmianki</string>
+    <string name="story_question">Question</string>
     <string name="priv_acc">To konto jest prywatne</string>
     <string name="priv_acc_confirm">Nie będziesz mieć dostępu do postów po anulowaniu obserwowania! Jesteś pewny?</string>
+    <string name="are_you_sure">Jesteś pewien?</string>
     <string name="no_acc">Możesz zalogować się za pomocą \"Więcej\" - &gt; \"Konto\" w prawym dolnym rogu lub możesz zobaczyć konta publiczne bez logowania!</string>
     <string name="empty_acc">To konto nie zawiera postów</string>
     <string name="empty_list">Nie ma więcej postów!</string>
@@ -109,7 +111,7 @@
     <string name="delete_collection">Usunąć kolekcję</string>
     <string name="delete_collection_confirm">Czy na pewno chcesz usunąć tę kolekcję?</string>
     <string name="delete_collection_note">Wszystkie media pozostaną w innych kolekcjach.</string>
-    <string name="add_to_collection">Dodaj do kolekcji...</string>
+    <string name="add_to_collection">Add to collection…</string>
     <string name="remove_from_collection">Usuń z kolekcji</string>
     <string name="liked">Polubione</string>
     <string name="saved">Zapisane</string>
@@ -188,9 +190,9 @@
     <string name="dms_inbox_raven_media_screenshot">Dokonano zrzutu ekranu</string>
     <string name="dms_inbox_raven_media_cant_deliver">Nie dostarczono</string>
     <string name="dms_inbox_error_null_count">Unseen count response is null!</string>
-    <string name="dms_thread_message_hint">Wiadomość...</string>
+    <string name="dms_thread_message_hint">Message…</string>
     <string name="dms_thread_audio_hint">Naciśnij i przytrzymaj, aby nagrać dźwięk</string>
-    <string name="dms_thread_updating">Aktualizowanie...</string>
+    <string name="dms_thread_updating">Updating…</string>
     <string name="dms_action_leave">Opuść czat</string>
     <string name="dms_action_leave_question">Opuścić ten czat?</string>
     <string name="dms_action_kick">Wyrzuć</string>
@@ -202,6 +204,7 @@
     <string name="direct_download_desc">Pobiera posty bezpośrednio na telefon!</string>
     <string name="direct_download_loading">Pobieranie post(ów)</string>
     <string name="downloader_complete">Pobieranie zakończone</string>
+    <string name="downloader_preparing">Przygotowywanie do pobrania…</string>
     <string name="downloader_downloading_post">Pobieranie wpisu…</string>
     <string name="downloader_downloading_media">Pobieranie multimediów</string>
     <string name="downloader_downloading_pfp">Pobieranie zdjęcia profilowego</string>
@@ -326,7 +329,7 @@
     <string name="comment">Komentarz</string>
     <string name="layout">Układ</string>
     <string name="feed_stories">Relacje</string>
-    <string name="opening_post">Otwieranie wpisu...</string>
+    <string name="opening_post">Opening post…</string>
     <string name="share">Udostępnij</string>
     <string name="layout_style">Styl układu</string>
     <string name="column_count">Liczba kolumn</string>
@@ -504,7 +507,7 @@
     <string name="dir_select_folder_not_exist">Poprzednio wybrany folder nie istnieje:</string>
     <string name="dir_select_message2">Wybierz ponownie folder lub wybierz now klikając przycisk poniżej.</string>
     <string name="select_a_folder">Nie wybrano folderu!</string>
-    <string name="dir_select_no_download_folder">Please choose a directory from your storage, not a category on the sidebar.</string>
+    <string name="dir_select_no_download_folder">Wybierz katalog z pamięci, a nie kategorię na pasku bocznym.\n(%s)</string>
     <string name="dir_select_success_message">Sukces! Proszę czekać. Uruchamianie aplikacji…</string>
     <string name="barinsta_folder">Folder Barinsta</string>
     <string name="top">Najlepsze</string>
@@ -514,7 +517,7 @@
     <string name="click_to_show_full">Kliknij, aby wyświetlić pełną liczbę polubień</string>
     <string name="no_profile_pic_found">Nie znaleziono zdjęcia profilowego!</string>
     <string name="swipe_up_confirmation">Czy na pewno chcesz otworzyć ten link?</string>
-    <string name="sending">Wysyłanie...</string>
+    <string name="sending">Sending…</string>
     <string name="share_via_dm">Udostępnij przez PW</string>
     <string name="share_link">Udostępnij link…</string>
     <string name="slide_to_cancel">Przesuń, by anulować</string>

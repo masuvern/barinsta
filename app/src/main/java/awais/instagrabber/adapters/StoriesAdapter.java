@@ -1,5 +1,7 @@
 package awais.instagrabber.adapters;
 
+import java.util.List;
+
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -69,6 +71,16 @@ public final class StoriesAdapter extends ListAdapter<StoryMedia, StoriesAdapter
 
             binding.selectedView.setVisibility(model.isCurrentSlide() ? View.VISIBLE : View.GONE);
             binding.icon.setImageURI(ResponseBodyUtils.getThumbUrl(model));
+        }
+    }
+
+    public void paginate(final int newIndex) {
+        final List<StoryMedia> list = getCurrentList();
+        for (int i = 0; i < list.size(); i++) {
+            final StoryMedia item = list.get(i);
+            if (!item.isCurrentSlide() && i != newIndex) continue;
+            item.setCurrentSlide(i == newIndex);
+            notifyItemChanged(i, item);
         }
     }
 
