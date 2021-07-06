@@ -47,7 +47,9 @@ import awais.instagrabber.utils.TextUtils.epochSecondToString
 import awais.instagrabber.utils.ResponseBodyUtils
 import awais.instagrabber.utils.Utils
 import awais.instagrabber.utils.extensions.TAG
-import awais.instagrabber.viewmodels.*
+import awais.instagrabber.viewmodels.ArchivesViewModel
+import awais.instagrabber.viewmodels.FeedStoriesViewModel
+import awais.instagrabber.viewmodels.StoryFragmentViewModel
 import awais.instagrabber.webservices.MediaRepository
 import awais.instagrabber.webservices.StoriesRepository
 import com.facebook.drawee.backends.pipeline.Fresco
@@ -92,7 +94,6 @@ class StoryViewerFragment : Fragment() {
     private var backStackSavedStateResultLiveData: MutableLiveData<Any?>? = null
     private lateinit var fragmentActivity: AppCompatActivity
     private lateinit var storiesViewModel: StoryFragmentViewModel
-    private lateinit var appStateViewModel: AppStateViewModel
     private lateinit var binding: FragmentStoryViewerBinding
 
     @Suppress("UNCHECKED_CAST")
@@ -121,7 +122,6 @@ class StoryViewerFragment : Fragment() {
         super.onCreate(savedInstanceState)
         fragmentActivity = requireActivity() as AppCompatActivity
         storiesViewModel = ViewModelProvider(this).get(StoryFragmentViewModel::class.java)
-        appStateViewModel = ViewModelProvider(fragmentActivity).get(AppStateViewModel::class.java)
         setHasOptionsMenu(true)
     }
 
@@ -191,26 +191,18 @@ class StoryViewerFragment : Fragment() {
     }
 
     private fun init() {
-        val args = arguments
-        if (args == null) return
+        val args = arguments ?: return
         val fragmentArgs = StoryViewerFragmentArgs.fromBundle(args)
         options = fragmentArgs.options
         currentFeedStoryIndex = options!!.currentFeedStoryIndex
         val type = options!!.type
         if (currentFeedStoryIndex >= 0) {
             listViewModel = when (type) {
-                StoryViewerOptions.Type.HIGHLIGHT, StoryViewerOptions.Type.USER -> {
-                    val pArgs = Bundle()
-                    pArgs.putString("username", options!!.name)
-                    ViewModelProvider(
-                        this, ProfileFragmentViewModelFactory(null, null, this, pArgs)
-                    ).get(ProfileFragmentViewModel::class.java)
-                }
                 StoryViewerOptions.Type.STORY_ARCHIVE ->
                     ViewModelProvider(fragmentActivity).get(ArchivesViewModel::class.java)
                 StoryViewerOptions.Type.FEED_STORY_POSITION ->
                     ViewModelProvider(fragmentActivity).get(FeedStoriesViewModel::class.java)
-                else -> ViewModelProvider(fragmentActivity).get(FeedStoriesViewModel::class.java)
+                else -> null
             }
         }
         setupButtons()
@@ -280,22 +272,8 @@ class StoryViewerFragment : Fragment() {
             val type = options!!.type
             when (type) {
                 StoryViewerOptions.Type.HIGHLIGHT -> {
-                    val profileFragmentViewModel = listViewModel as ProfileFragmentViewModel?
-                    appStateViewModel.currentUserLiveData.observe(
-                        viewLifecycleOwner, profileFragmentViewModel!!::setCurrentUser
-                    )
-                    profileFragmentViewModel.currentUserProfileActionLiveData.observe(viewLifecycleOwner) {}
-                    profileFragmentViewModel.userHighlights.observe(viewLifecycleOwner) {}
-                    liveModels = profileFragmentViewModel.highlights
-                }
-                StoryViewerOptions.Type.USER -> {
-                    val profileFragmentViewModel = listViewModel as ProfileFragmentViewModel?
-                    appStateViewModel.currentUserLiveData.observe(
-                        viewLifecycleOwner, profileFragmentViewModel!!::setCurrentUser
-                    )
-                    profileFragmentViewModel.currentUserProfileActionLiveData.observe(viewLifecycleOwner) {}
-                    profileFragmentViewModel.userStories.observe(viewLifecycleOwner) {}
-                    liveModels = profileFragmentViewModel.stories
+                    storiesViewModel.fetchHighlights(options!!.id)
+                    liveModels = storiesViewModel.getHighlights()
                 }
                 StoryViewerOptions.Type.FEED_STORY_POSITION -> {
                     val feedStoriesViewModel = listViewModel as FeedStoriesViewModel?
@@ -304,6 +282,9 @@ class StoryViewerFragment : Fragment() {
                 StoryViewerOptions.Type.STORY_ARCHIVE -> {
                     val archivesViewModel = listViewModel as ArchivesViewModel?
                     liveModels = archivesViewModel!!.list
+                }
+                StoryViewerOptions.Type.USER -> {
+                    resetView()
                 }
             }
         }
@@ -387,13 +368,12 @@ class StoryViewerFragment : Fragment() {
         var fetchOptions: StoryViewerOptions? = null
         when (type) {
             StoryViewerOptions.Type.HIGHLIGHT -> {
-                val profileFragmentViewModel = listViewModel as ProfileFragmentViewModel?
-                val models = profileFragmentViewModel!!.highlights.value
+                val models = storiesViewModel.getHighlights().value
                 if (models == null || models.isEmpty() || currentFeedStoryIndex >= models.size || currentFeedStoryIndex < 0) {
                     Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show()
                     return
                 }
-                fetchOptions = StoryViewerOptions.forHighlight(models[currentFeedStoryIndex].id)
+                fetchOptions = StoryViewerOptions.forHighlight(0L, models[currentFeedStoryIndex].id)
             }
             StoryViewerOptions.Type.FEED_STORY_POSITION -> {
                 val feedStoriesViewModel = listViewModel as FeedStoriesViewModel?

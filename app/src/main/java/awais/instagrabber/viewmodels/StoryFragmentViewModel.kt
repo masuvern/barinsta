@@ -59,6 +59,9 @@ class StoryFragmentViewModel : ViewModel() {
     private val storiesRepository: StoriesRepository by lazy { StoriesRepository.getInstance() }
     private val mediaRepository: MediaRepository by lazy { MediaRepository.getInstance() }
 
+    // for highlights ONLY
+    private val highlights = MutableLiveData<List<Story>?>()
+
     /* set functions */
 
     fun setStory(story: Story) {
@@ -180,6 +183,10 @@ class StoryFragmentViewModel : ViewModel() {
     }
 
     /* get functions */
+
+    fun getHighlights(): LiveData<List<Story>?> {
+        return highlights
+    }
 
     fun getCurrentStory(): LiveData<Story?> {
         return currentStory
@@ -439,6 +446,16 @@ class StoryFragmentViewModel : ViewModel() {
             }
         }
         return data
+    }
+
+    fun fetchHighlights(id: Long) {
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                val result = storiesRepository.fetchHighlights(id)
+                highlights.postValue(result)
+            } catch (e: Exception) {
+            }
+        }
     }
 
     fun fetchSingleMedia(mediaId: Long): LiveData<Resource<Any?>> {
