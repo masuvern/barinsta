@@ -1,453 +1,260 @@
-package awais.instagrabber.fragments;
+package awais.instagrabber.fragments
 
-import android.content.Context;
-import android.content.res.Resources;
-import android.os.Bundle;
-import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.Toast;
+import android.content.Context
+import android.content.res.Resources
+import android.os.Bundle
+import android.util.Log
+import android.view.LayoutInflater
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
+import android.view.View
+import android.view.ViewGroup
+import android.widget.Toast
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.SearchView;
-import androidx.fragment.app.Fragment;
-import androidx.navigation.fragment.NavHostFragment;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+import androidx.annotation.NonNull
+import androidx.annotation.Nullable
+import androidx.appcompat.app.ActionBar
+import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.SearchView
+import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.fragment.NavHostFragment
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 
-import java.util.ArrayList;
+import java.util.ArrayList
 
-import awais.instagrabber.R;
-import awais.instagrabber.adapters.FollowAdapter;
-import awais.instagrabber.customviews.helpers.RecyclerLazyLoader;
-import awais.instagrabber.databinding.FragmentFollowersViewerBinding;
-import awais.instagrabber.models.FollowModel;
-import awais.instagrabber.repositories.responses.FriendshipListFetchResponse;
-import awais.instagrabber.utils.AppExecutors;
-import awais.instagrabber.utils.CoroutineUtilsKt;
-import awais.instagrabber.utils.TextUtils;
-import awais.instagrabber.webservices.FriendshipRepository;
-import awais.instagrabber.webservices.ServiceCallback;
-import kotlinx.coroutines.Dispatchers;
-import thoughtbot.expandableadapter.ExpandableGroup;
+import awais.instagrabber.R
+import awais.instagrabber.adapters.FollowAdapter
+import awais.instagrabber.customviews.helpers.RecyclerLazyLoader
+import awais.instagrabber.databinding.FragmentFollowersViewerBinding
+import awais.instagrabber.models.Resource
+import awais.instagrabber.repositories.responses.User
+import awais.instagrabber.utils.AppExecutors
+import awais.instagrabber.viewmodels.FollowViewModel
+import thoughtbot.expandableadapter.ExpandableGroup
 
-public final class FollowViewerFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener {
-    private static final String TAG = "FollowViewerFragment";
+class FollowViewerFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
+    private val followModels: ArrayList<User> = ArrayList<User>()
+    private val followingModels: ArrayList<User> = ArrayList<User>()
+    private val followersModels: ArrayList<User> = ArrayList<User>()
+    private val allFollowing: ArrayList<User> = ArrayList<User>()
+    private val moreAvailable = true
+    private var isFollowersList = false
+    private var isCompare = false
+    private var shouldRefresh = true
+    private var searching = false
+    private var profileId: Long = 0
+    private var username: String? = null
+    private var namePost: String? = null
+    private var type = 0
+    private var root: SwipeRefreshLayout? = null
+    private var adapter: FollowAdapter? = null
+    private lateinit var lazyLoader: RecyclerLazyLoader
+    private lateinit var fragmentActivity: AppCompatActivity
+    private lateinit var viewModel: FollowViewModel
+    private lateinit var binding: FragmentFollowersViewerBinding
 
-    private final ArrayList<FollowModel> followModels = new ArrayList<>();
-    private final ArrayList<FollowModel> followingModels = new ArrayList<>();
-    private final ArrayList<FollowModel> followersModels = new ArrayList<>();
-    private final ArrayList<FollowModel> allFollowing = new ArrayList<>();
-
-    private boolean moreAvailable = true, isFollowersList, isCompare = false, loading = false, shouldRefresh = true, searching = false;
-    private long profileId;
-    private String username;
-    private String namePost;
-    private String type;
-    private String endCursor;
-    private Resources resources;
-    private LinearLayoutManager layoutManager;
-    private RecyclerLazyLoader lazyLoader;
-    private FollowModel model;
-    private FollowAdapter adapter;
-    private View.OnClickListener clickListener;
-    private FragmentFollowersViewerBinding binding;
-    private SwipeRefreshLayout root;
-    private FriendshipRepository friendshipRepository;
-    private AppCompatActivity fragmentActivity;
-
-    final ServiceCallback<FriendshipListFetchResponse> followingFetchCb = new ServiceCallback<FriendshipListFetchResponse>() {
-        @Override
-        public void onSuccess(final FriendshipListFetchResponse result) {
-            if (result != null && isCompare) {
-                followingModels.addAll(result.getItems());
-                if (!isFollowersList) followModels.addAll(result.getItems());
-                if (result.isMoreAvailable()) {
-                    endCursor = result.getNextMaxId();
-                    friendshipRepository.getList(
-                            false,
-                            profileId,
-                            endCursor,
-                            CoroutineUtilsKt.getContinuation((response, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
-                                if (throwable != null) {
-                                    onFailure(throwable);
-                                    return;
-                                }
-                                onSuccess(response);
-                            }), Dispatchers.getIO())
-                    );
-                } else if (followersModels.size() == 0) {
-                    if (!isFollowersList) moreAvailable = false;
-                    friendshipRepository.getList(
-                            true,
-                            profileId,
-                            null,
-                            CoroutineUtilsKt.getContinuation((response, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
-                                if (throwable != null) {
-                                    followingFetchCb.onFailure(throwable);
-                                    return;
-                                }
-                                followingFetchCb.onSuccess(response);
-                            }), Dispatchers.getIO())
-                    );
-                } else {
-                    if (!isFollowersList) moreAvailable = false;
-                    showCompare();
-                }
-            } else if (isCompare) binding.swipeRefreshLayout.setRefreshing(false);
-        }
-
-        @Override
-        public void onFailure(final Throwable t) {
-            try {
-                binding.swipeRefreshLayout.setRefreshing(false);
-                Toast.makeText(getContext(), t.getMessage(), Toast.LENGTH_SHORT).show();
-            } catch (Throwable ignored) {}
-            Log.e(TAG, "Error fetching list (double, following)", t);
-        }
-    };
-    final ServiceCallback<FriendshipListFetchResponse> followersFetchCb = new ServiceCallback<FriendshipListFetchResponse>() {
-        @Override
-        public void onSuccess(final FriendshipListFetchResponse result) {
-            if (result != null && isCompare) {
-                followersModels.addAll(result.getItems());
-                if (isFollowersList) followModels.addAll(result.getItems());
-                if (result.isMoreAvailable()) {
-                    endCursor = result.getNextMaxId();
-                    friendshipRepository.getList(
-                            true,
-                            profileId,
-                            endCursor,
-                            CoroutineUtilsKt.getContinuation((response, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
-                                if (throwable != null) {
-                                    onFailure(throwable);
-                                    return;
-                                }
-                                onSuccess(response);
-                            }), Dispatchers.getIO())
-                    );
-                } else if (followingModels.size() == 0) {
-                    if (isFollowersList) moreAvailable = false;
-                    friendshipRepository.getList(
-                            false,
-                            profileId,
-                            null,
-                            CoroutineUtilsKt.getContinuation((response, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
-                                if (throwable != null) {
-                                    followingFetchCb.onFailure(throwable);
-                                    return;
-                                }
-                                followingFetchCb.onSuccess(response);
-                            }), Dispatchers.getIO())
-                    );
-                } else {
-                    if (isFollowersList) moreAvailable = false;
-                    showCompare();
-                }
-            } else if (isCompare) binding.swipeRefreshLayout.setRefreshing(false);
-        }
-
-        @Override
-        public void onFailure(final Throwable t) {
-            try {
-                binding.swipeRefreshLayout.setRefreshing(false);
-                Toast.makeText(getContext(), t.getMessage(), Toast.LENGTH_SHORT).show();
-            } catch (Throwable ignored) {}
-            Log.e(TAG, "Error fetching list (double, follower)", t);
-        }
-    };
-
-    @Override
-    public void onCreate(@Nullable final Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        friendshipRepository = FriendshipRepository.Companion.getInstance();
-        fragmentActivity = (AppCompatActivity) getActivity();
-        setHasOptionsMenu(true);
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        fragmentActivity = activity as AppCompatActivity
+        viewModel = ViewModelProvider(this).get(FollowViewModel::class.java)
+        setHasOptionsMenu(true)
     }
 
-    @NonNull
-    @Override
-    public View onCreateView(@NonNull final LayoutInflater inflater, @Nullable final ViewGroup container, @Nullable final Bundle savedInstanceState) {
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
         if (root != null) {
-            shouldRefresh = false;
-            return root;
+            shouldRefresh = false
+            return root!!
         }
-        binding = FragmentFollowersViewerBinding.inflate(getLayoutInflater());
-        root = binding.getRoot();
-        return root;
+        binding = FragmentFollowersViewerBinding.inflate(layoutInflater)
+        root = binding.root
+        return root!!
     }
 
-    @Override
-    public void onViewCreated(@NonNull final View view, @Nullable final Bundle savedInstanceState) {
-        if (!shouldRefresh) return;
-        init();
-        shouldRefresh = false;
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        if (!shouldRefresh) return
+        init()
+        shouldRefresh = false
     }
 
-    private void init() {
-        if (getArguments() == null) return;
-        final FollowViewerFragmentArgs fragmentArgs = FollowViewerFragmentArgs.fromBundle(getArguments());
-        profileId = fragmentArgs.getProfileId();
-        isFollowersList = fragmentArgs.getIsFollowersList();
-        username = fragmentArgs.getUsername();
-        namePost = username;
-        if (TextUtils.isEmpty(username)) {
-            // this usually should not occur
-            username = "You";
-            namePost = "You're";
+    private fun init() {
+        val args = arguments ?: return
+        val fragmentArgs = FollowViewerFragmentArgs.fromBundle(args)
+        viewModel.userId.value = fragmentArgs.profileId
+        isFollowersList = fragmentArgs.isFollowersList
+        username = fragmentArgs.username
+        namePost = username
+        setTitle(username)
+        binding.swipeRefreshLayout.setOnRefreshListener(this)
+        if (isCompare) listCompare() else listFollows()
+        viewModel.fetch(isFollowersList, null)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        setTitle(username)
+        setSubtitle(type)
+    }
+
+    private fun setTitle(title: String?) {
+        val actionBar: ActionBar = fragmentActivity.supportActionBar ?: return
+        actionBar.title = title
+    }
+
+    private fun setSubtitle(subtitleRes: Int) {
+        val actionBar: ActionBar = fragmentActivity.supportActionBar ?: return
+        actionBar.setSubtitle(subtitleRes)
+    }
+
+    override fun onRefresh() {
+        lazyLoader.resetState()
+        viewModel.clearProgress()
+        if (isCompare) listCompare()
+        else viewModel.fetch(isFollowersList, null)
+    }
+
+    private fun listFollows() {
+        viewModel.comparison.removeObservers(viewLifecycleOwner)
+        viewModel.status.removeObservers(viewLifecycleOwner)
+        type = if (isFollowersList) R.string.followers_type_followers else R.string.followers_type_following
+        setSubtitle(type)
+        val layoutManager = LinearLayoutManager(context)
+        lazyLoader = RecyclerLazyLoader(layoutManager, { _, totalItemsCount ->
+            binding.swipeRefreshLayout.isRefreshing = true
+            val liveData = if (searching) viewModel.search(isFollowersList)
+                           else viewModel.fetch(isFollowersList, null)
+            liveData.observe(viewLifecycleOwner) {
+                binding.swipeRefreshLayout.isRefreshing = it.status != Resource.Status.SUCCESS
+                layoutManager.scrollToPosition(totalItemsCount)
+            }
+        })
+        binding.rvFollow.addOnScrollListener(lazyLoader)
+        binding.rvFollow.layoutManager = layoutManager
+        viewModel.getList(isFollowersList).observe(viewLifecycleOwner) {
+            binding.swipeRefreshLayout.isRefreshing = false
+            refreshAdapter(it, null, null, null)
         }
-        setTitle(username);
-        resources = getResources();
-        clickListener = v -> {
-            final Object tag = v.getTag();
-            if (tag instanceof FollowModel) {
-                model = (FollowModel) tag;
-                final FollowViewerFragmentDirections.ActionFollowViewerFragmentToProfileFragment action = FollowViewerFragmentDirections
-                        .actionFollowViewerFragmentToProfileFragment();
-                action.setUsername("@" + model.getUsername());
-                NavHostFragment.findNavController(this).navigate(action);
+    }
+
+    private fun listCompare() {
+        viewModel.getList(isFollowersList).removeObservers(viewLifecycleOwner)
+        binding.rvFollow.clearOnScrollListeners()
+        binding.swipeRefreshLayout.isRefreshing = true
+        setSubtitle(R.string.followers_compare)
+        viewModel.status.observe(viewLifecycleOwner) {}
+        viewModel.comparison.observe(viewLifecycleOwner) {
+            if (it != null) {
+                binding.swipeRefreshLayout.isRefreshing = false
+                refreshAdapter(null, it.first, it.second, it.third)
             }
-        };
-        binding.swipeRefreshLayout.setOnRefreshListener(this);
-        onRefresh();
+        }
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
-        setTitle(username);
-        setSubtitle(type);
-    }
-
-    private void setTitle(final String title) {
-        final ActionBar actionBar = fragmentActivity.getSupportActionBar();
-        if (actionBar == null) return;
-        actionBar.setTitle(title);
-    }
-
-    private void setSubtitle(final String subtitle) {
-        final ActionBar actionBar = fragmentActivity.getSupportActionBar();
-        if (actionBar == null) return;
-        actionBar.setSubtitle(subtitle);
-    }
-
-    private void setSubtitle(@SuppressWarnings("SameParameterValue") final int subtitleRes) {
-        final ActionBar actionBar = fragmentActivity.getSupportActionBar();
-        if (actionBar == null) return;
-        actionBar.setSubtitle(subtitleRes);
-    }
-
-    @Override
-    public void onRefresh() {
-        if (isCompare) listCompare();
-        else listFollows();
-        endCursor = null;
-        lazyLoader.resetState();
-    }
-
-    private void listFollows() {
-        type = resources.getString(isFollowersList ? R.string.followers_type_followers : R.string.followers_type_following);
-        setSubtitle(type);
-        final ServiceCallback<FriendshipListFetchResponse> cb = new ServiceCallback<FriendshipListFetchResponse>() {
-            @Override
-            public void onSuccess(final FriendshipListFetchResponse result) {
-                if (result == null) {
-                    binding.swipeRefreshLayout.setRefreshing(false);
-                    return;
-                }
-                int oldSize = followModels.size() == 0 ? 0 : followModels.size() - 1;
-                followModels.addAll(result.getItems());
-                if (result.isMoreAvailable()) {
-                    moreAvailable = true;
-                    endCursor = result.getNextMaxId();
-                } else moreAvailable = false;
-                binding.swipeRefreshLayout.setRefreshing(false);
-                if (isFollowersList) followersModels.addAll(result.getItems());
-                else followingModels.addAll(result.getItems());
-                refreshAdapter(followModels, null, null, null);
-                layoutManager.scrollToPosition(oldSize);
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        inflater.inflate(R.menu.follow, menu)
+        val menuSearch = menu.findItem(R.id.action_search)
+        val searchView = menuSearch.actionView as SearchView
+        searchView.queryHint = resources.getString(R.string.action_search)
+        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String): Boolean {
+                return false
             }
 
-            @Override
-            public void onFailure(final Throwable t) {
-                try {
-                    binding.swipeRefreshLayout.setRefreshing(false);
-                    Toast.makeText(getContext(), t.getMessage(), Toast.LENGTH_SHORT).show();
-                } catch (Throwable ignored) {}
-                Log.e(TAG, "Error fetching list (single)", t);
-            }
-        };
-        layoutManager = new LinearLayoutManager(getContext());
-        lazyLoader = new RecyclerLazyLoader(layoutManager, (page, totalItemsCount) -> {
-            if (!TextUtils.isEmpty(endCursor) && !searching) {
-                binding.swipeRefreshLayout.setRefreshing(true);
-                layoutManager.setStackFromEnd(true);
-                friendshipRepository.getList(
-                        isFollowersList,
-                        profileId,
-                        endCursor,
-                        CoroutineUtilsKt.getContinuation((response, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
-                            if (throwable != null) {
-                                cb.onFailure(throwable);
-                                return;
-                            }
-                            cb.onSuccess(response);
-                        }), Dispatchers.getIO())
-                );
-                endCursor = null;
-            }
-        });
-        binding.rvFollow.addOnScrollListener(lazyLoader);
-        binding.rvFollow.setLayoutManager(layoutManager);
-        if (moreAvailable) {
-            binding.swipeRefreshLayout.setRefreshing(true);
-            friendshipRepository.getList(
-                    isFollowersList,
-                    profileId,
-                    endCursor,
-                    CoroutineUtilsKt.getContinuation((response, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
-                        if (throwable != null) {
-                            cb.onFailure(throwable);
-                            return;
+            override fun onQueryTextChange(query: String): Boolean {
+                if (query.isNullOrEmpty()) {
+                    if (!isCompare && searching) {
+                        viewModel.setQuery(null, isFollowersList)
+                        viewModel.getSearch().removeObservers(viewLifecycleOwner)
+                        viewModel.getList(isFollowersList).observe(viewLifecycleOwner) {
+                            refreshAdapter(it, null, null, null)
                         }
-                        cb.onSuccess(response);
-                    }), Dispatchers.getIO())
-            );
+                    }
+                    searching = false
+                    return true
+                }
+                searching = true
+                if (isCompare && adapter != null) {
+                    adapter!!.filter.filter(query)
+                    return true
+                }
+                viewModel.getList(isFollowersList).removeObservers(viewLifecycleOwner)
+                binding.swipeRefreshLayout.isRefreshing = true
+                viewModel.setQuery(query, isFollowersList)
+                viewModel.getSearch().observe(viewLifecycleOwner) {
+                    binding.swipeRefreshLayout.isRefreshing = false
+                    refreshAdapter(it, null, null, null)
+                }
+                return true
+            }
+        })
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        if (item.itemId != R.id.action_compare) return super.onOptionsItemSelected(item)
+        binding.rvFollow.adapter = null
+        if (isCompare) {
+            isCompare = false
+            listFollows()
         } else {
-            refreshAdapter(followModels, null, null, null);
-            layoutManager.scrollToPosition(0);
+            isCompare = true
+            listCompare()
         }
+        return true
     }
 
-    private void listCompare() {
-        layoutManager.setStackFromEnd(false);
-        binding.rvFollow.clearOnScrollListeners();
-        loading = true;
-        setSubtitle(R.string.followers_compare);
-        allFollowing.clear();
-        if (moreAvailable) {
-            binding.swipeRefreshLayout.setRefreshing(true);
-            Toast.makeText(getContext(), R.string.follower_start_compare, Toast.LENGTH_LONG).show();
-            friendshipRepository.getList(
-                    isFollowersList,
-                    profileId,
-                    endCursor,
-                    CoroutineUtilsKt.getContinuation((response, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
-                        final ServiceCallback<FriendshipListFetchResponse> callback = isFollowersList ? followersFetchCb : followingFetchCb;
-                        if (throwable != null) {
-                            callback.onFailure(throwable);
-                            return;
-                        }
-                        callback.onSuccess(response);
-                    }), Dispatchers.getIO())
-            );
-        } else if (followersModels.size() == 0 || followingModels.size() == 0) {
-            binding.swipeRefreshLayout.setRefreshing(true);
-            Toast.makeText(getContext(), R.string.follower_start_compare, Toast.LENGTH_LONG).show();
-            friendshipRepository.getList(
-                    !isFollowersList,
-                    profileId,
-                    null,
-                    CoroutineUtilsKt.getContinuation((response, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
-                        final ServiceCallback<FriendshipListFetchResponse> callback = isFollowersList ? followingFetchCb : followersFetchCb;
-                        if (throwable != null) {
-                            callback.onFailure(throwable);
-                            return;
-                        }
-                        callback.onSuccess(response);
-                    }), Dispatchers.getIO()));
-        } else showCompare();
-    }
-
-    private void showCompare() {
-        allFollowing.addAll(followersModels);
-        allFollowing.retainAll(followingModels);
-
-        for (final FollowModel followModel : allFollowing) {
-            followersModels.remove(followModel);
-            followingModels.remove(followModel);
-        }
-
-        allFollowing.trimToSize();
-        followersModels.trimToSize();
-        followingModels.trimToSize();
-
-        binding.swipeRefreshLayout.setRefreshing(false);
-
-        refreshAdapter(null, followingModels, followersModels, allFollowing);
-    }
-
-    @Override
-    public void onCreateOptionsMenu(@NonNull final Menu menu, final MenuInflater inflater) {
-        inflater.inflate(R.menu.follow, menu);
-        final MenuItem menuSearch = menu.findItem(R.id.action_search);
-        final SearchView searchView = (SearchView) menuSearch.getActionView();
-        searchView.setQueryHint(getResources().getString(R.string.action_search));
-        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-
-            @Override
-            public boolean onQueryTextSubmit(final String query) {
-                return false;
-            }
-
-            @Override
-            public boolean onQueryTextChange(final String query) {
-                if (TextUtils.isEmpty(query)) {
-                    searching = false;
-                    // refreshAdapter(followModels, followingModels, followersModels, allFollowing);
-                }
-                // else filter.filter(query.toLowerCase());
-                if (adapter != null) {
-                    searching = true;
-                    adapter.getFilter().filter(query);
-                }
-                return true;
-            }
-        });
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(@NonNull final MenuItem item) {
-        if (item.getItemId() != R.id.action_compare) return super.onOptionsItemSelected(item);
-        binding.rvFollow.setAdapter(null);
-        final Context context = getContext();
-        if (loading) Toast.makeText(context, R.string.follower_wait_to_load, Toast.LENGTH_LONG).show();
-        else if (isCompare) {
-            isCompare = false;
-            listFollows();
-        } else {
-            isCompare = true;
-            listCompare();
-        }
-        return true;
-    }
-
-    private void refreshAdapter(final ArrayList<FollowModel> followModels,
-                                final ArrayList<FollowModel> followingModels,
-                                final ArrayList<FollowModel> followersModels,
-                                final ArrayList<FollowModel> allFollowing) {
-        loading = false;
-        final ArrayList<ExpandableGroup> groups = new ArrayList<>(1);
-
+    private fun refreshAdapter(
+        followModels: List<User>?,
+        allFollowing: List<User>?,
+        followingModels: List<User>?,
+        followersModels: List<User>?
+    ) {
+        val groups: ArrayList<ExpandableGroup> = ArrayList<ExpandableGroup>(1)
         if (isCompare && followingModels != null && followersModels != null && allFollowing != null) {
-            if (followingModels.size() > 0)
-                groups.add(new ExpandableGroup(resources.getString(R.string.followers_not_following, username), followingModels));
-            if (followersModels.size() > 0)
-                groups.add(new ExpandableGroup(resources.getString(R.string.followers_not_follower, namePost), followersModels));
-            if (allFollowing.size() > 0)
-                groups.add(new ExpandableGroup(resources.getString(R.string.followers_both_following), allFollowing));
+            if (followingModels.size > 0) groups.add(
+                ExpandableGroup(
+                    getString(
+                        R.string.followers_not_following,
+                        username
+                    ), followingModels
+                )
+            )
+            if (followersModels.size > 0) groups.add(
+                ExpandableGroup(
+                    getString(
+                        R.string.followers_not_follower,
+                        namePost
+                    ), followersModels
+                )
+            )
+            if (allFollowing.size > 0) groups.add(
+                ExpandableGroup(
+                    getString(R.string.followers_both_following),
+                    allFollowing
+                )
+            )
         } else if (followModels != null) {
-            groups.add(new ExpandableGroup(type, followModels));
-        } else return;
-        adapter = new FollowAdapter(clickListener, groups);
-        adapter.toggleGroup(0);
-        binding.rvFollow.setAdapter(adapter);
+            groups.add(ExpandableGroup(getString(type), followModels))
+        } else return
+        adapter = FollowAdapter({ v ->
+            val tag = v.tag
+            if (tag is User) {
+                val model = tag
+                val bundle = Bundle()
+                bundle.putString("username", model.username)
+                NavHostFragment.findNavController(this).navigate(R.id.action_global_profileFragment, bundle)
+            }
+        }, groups)
+        adapter!!.toggleGroup(0)
+        binding.rvFollow.adapter = adapter!!
+    }
+
+    companion object {
+        private const val TAG = "FollowViewerFragment"
     }
 }

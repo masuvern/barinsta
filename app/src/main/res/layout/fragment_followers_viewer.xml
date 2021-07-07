@@ -16,6 +16,5 @@
         android:paddingLeft="8dp"
         android:paddingEnd="8dp"
         android:paddingRight="8dp"
-        app:layoutManager="LinearLayoutManager"
         tools:listitem="@layout/item_follow" />
 </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
