@@ -94,7 +94,7 @@ public class DownloadsPreferencesFragment extends BasePreferencesFragment {
                 Utils.setupSelectedDir(context, data);
                 String path;
                 try {
-                    path = URLDecoder.decode(data.getData().toString(), StandardCharsets.UTF_8.toString());
+                    path = URLDecoder.decode(data.getData().toString(), StandardCharsets.UTF_8.name());
                 } catch (UnsupportedEncodingException e) {
                     path = data.getData().toString();
                 }
