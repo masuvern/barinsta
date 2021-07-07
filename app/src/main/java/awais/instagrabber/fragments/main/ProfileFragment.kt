@@ -85,6 +85,14 @@ class ProfileFragment : Fragment(), OnRefreshListener, ConfirmDialogFragmentCall
     private lateinit var appStateViewModel: AppStateViewModel
     private lateinit var viewModel: ProfileFragmentViewModel
 
+    private val userRepository by lazy { UserRepository.getInstance() }
+    private val friendshipRepository by lazy { FriendshipRepository.getInstance() }
+    private val storiesRepository by lazy { StoriesRepository.getInstance() }
+    private val mediaRepository by lazy { MediaRepository.getInstance() }
+    private val graphQLRepository by lazy { GraphQLRepository.getInstance() }
+    private val favoriteRepository by lazy { FavoriteRepository.getInstance(requireContext()) }
+    private val directMessagesRepository by lazy { DirectMessagesRepository.getInstance() }
+
     private val confirmDialogFragmentRequestCode = 100
     private val ppOptsDialogRequestCode = 101
     private val bioDialogRequestCode = 102
@@ -309,7 +317,15 @@ class ProfileFragment : Fragment(), OnRefreshListener, ConfirmDialogFragmentCall
         viewModel = ViewModelProvider(
             this,
             ProfileFragmentViewModelFactory(
-                FavoriteRepository.getInstance(requireContext()),
+                csrfToken,
+                deviceUuid,
+                userRepository,
+                friendshipRepository,
+                storiesRepository,
+                mediaRepository,
+                graphQLRepository,
+                favoriteRepository,
+                directMessagesRepository,
                 if (isLoggedIn) DirectMessagesManager else null,
                 this,
                 arguments
