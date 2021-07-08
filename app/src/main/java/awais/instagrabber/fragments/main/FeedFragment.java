@@ -322,7 +322,9 @@ public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefre
     @Override
     public void onResume() {
         super.onResume();
-        binding.getRoot().postDelayed(feedStoriesAdapter::notifyDataSetChanged, 1000);
+        // temporary fix
+        feedStoriesViewModel.getList().removeObservers(getViewLifecycleOwner());
+        feedStoriesViewModel.getList().observe(getViewLifecycleOwner(), feedStoriesAdapter::submitList);
     }
 
     @Override
@@ -398,8 +400,6 @@ public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefre
                     storiesFetching = false;
                     //noinspection unchecked
                     feedStoriesViewModel.getList().postValue((List<Story>) feedStoryModels);
-                    //noinspection unchecked
-                    feedStoriesAdapter.submitList((List<Story>) feedStoryModels);
                     if (storyListMenu != null) storyListMenu.setVisible(true);
                     updateSwipeRefreshState();
                 }), Dispatchers.getIO())
