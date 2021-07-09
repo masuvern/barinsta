@@ -755,6 +755,8 @@ public class PostViewV2Fragment extends Fragment implements EditTextDialogFragme
                 popupMenu.setOnMenuItemClickListener(item -> {
                     final int itemId = item.getItemId();
                     if (itemId == R.id.share_dm) {
+                        if (profileModel.isPrivate())
+                            Toast.makeText(context, R.string.share_private_post, Toast.LENGTH_SHORT).show();
                         final UserSearchNavGraphDirections.ActionGlobalUserSearch actionGlobalUserSearch = UserSearchFragmentDirections
                                 .actionGlobalUserSearch()
                                 .setTitle(getString(R.string.share))

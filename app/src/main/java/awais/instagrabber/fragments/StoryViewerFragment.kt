@@ -797,6 +797,13 @@ class StoryViewerFragment : Fragment() {
     }
 
     private fun shareStoryViaDm() {
+        val story = storiesViewModel.getCurrentStory().value ?: return
+        val context = context
+        if (story.user?.isPrivate == true && context != null) {
+            Toast.makeText(context, R.string.share_private_post, Toast.LENGTH_SHORT).show()
+        }
+        val actionBar = fragmentActivity.supportActionBar
+        if (actionBar != null) actionBar.subtitle = null
         val actionGlobalUserSearch = UserSearchFragmentDirections.actionGlobalUserSearch().apply {
             title = getString(R.string.share)
             setActionLabel(getString(R.string.send))
