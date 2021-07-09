@@ -473,7 +473,9 @@ class StoryFragmentViewModel : ViewModel() {
     fun markAsSeen(storyMedia: StoryMedia): LiveData<Resource<Story?>> {
         val data = MutableLiveData<Resource<Story?>>()
         data.postValue(loading(null))
-        viewModelScope.launch(Dispatchers.IO) {
+        val oldStory = currentStory.value!!
+        if (oldStory.seen != null && oldStory.seen >= storyMedia.takenAt) data.postValue(success(null))
+        else viewModelScope.launch(Dispatchers.IO) {
             try {
                 storiesRepository.seen(
                     csrfToken!!,
@@ -483,7 +485,6 @@ class StoryFragmentViewModel : ViewModel() {
                     storyMedia.takenAt,
                     System.currentTimeMillis() / 1000
                 )
-                val oldStory = currentStory.value!!
                 val newStory = oldStory.copy(seen = storyMedia.takenAt)
                 data.postValue(success(newStory))
             } catch (e: Exception) {
