@@ -857,7 +857,11 @@ class ProfileFragment : Fragment(), OnRefreshListener, ConfirmDialogFragmentCall
             .setLifeCycleOwner(this)
             .setPostFetchService(ProfilePostFetchService(profile, currentUser != null))
             .setLayoutPreferences(layoutPreferences)
-            .addFetchStatusChangeListener { binding.swipeRefreshLayout.isRefreshing = it }
+            .addFetchStatusChangeListener {
+                AppExecutors.mainThread.execute {
+                    binding.swipeRefreshLayout.isRefreshing = it
+                }
+            }
             .setFeedItemCallback(feedItemCallback)
             .setSelectionModeCallback(selectionModeCallback)
             .init()

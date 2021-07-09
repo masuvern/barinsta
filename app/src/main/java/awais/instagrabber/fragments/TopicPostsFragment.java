@@ -53,6 +53,7 @@ import awais.instagrabber.fragments.main.DiscoverFragmentDirections;
 import awais.instagrabber.models.PostsLayoutPreferences;
 import awais.instagrabber.repositories.responses.Media;
 import awais.instagrabber.repositories.responses.discover.TopicCluster;
+import awais.instagrabber.utils.AppExecutors;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.DownloadUtils;
 import awais.instagrabber.utils.ResponseBodyUtils;
@@ -375,7 +376,9 @@ public class TopicPostsFragment extends Fragment implements SwipeRefreshLayout.O
     }
 
     private void updateSwipeRefreshState() {
-        binding.swipeRefreshLayout.setRefreshing(binding.posts.isFetching());
+        AppExecutors.INSTANCE.getMainThread().execute(() ->
+                binding.swipeRefreshLayout.setRefreshing(binding.posts.isFetching())
+        );
     }
 
     private void navigateToProfile(final String username) {

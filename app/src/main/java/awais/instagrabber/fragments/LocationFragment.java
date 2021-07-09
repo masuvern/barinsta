@@ -64,7 +64,7 @@ import awais.instagrabber.utils.Utils;
 import awais.instagrabber.webservices.GraphQLRepository;
 import awais.instagrabber.webservices.LocationService;
 import awais.instagrabber.webservices.ServiceCallback;
-import awais.instagrabber.webservices.StoriesRepository;
+//import awais.instagrabber.webservices.StoriesRepository;
 import kotlinx.coroutines.Dispatchers;
 
 import static awais.instagrabber.utils.Utils.settingsHelper;
@@ -81,11 +81,11 @@ public class LocationFragment extends Fragment implements SwipeRefreshLayout.OnR
     private long locationId;
     private Location locationModel;
     private ActionMode actionMode;
-    private StoriesRepository storiesRepository;
+//    private StoriesRepository storiesRepository;
     private GraphQLRepository graphQLRepository;
     private LocationService locationService;
     private boolean isLoggedIn;
-    private boolean storiesFetching;
+//    private boolean storiesFetching;
     private Set<Media> selectedFeedModels;
     private PostsLayoutPreferences layoutPreferences = Utils.getPostsLayoutPreferences(Constants.PREF_LOCATION_POSTS_LAYOUT);
     private LayoutLocationDetailsBinding locationDetailsBinding;
@@ -274,7 +274,7 @@ public class LocationFragment extends Fragment implements SwipeRefreshLayout.OnR
         final String cookie = settingsHelper.getString(Constants.COOKIE);
         isLoggedIn = !TextUtils.isEmpty(cookie) && CookieUtils.getUserIdFromCookie(cookie) > 0;
         locationService = isLoggedIn ? LocationService.getInstance() : null;
-        storiesRepository = StoriesRepository.Companion.getInstance();
+//        storiesRepository = StoriesRepository.Companion.getInstance();
         graphQLRepository = isLoggedIn ? null : GraphQLRepository.Companion.getInstance();
         setHasOptionsMenu(true);
     }
@@ -578,7 +578,9 @@ public class LocationFragment extends Fragment implements SwipeRefreshLayout.OnR
     }
 
     private void updateSwipeRefreshState() {
-        binding.swipeRefreshLayout.setRefreshing(binding.posts.isFetching() || storiesFetching);
+        AppExecutors.INSTANCE.getMainThread().execute(() ->
+                binding.swipeRefreshLayout.setRefreshing(binding.posts.isFetching())
+        );
     }
 
     private void navigateToProfile(final String username) {

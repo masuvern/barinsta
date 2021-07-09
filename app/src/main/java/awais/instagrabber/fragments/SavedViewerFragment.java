@@ -39,6 +39,7 @@ import awais.instagrabber.fragments.main.ProfileFragmentDirections;
 import awais.instagrabber.models.PostsLayoutPreferences;
 import awais.instagrabber.models.enums.PostItemType;
 import awais.instagrabber.repositories.responses.Media;
+import awais.instagrabber.utils.AppExecutors;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.CookieUtils;
 import awais.instagrabber.utils.DownloadUtils;
@@ -313,7 +314,9 @@ public final class SavedViewerFragment extends Fragment implements SwipeRefreshL
     }
 
     private void updateSwipeRefreshState() {
-        binding.swipeRefreshLayout.setRefreshing(binding.posts.isFetching());
+        AppExecutors.INSTANCE.getMainThread().execute(() ->
+                binding.swipeRefreshLayout.setRefreshing(binding.posts.isFetching())
+        );
     }
 
     private void navigateToProfile(final String username) {

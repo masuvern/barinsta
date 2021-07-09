@@ -369,7 +369,9 @@ public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefre
     }
 
     private void updateSwipeRefreshState() {
-        binding.feedSwipeRefreshLayout.setRefreshing(binding.feedRecyclerView.isFetching() || storiesFetching);
+        AppExecutors.INSTANCE.getMainThread().execute(() ->
+                binding.feedSwipeRefreshLayout.setRefreshing(binding.feedRecyclerView.isFetching() || storiesFetching)
+        );
     }
 
     private void setupFeedStories() {
