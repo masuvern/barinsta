@@ -94,7 +94,7 @@ public class ChatMessageLayout extends FrameLayout {
             heightSize += viewPartMainHeight;
         } else if (firstChildId == R.id.raven_media_container || firstChildId == R.id.profile_container || firstChildId == R.id.voice_media
                 || firstChildId == R.id.story_container || firstChildId == R.id.media_share_container || firstChildId == R.id.link_container
-                || firstChildId == R.id.ivAnimatedMessage) {
+                || firstChildId == R.id.ivAnimatedMessage || firstChildId == R.id.reel_share_container) {
             widthSize += viewPartMainWidth;
             heightSize += viewPartMainHeight + viewPartInfoHeight;
         } else {
@@ -103,12 +103,6 @@ public class ChatMessageLayout extends FrameLayout {
             final TextView textMessage;
             if (firstChild instanceof TextView) {
                 textMessage = (TextView) firstChild;
-            }
-            else if (firstChildId == R.id.reel_share_container) {
-                textMessage = (TextView) ((ConstraintLayout) firstChild).getChildAt(5);
-            }
-            else if (firstChildId == R.id.story_container) {
-                textMessage = (TextView) ((ConstraintLayout) firstChild).getChildAt(2);
             }
             else textMessage = null;
             if (textMessage != null) {
