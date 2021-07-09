@@ -213,7 +213,7 @@ class StoryViewerFragment : Fragment() {
             storiesViewModel.setMedia(position)
         }
         binding.storiesList.adapter = storiesAdapter
-        storiesViewModel.getCurrentStory().observe(viewLifecycleOwner, {
+        storiesViewModel.getCurrentStory().observe(fragmentActivity, {
             if (it?.items != null && it.items.size > 1) {
                 val storyMedias = it.items.toMutableList()
                 val newItem = storyMedias.get(0)
@@ -231,19 +231,19 @@ class StoryViewerFragment : Fragment() {
                 binding.storiesList.visibility = View.GONE
             }
         })
-        storiesViewModel.getDate().observe(viewLifecycleOwner, {
+        storiesViewModel.getDate().observe(fragmentActivity, {
             val actionBar = fragmentActivity.supportActionBar
             if (actionBar != null && it != null) actionBar.subtitle = it
         })
-        storiesViewModel.getTitle().observe(viewLifecycleOwner, {
+        storiesViewModel.getTitle().observe(fragmentActivity, {
             val actionBar = fragmentActivity.supportActionBar
             if (actionBar != null && it != null) actionBar.title = it
         })
-        storiesViewModel.getCurrentMedia().observe(viewLifecycleOwner, { refreshStory(it) })
-        storiesViewModel.getCurrentIndex().observe(viewLifecycleOwner, {
+        storiesViewModel.getCurrentMedia().observe(fragmentActivity, { refreshStory(it) })
+        storiesViewModel.getCurrentIndex().observe(fragmentActivity, {
             storiesAdapter!!.paginate(it)
         })
-        storiesViewModel.getOptions().observe(viewLifecycleOwner, {
+        storiesViewModel.getOptions().observe(fragmentActivity, {
             binding.stickers.isEnabled = it.first.size > 0
         })
     }
@@ -268,7 +268,7 @@ class StoryViewerFragment : Fragment() {
             when (type) {
                 StoryViewerOptions.Type.HIGHLIGHT -> {
                     storiesViewModel.fetchHighlights(options!!.id)
-                    storiesViewModel.highlights.observe(viewLifecycleOwner) {
+                    storiesViewModel.highlights.observe(fragmentActivity) {
                         setupMultipage(it)
                     }
                 }
@@ -319,7 +319,7 @@ class StoryViewerFragment : Fragment() {
 
     private fun setupMultipage(models: List<Story>?) {
         if (models == null) return
-        storiesViewModel.getPagination().observe(viewLifecycleOwner, {
+        storiesViewModel.getPagination().observe(fragmentActivity, {
             when (it) {
                 StoryPaginationType.FORWARD -> {
                     if (currentFeedStoryIndex == models.size - 1)

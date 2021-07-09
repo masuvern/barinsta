@@ -320,14 +320,6 @@ public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefre
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
-        // temporary fix
-        feedStoriesViewModel.getList().removeObservers(getViewLifecycleOwner());
-        feedStoriesViewModel.getList().observe(getViewLifecycleOwner(), feedStoriesAdapter::submitList);
-    }
-
-    @Override
     public void onRefresh() {
         binding.feedRecyclerView.refresh();
         fetchStories();
@@ -382,7 +374,7 @@ public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         storiesRecyclerView = binding.header;
         storiesRecyclerView.setLayoutManager(new LinearLayoutManager(context, RecyclerView.HORIZONTAL, false));
         storiesRecyclerView.setAdapter(feedStoriesAdapter);
-        feedStoriesViewModel.getList().observe(getViewLifecycleOwner(), feedStoriesAdapter::submitList);
+        feedStoriesViewModel.getList().observe(fragmentActivity, feedStoriesAdapter::submitList);
         fetchStories();
     }
 
