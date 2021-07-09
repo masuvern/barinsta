@@ -237,7 +237,6 @@
     <string name="action_ayml">Vorgeschlagene Benutzer</string>
     <string name="select_picture">Bild auswählen</string>
     <string name="uploading">Hochladen…</string>
-    <string name="activity_count_prefix">Du hast:</string>
     <string name="activity_count_relationship">%d Abonnenten</string>
     <string name="activity_count_comments">%d Kommentare</string>
     <string name="activity_count_commentlikes">%d gelikte Kommentare</string>

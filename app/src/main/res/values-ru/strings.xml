@@ -245,7 +245,6 @@
     <string name="action_ayml">Предлагаемые пользователи</string>
     <string name="select_picture">Выберите изображение</string>
     <string name="uploading">Загрузка…</string>
-    <string name="activity_count_prefix">У вас есть:</string>
     <string name="activity_count_relationship">%d подписано</string>
     <string name="activity_count_comments">%d комментариев</string>
     <string name="activity_count_commentlikes">%d симпатий к комментарию</string>

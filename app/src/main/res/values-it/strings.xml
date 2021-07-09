@@ -237,7 +237,6 @@
     <string name="action_ayml">Utenti suggeriti</string>
     <string name="select_picture">Seleziona Immagine</string>
     <string name="uploading">Caricamento…</string>
-    <string name="activity_count_prefix">Hai:</string>
     <string name="activity_count_relationship">%d seguaci</string>
     <string name="activity_count_comments">%d commenti</string>
     <string name="activity_count_commentlikes">%d mi piace al commento</string>
