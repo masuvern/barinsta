@@ -2,7 +2,6 @@ package awais.instagrabber.fragments;
 
 import android.animation.ArgbEvaluator;
 import android.content.Context;
-import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Animatable;
@@ -101,13 +100,13 @@ public class TopicPostsFragment extends Fragment implements SwipeRefreshLayout.O
     });
     private final FeedAdapterV2.FeedItemCallback feedItemCallback = new FeedAdapterV2.FeedItemCallback() {
         @Override
-        public void onPostClick(final Media feedModel, final View profilePicView, final View mainPostImage) {
-            openPostDialog(feedModel, profilePicView, mainPostImage, -1);
+        public void onPostClick(final Media feedModel) {
+            openPostDialog(feedModel, -1);
         }
 
         @Override
         public void onSliderClick(final Media feedModel, final int position) {
-            openPostDialog(feedModel, null, null, position);
+            openPostDialog(feedModel, position);
         }
 
         @Override
@@ -145,12 +144,12 @@ public class TopicPostsFragment extends Fragment implements SwipeRefreshLayout.O
         }
 
         @Override
-        public void onNameClick(final Media feedModel, final View profilePicView) {
+        public void onNameClick(final Media feedModel) {
             navigateToProfile("@" + feedModel.getUser().getUsername());
         }
 
         @Override
-        public void onProfilePicClick(final Media feedModel, final View profilePicView) {
+        public void onProfilePicClick(final Media feedModel) {
             navigateToProfile("@" + feedModel.getUser().getUsername());
         }
 
@@ -164,10 +163,7 @@ public class TopicPostsFragment extends Fragment implements SwipeRefreshLayout.O
             Utils.openEmailAddress(getContext(), emailId);
         }
 
-        private void openPostDialog(final Media feedModel,
-                                    final View profilePicView,
-                                    final View mainPostImage,
-                                    final int position) {
+        private void openPostDialog(final Media feedModel, final int position) {
             final NavController navController = NavHostFragment.findNavController(TopicPostsFragment.this);
             final Bundle bundle = new Bundle();
             bundle.putSerializable(PostViewV2Fragment.ARG_MEDIA, feedModel);

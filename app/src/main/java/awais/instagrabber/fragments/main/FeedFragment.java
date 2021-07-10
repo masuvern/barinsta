@@ -92,13 +92,13 @@ public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefre
 
     private final FeedAdapterV2.FeedItemCallback feedItemCallback = new FeedAdapterV2.FeedItemCallback() {
         @Override
-        public void onPostClick(final Media feedModel, final View profilePicView, final View mainPostImage) {
-            openPostDialog(feedModel, profilePicView, mainPostImage, -1);
+        public void onPostClick(final Media feedModel) {
+            openPostDialog(feedModel, -1);
         }
 
         @Override
         public void onSliderClick(final Media feedModel, final int position) {
-            openPostDialog(feedModel, null, null, position);
+            openPostDialog(feedModel, position);
         }
 
         @Override
@@ -140,13 +140,13 @@ public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         }
 
         @Override
-        public void onNameClick(final Media feedModel, final View profilePicView) {
+        public void onNameClick(final Media feedModel) {
             if (feedModel.getUser() == null) return;
             navigateToProfile("@" + feedModel.getUser().getUsername());
         }
 
         @Override
-        public void onProfilePicClick(final Media feedModel, final View profilePicView) {
+        public void onProfilePicClick(final Media feedModel) {
             if (feedModel.getUser() == null) return;
             navigateToProfile("@" + feedModel.getUser().getUsername());
         }
@@ -161,16 +161,7 @@ public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefre
             Utils.openEmailAddress(getContext(), emailId);
         }
 
-        private void openPostDialog(final Media feedModel,
-                                    final View profilePicView,
-                                    final View mainPostImage,
-                                    final int position) {
-            // ViewCompat.setTransitionName(profilePicView, "profile_pic");
-            // ViewCompat.setTransitionName(mainPostImage, "post_image");
-            // final FragmentNavigator.Extras extras = new FragmentNavigator.Extras.Builder()
-            //         .addSharedElement(profilePicView, "profile_pic")
-            //         .addSharedElement(mainPostImage, "post_image")
-            //         .build();
+        private void openPostDialog(final Media feedModel, final int position) {
             final NavController navController = NavHostFragment.findNavController(FeedFragment.this);
             final Bundle bundle = new Bundle();
             bundle.putSerializable(PostViewV2Fragment.ARG_MEDIA, feedModel);

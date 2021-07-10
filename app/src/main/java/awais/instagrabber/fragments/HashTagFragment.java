@@ -2,7 +2,6 @@ package awais.instagrabber.fragments;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.content.pm.PackageManager;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.Handler;
@@ -53,7 +52,7 @@ import awais.instagrabber.dialogs.PostsLayoutPreferencesDialogFragment;
 import awais.instagrabber.models.PostsLayoutPreferences;
 import awais.instagrabber.models.enums.FavoriteType;
 import awais.instagrabber.models.enums.FollowingType;
-import awais.instagrabber.repositories.requests.StoryViewerOptions;
+//import awais.instagrabber.repositories.requests.StoryViewerOptions;
 import awais.instagrabber.repositories.responses.Hashtag;
 import awais.instagrabber.repositories.responses.Location;
 import awais.instagrabber.repositories.responses.Media;
@@ -125,13 +124,13 @@ public class HashTagFragment extends Fragment implements SwipeRefreshLayout.OnRe
             });
     private final FeedAdapterV2.FeedItemCallback feedItemCallback = new FeedAdapterV2.FeedItemCallback() {
         @Override
-        public void onPostClick(final Media feedModel, final View profilePicView, final View mainPostImage) {
-            openPostDialog(feedModel, profilePicView, mainPostImage, -1);
+        public void onPostClick(final Media feedModel) {
+            openPostDialog(feedModel, -1);
         }
 
         @Override
         public void onSliderClick(final Media feedModel, final int position) {
-            openPostDialog(feedModel, null, null, position);
+            openPostDialog(feedModel, position);
         }
 
         @Override
@@ -171,12 +170,12 @@ public class HashTagFragment extends Fragment implements SwipeRefreshLayout.OnRe
         }
 
         @Override
-        public void onNameClick(final Media feedModel, final View profilePicView) {
+        public void onNameClick(final Media feedModel) {
             navigateToProfile("@" + feedModel.getUser().getUsername());
         }
 
         @Override
-        public void onProfilePicClick(final Media feedModel, final View profilePicView) {
+        public void onProfilePicClick(final Media feedModel) {
             navigateToProfile("@" + feedModel.getUser().getUsername());
         }
 
@@ -190,10 +189,7 @@ public class HashTagFragment extends Fragment implements SwipeRefreshLayout.OnRe
             Utils.openEmailAddress(getContext(), emailId);
         }
 
-        private void openPostDialog(@NonNull final Media feedModel,
-                                    final View profilePicView,
-                                    final View mainPostImage,
-                                    final int position) {
+        private void openPostDialog(@NonNull final Media feedModel, final int position) {
             if (opening) return;
             final User user = feedModel.getUser();
             if (user == null) return;
@@ -207,7 +203,7 @@ public class HashTagFragment extends Fragment implements SwipeRefreshLayout.OnRe
                         return;
                     }
                     if (media == null) return;
-                    AppExecutors.INSTANCE.getMainThread().execute(() -> openPostDialog(media, profilePicView, mainPostImage, position));
+                    AppExecutors.INSTANCE.getMainThread().execute(() -> openPostDialog(media, position));
                 }, Dispatchers.getIO()));
                 return;
             }

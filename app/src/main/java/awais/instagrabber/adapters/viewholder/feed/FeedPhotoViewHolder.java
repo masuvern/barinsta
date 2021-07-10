@@ -61,7 +61,7 @@ public class FeedPhotoViewHolder extends FeedItemViewHolder {
                 @Override
                 public boolean onSingleTapConfirmed(final MotionEvent e) {
                     if (feedItemCallback != null) {
-                        feedItemCallback.onPostClick(media, binding.itemFeedTop.ivProfilePic, binding.imageViewer);
+                        feedItemCallback.onPostClick(media);
                         return true;
                     }
                     return false;

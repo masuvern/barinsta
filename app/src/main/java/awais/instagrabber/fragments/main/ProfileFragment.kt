@@ -92,15 +92,15 @@ class ProfileFragment : Fragment(), OnRefreshListener, ConfirmDialogFragmentCall
     private val bioDialogRequestCode = 102
     private val translationDialogRequestCode = 103
     private val feedItemCallback: FeedAdapterV2.FeedItemCallback = object : FeedAdapterV2.FeedItemCallback {
-        override fun onPostClick(media: Media?, profilePicView: View?, mainPostImage: View?) {
+        override fun onPostClick(media: Media) {
             openPostDialog(media ?: return, -1)
         }
 
-        override fun onProfilePicClick(media: Media?, profilePicView: View?) {
+        override fun onProfilePicClick(media: Media) {
             navigateToProfile(media?.user?.username)
         }
 
-        override fun onNameClick(media: Media?, profilePicView: View?) {
+        override fun onNameClick(media: Media) {
             navigateToProfile(media?.user?.username)
         }
 

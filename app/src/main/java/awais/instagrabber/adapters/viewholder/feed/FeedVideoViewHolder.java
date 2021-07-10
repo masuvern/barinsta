@@ -70,7 +70,7 @@ public class FeedVideoViewHolder extends FeedItemViewHolder {
 
             @Override
             public void onThumbnailClick() {
-                feedItemCallback.onPostClick(media, binding.itemFeedTop.ivProfilePic, binding.videoPost.thumbnail);
+                feedItemCallback.onPostClick(media);
             }
 
             @Override

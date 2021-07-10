@@ -3,7 +3,6 @@ package awais.instagrabber.fragments;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -50,7 +49,7 @@ import awais.instagrabber.db.repositories.FavoriteRepository;
 import awais.instagrabber.dialogs.PostsLayoutPreferencesDialogFragment;
 import awais.instagrabber.models.PostsLayoutPreferences;
 import awais.instagrabber.models.enums.FavoriteType;
-import awais.instagrabber.repositories.requests.StoryViewerOptions;
+//import awais.instagrabber.repositories.requests.StoryViewerOptions;
 import awais.instagrabber.repositories.responses.Location;
 import awais.instagrabber.repositories.responses.Media;
 import awais.instagrabber.repositories.responses.User;
@@ -119,13 +118,13 @@ public class LocationFragment extends Fragment implements SwipeRefreshLayout.OnR
     });
     private final FeedAdapterV2.FeedItemCallback feedItemCallback = new FeedAdapterV2.FeedItemCallback() {
         @Override
-        public void onPostClick(final Media feedModel, final View profilePicView, final View mainPostImage) {
-            openPostDialog(feedModel, profilePicView, mainPostImage, -1);
+        public void onPostClick(final Media feedModel) {
+            openPostDialog(feedModel, -1);
         }
 
         @Override
         public void onSliderClick(final Media feedModel, final int position) {
-            openPostDialog(feedModel, null, null, position);
+            openPostDialog(feedModel, position);
         }
 
         @Override
@@ -163,12 +162,12 @@ public class LocationFragment extends Fragment implements SwipeRefreshLayout.OnR
         }
 
         @Override
-        public void onNameClick(final Media feedModel, final View profilePicView) {
+        public void onNameClick(final Media feedModel) {
             navigateToProfile("@" + feedModel.getUser().getUsername());
         }
 
         @Override
-        public void onProfilePicClick(final Media feedModel, final View profilePicView) {
+        public void onProfilePicClick(final Media feedModel) {
             navigateToProfile("@" + feedModel.getUser().getUsername());
         }
 
@@ -182,10 +181,7 @@ public class LocationFragment extends Fragment implements SwipeRefreshLayout.OnR
             Utils.openEmailAddress(getContext(), emailId);
         }
 
-        private void openPostDialog(@NonNull final Media feedModel,
-                                    final View profilePicView,
-                                    final View mainPostImage,
-                                    final int position) {
+        private void openPostDialog(@NonNull final Media feedModel, final int position) {
             if (opening) return;
             final User user = feedModel.getUser();
             if (user == null) return;
@@ -200,7 +196,7 @@ public class LocationFragment extends Fragment implements SwipeRefreshLayout.OnR
                                 return;
                             }
                             if (media == null) return;
-                            openPostDialog(media, profilePicView, mainPostImage, position);
+                            openPostDialog(media, position);
                         }))
                 );
                 return;
