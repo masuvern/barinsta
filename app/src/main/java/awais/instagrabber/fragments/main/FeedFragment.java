@@ -331,12 +331,6 @@ public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefre
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
-        binding.getRoot().postDelayed(feedStoriesAdapter::notifyDataSetChanged, 1000);
-    }
-
-    @Override
     public void onRefresh() {
         binding.feedRecyclerView.refresh();
         fetchStories();
@@ -370,7 +364,9 @@ public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefre
     }
 
     private void updateSwipeRefreshState() {
-        binding.feedSwipeRefreshLayout.setRefreshing(binding.feedRecyclerView.isFetching() || storiesFetching);
+        AppExecutors.INSTANCE.getMainThread().execute(() ->
+                binding.feedSwipeRefreshLayout.setRefreshing(binding.feedRecyclerView.isFetching() || storiesFetching)
+        );
     }
 
     private void setupFeedStories() {
@@ -381,7 +377,7 @@ public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         storiesRecyclerView = binding.header;
         storiesRecyclerView.setLayoutManager(new LinearLayoutManager(context, RecyclerView.HORIZONTAL, false));
         storiesRecyclerView.setAdapter(feedStoriesAdapter);
-        feedStoriesViewModel.getList().observe(getViewLifecycleOwner(), feedStoriesAdapter::submitList);
+        feedStoriesViewModel.getList().observe(fragmentActivity, feedStoriesAdapter::submitList);
         fetchStories();
     }
 
@@ -401,8 +397,6 @@ public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefre
                     storiesFetching = false;
                     //noinspection unchecked
                     feedStoriesViewModel.getList().postValue((List<Story>) feedStoryModels);
-                    //noinspection unchecked
-                    feedStoriesAdapter.submitList((List<Story>) feedStoryModels);
                     if (storyListMenu != null) storyListMenu.setVisible(true);
                     updateSwipeRefreshState();
                 }), Dispatchers.getIO())

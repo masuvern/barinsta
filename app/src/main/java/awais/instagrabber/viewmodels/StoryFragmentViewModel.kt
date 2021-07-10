@@ -7,19 +7,22 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import awais.instagrabber.R
 import awais.instagrabber.managers.DirectMessagesManager
-import awais.instagrabber.models.enums.FavoriteType
-import awais.instagrabber.models.enums.MediaItemType
-import awais.instagrabber.models.enums.StoryPaginationType
 import awais.instagrabber.models.Resource
 import awais.instagrabber.models.Resource.Companion.error
 import awais.instagrabber.models.Resource.Companion.loading
 import awais.instagrabber.models.Resource.Companion.success
 import awais.instagrabber.models.enums.BroadcastItemType
+import awais.instagrabber.models.enums.FavoriteType
+import awais.instagrabber.models.enums.MediaItemType
+import awais.instagrabber.models.enums.StoryPaginationType
 import awais.instagrabber.repositories.requests.StoryViewerOptions
+import awais.instagrabber.repositories.responses.Media
 import awais.instagrabber.repositories.responses.directmessages.RankedRecipient
 import awais.instagrabber.repositories.responses.stories.*
-import awais.instagrabber.repositories.responses.Media
-import awais.instagrabber.utils.*
+import awais.instagrabber.utils.Constants
+import awais.instagrabber.utils.Utils
+import awais.instagrabber.utils.getCsrfTokenFromCookie
+import awais.instagrabber.utils.getUserIdFromCookie
 import awais.instagrabber.webservices.MediaRepository
 import awais.instagrabber.webservices.StoriesRepository
 import com.google.common.collect.ImmutableList
@@ -60,21 +63,22 @@ class StoryFragmentViewModel : ViewModel() {
     private val mediaRepository: MediaRepository by lazy { MediaRepository.getInstance() }
 
     // for highlights ONLY
-    private val highlights = MutableLiveData<List<Story>?>()
+    val highlights = MutableLiveData<List<Story>?>()
 
     /* set functions */
 
     fun setStory(story: Story) {
-        if (story.items == null || story.items.size == 0) {
-            pagination.postValue(StoryPaginationType.ERROR)
-            return
-        }
         currentStory.postValue(story)
         storyTitle.postValue(story.title ?: story.user?.username)
         if (story.broadcast != null) {
             date.postValue(story.dateTime)
             type.postValue(MediaItemType.MEDIA_TYPE_LIVE)
             pagination.postValue(StoryPaginationType.DO_NOTHING)
+            return
+        }
+        if (story.items == null || story.items.size == 0) {
+            pagination.postValue(StoryPaginationType.ERROR)
+            return
         }
     }
 
@@ -183,10 +187,6 @@ class StoryFragmentViewModel : ViewModel() {
     }
 
     /* get functions */
-
-    fun getHighlights(): LiveData<List<Story>?> {
-        return highlights
-    }
 
     fun getCurrentStory(): LiveData<Story?> {
         return currentStory
@@ -466,6 +466,30 @@ class StoryFragmentViewModel : ViewModel() {
                 val storyMedia = storiesRepository.fetch(mediaId)
                 setSingleMedia(storyMedia!!)
                 data.postValue(success(null))
+            } catch (e: Exception) {
+                data.postValue(error(e.message, null))
+            }
+        }
+        return data
+    }
+
+    fun markAsSeen(storyMedia: StoryMedia): LiveData<Resource<Story?>> {
+        val data = MutableLiveData<Resource<Story?>>()
+        data.postValue(loading(null))
+        val oldStory = currentStory.value!!
+        if (oldStory.seen != null && oldStory.seen >= storyMedia.takenAt) data.postValue(success(null))
+        else viewModelScope.launch(Dispatchers.IO) {
+            try {
+                storiesRepository.seen(
+                    csrfToken!!,
+                    userId,
+                    deviceId,
+                    storyMedia.id,
+                    storyMedia.takenAt,
+                    System.currentTimeMillis() / 1000
+                )
+                val newStory = oldStory.copy(seen = storyMedia.takenAt)
+                data.postValue(success(newStory))
             } catch (e: Exception) {
                 data.postValue(error(e.message, null))
             }

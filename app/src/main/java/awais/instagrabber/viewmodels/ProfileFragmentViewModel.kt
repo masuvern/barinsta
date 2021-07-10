@@ -222,7 +222,7 @@ class ProfileFragmentViewModel(
     private suspend fun fetchUser(
         currentUser: User?,
         stateUsername: String,
-    ): User {
+    ): User? {
         if (currentUser != null) {
             // logged in
             val tempUser = userRepository.getUsernameInfo(stateUsername)

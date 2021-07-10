@@ -18,9 +18,7 @@ import androidx.appcompat.widget.PopupMenu
 import androidx.core.view.GestureDetectorCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavController
@@ -40,9 +38,7 @@ import awais.instagrabber.models.enums.StoryPaginationType
 import awais.instagrabber.repositories.requests.StoryViewerOptions
 import awais.instagrabber.repositories.responses.directmessages.RankedRecipient
 import awais.instagrabber.repositories.responses.stories.*
-import awais.instagrabber.utils.Constants
 import awais.instagrabber.utils.DownloadUtils.download
-import awais.instagrabber.utils.TextUtils.epochSecondToString
 import awais.instagrabber.utils.ResponseBodyUtils
 import awais.instagrabber.utils.Utils
 import awais.instagrabber.utils.extensions.TAG
@@ -78,7 +74,6 @@ class StoryViewerFragment : Fragment() {
     private var gestureDetector: GestureDetectorCompat? = null
     private val storiesRepository: StoriesRepository? = null
     private val mediaRepository: MediaRepository? = null
-    private var live: Broadcast? = null
     private var menuProfile: MenuItem? = null
     private var profileVisible: Boolean = false
     private var player: SimpleExoPlayer? = null
@@ -218,7 +213,7 @@ class StoryViewerFragment : Fragment() {
         }
         binding.storiesList.adapter = storiesAdapter
         storiesViewModel.getCurrentStory().observe(fragmentActivity, {
-            if (it?.items != null) {
+            if (it?.items != null && it.items.size > 1) {
                 val storyMedias = it.items.toMutableList()
                 val newItem = storyMedias.get(0)
                 newItem.isCurrentSlide = true
@@ -230,6 +225,7 @@ class StoryViewerFragment : Fragment() {
                 else View.GONE
             }
             else {
+                if (it?.items != null) storiesViewModel.setMedia(0)
                 binding.listToggle.isEnabled = false
                 binding.storiesList.visibility = View.GONE
             }
@@ -266,65 +262,28 @@ class StoryViewerFragment : Fragment() {
 
     @SuppressLint("ClickableViewAccessibility")
     private fun setupListeners() {
-        var liveModels: LiveData<List<Story>?>? = null
         if (currentFeedStoryIndex >= 0) {
             val type = options!!.type
             when (type) {
                 StoryViewerOptions.Type.HIGHLIGHT -> {
                     storiesViewModel.fetchHighlights(options!!.id)
-                    liveModels = storiesViewModel.getHighlights()
+                    storiesViewModel.highlights.observe(fragmentActivity) {
+                        setupMultipage(it)
+                    }
                 }
                 StoryViewerOptions.Type.FEED_STORY_POSITION -> {
                     val feedStoriesViewModel = listViewModel as FeedStoriesViewModel?
-                    liveModels = feedStoriesViewModel!!.list
+                    setupMultipage(feedStoriesViewModel!!.list.value)
                 }
                 StoryViewerOptions.Type.STORY_ARCHIVE -> {
                     val archivesViewModel = listViewModel as ArchivesViewModel?
-                    liveModels = archivesViewModel!!.list
+                    setupMultipage(archivesViewModel!!.list.value)
                 }
                 StoryViewerOptions.Type.USER -> {
                     resetView()
                 }
             }
         }
-        if (liveModels != null) liveModels.observe(viewLifecycleOwner, { models ->
-            storiesViewModel.getPagination().observe(fragmentActivity, {
-                if (models != null) {
-                    when (it) {
-                        StoryPaginationType.FORWARD -> {
-                            if (currentFeedStoryIndex == models.size - 1)
-                                Toast.makeText(
-                                    context,
-                                    R.string.no_more_stories,
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                            else paginateStories(false, currentFeedStoryIndex == models.size - 2)
-                        }
-                        StoryPaginationType.BACKWARD -> {
-                            if (currentFeedStoryIndex == 0)
-                                Toast.makeText(
-                                    context,
-                                    R.string.no_more_stories,
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                            else paginateStories(true, false)
-                        }
-                        StoryPaginationType.ERROR -> {
-                            Toast.makeText(
-                                context,
-                                R.string.downloader_unknown_error,
-                                Toast.LENGTH_SHORT
-                            ).show()
-                        }
-                    }
-                }
-            })
-            if (models != null && !models.isEmpty()) {
-                binding.btnBackward.isEnabled = currentFeedStoryIndex != 0
-                binding.btnForward.isEnabled = currentFeedStoryIndex != models.size - 1
-                resetView()
-            }
-        })
 
         val context = context ?: return
         swipeEvent = SwipeEvent { isRightSwipe: Boolean ->
@@ -357,9 +316,46 @@ class StoryViewerFragment : Fragment() {
         binding.imageViewer.setTapListener(simpleOnGestureListener)
     }
 
+    private fun setupMultipage(models: List<Story>?) {
+        if (models == null) return
+        storiesViewModel.getPagination().observe(fragmentActivity, {
+            when (it) {
+                StoryPaginationType.FORWARD -> {
+                    if (currentFeedStoryIndex == models.size - 1)
+                        Toast.makeText(
+                            context,
+                            R.string.no_more_stories,
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    else paginateStories(false, currentFeedStoryIndex == models.size - 2)
+                }
+                StoryPaginationType.BACKWARD -> {
+                    if (currentFeedStoryIndex == 0)
+                        Toast.makeText(
+                            context,
+                            R.string.no_more_stories,
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    else paginateStories(true, false)
+                }
+                StoryPaginationType.ERROR -> {
+                    Toast.makeText(
+                        context,
+                        R.string.downloader_unknown_error,
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            }
+        })
+        if (!models.isEmpty()) {
+            binding.btnBackward.isEnabled = currentFeedStoryIndex != 0
+            binding.btnForward.isEnabled = currentFeedStoryIndex != models.size - 1
+            resetView()
+        }
+    }
+
     private fun resetView() {
         val context = context ?: return
-        live = null
         if (menuProfile != null) menuProfile!!.isVisible = false
         binding.imageViewer.controller = null
         releasePlayer()
@@ -367,7 +363,7 @@ class StoryViewerFragment : Fragment() {
         var fetchOptions: StoryViewerOptions? = null
         when (type) {
             StoryViewerOptions.Type.HIGHLIGHT -> {
-                val models = storiesViewModel.getHighlights().value
+                val models = storiesViewModel.highlights.value
                 if (models == null || models.isEmpty() || currentFeedStoryIndex >= models.size || currentFeedStoryIndex < 0) {
                     Toast.makeText(context, R.string.downloader_unknown_error, Toast.LENGTH_SHORT).show()
                     return
@@ -378,10 +374,15 @@ class StoryViewerFragment : Fragment() {
                 val feedStoriesViewModel = listViewModel as FeedStoriesViewModel?
                 val models = feedStoriesViewModel!!.list.value
                 if (models == null || currentFeedStoryIndex >= models.size || currentFeedStoryIndex < 0) return
-                val (_, _, _, _, user, _, _, _, _, _, _, broadcast) = models[currentFeedStoryIndex]
-                currentStoryUsername = user!!.username
-                fetchOptions = StoryViewerOptions.forUser(user.pk, currentStoryUsername)
-                live = broadcast
+                val userStory = models[currentFeedStoryIndex]
+                currentStoryUsername = userStory.user!!.username
+                fetchOptions = StoryViewerOptions.forUser(userStory.user.pk, currentStoryUsername)
+                val live = userStory.broadcast
+                if (live != null) {
+                    storiesViewModel.setStory(userStory)
+                    refreshLive(live)
+                    return
+                }
             }
             StoryViewerOptions.Type.STORY_ARCHIVE -> {
                 val archivesViewModel = listViewModel as ArchivesViewModel?
@@ -404,11 +405,7 @@ class StoryViewerFragment : Fragment() {
             storiesViewModel.fetchSingleMedia(options!!.id)
             return
         }
-        if (live != null) {
-            refreshLive()
-            return
-        }
-        storiesViewModel.fetchStory(fetchOptions).observe(fragmentActivity, {
+        storiesViewModel.fetchStory(fetchOptions).observe(viewLifecycleOwner, {
             if (it.status == Resource.Status.ERROR) {
                 Toast.makeText(context, "Error: " + it.message, Toast.LENGTH_SHORT).show()
             }
@@ -416,18 +413,14 @@ class StoryViewerFragment : Fragment() {
     }
 
     @Synchronized
-    private fun refreshLive() {
+    private fun refreshLive(live: Broadcast) {
+        binding.btnDownload.isEnabled = false
+        binding.stickers.isEnabled = false
+        binding.listToggle.isEnabled = false
+        binding.btnShare.isEnabled = false
+        binding.btnReply.isEnabled = false
         releasePlayer()
-        setupLive(live!!.dashPlaybackUrl ?: live!!.dashAbrPlaybackUrl ?: return)
-        val actionBar = fragmentActivity.supportActionBar
-        actionBarSubtitle = epochSecondToString(live!!.publishedTime!!)
-        if (actionBar != null) {
-            try {
-                actionBar.setSubtitle(actionBarSubtitle)
-            } catch (e: Exception) {
-                Log.e(TAG, "refreshLive: ", e)
-            }
-        }
+        setupLive(live.dashPlaybackUrl ?: live.dashAbrPlaybackUrl ?: return)
     }
 
     @Synchronized
@@ -446,14 +439,19 @@ class StoryViewerFragment : Fragment() {
         binding.btnReply.isEnabled = currentStory.canReply
         if (itemType === MediaItemType.MEDIA_TYPE_VIDEO) setupVideo(url) else setupImage(url)
 
-//        if (Utils.settingsHelper.getBoolean(MARK_AS_SEEN)) storiesRepository!!.seen(
-//            csrfToken,
-//            userId,
-//            deviceId,
-//            currentStory!!.id!!,
-//            currentStory!!.takenAt,
-//            System.currentTimeMillis() / 1000
-//        )
+        if (options!!.type == StoryViewerOptions.Type.FEED_STORY_POSITION
+            && Utils.settingsHelper.getBoolean(PreferenceKeys.MARK_AS_SEEN)) {
+                val feedStoriesViewModel = listViewModel as FeedStoriesViewModel?
+                storiesViewModel.markAsSeen(currentStory).observe(viewLifecycleOwner) { m ->
+                    if (m.status == Resource.Status.SUCCESS && m.data != null) {
+                        val liveModels: MutableLiveData<List<Story>> = feedStoriesViewModel!!.list
+                        val models = liveModels.value
+                        val modelsCopy: MutableList<Story> = models!!.toMutableList()
+                        modelsCopy.set(currentFeedStoryIndex, m.data)
+                        liveModels.postValue(modelsCopy)
+                    }
+                }
+        }
     }
 
     private fun downloadStory() {
@@ -797,6 +795,13 @@ class StoryViewerFragment : Fragment() {
     }
 
     private fun shareStoryViaDm() {
+        val story = storiesViewModel.getCurrentStory().value ?: return
+        val context = context
+        if (story.user?.isPrivate == true && context != null) {
+            Toast.makeText(context, R.string.share_private_post, Toast.LENGTH_SHORT).show()
+        }
+        val actionBar = fragmentActivity.supportActionBar
+        if (actionBar != null) actionBar.subtitle = null
         val actionGlobalUserSearch = StoryViewerFragmentDirections.actionToUserSearch().apply {
             title = getString(R.string.share)
             actionLabel = getString(R.string.send)

@@ -240,6 +240,7 @@ public class SearchFragment extends Fragment implements SearchCategoryFragment.O
                 switch (resource.status) {
                     case SUCCESS:
                         viewModel.search("", type);
+                        viewModel.search("", FavoriteType.TOP);
                         liveData.removeObserver(this);
                         break;
                     case ERROR:

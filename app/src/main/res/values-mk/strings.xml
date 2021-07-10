@@ -237,7 +237,6 @@
     <string name="action_ayml">Препорачани кориснчки сметки</string>
     <string name="select_picture">Селектирај слика</string>
     <string name="uploading">Се Прикачува…</string>
-    <string name="activity_count_prefix">Вие имате:</string>
     <string name="activity_count_relationship">%d следачи</string>
     <string name="activity_count_comments">%d коментари</string>
     <string name="activity_count_commentlikes">%d лајкови на коментари</string>

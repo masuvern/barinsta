@@ -390,7 +390,6 @@ public class HashTagFragment extends Fragment implements SwipeRefreshLayout.OnRe
         }
         setTitle();
         setupPosts();
-        //        fetchStories();
         if (isLoggedIn) {
             hashtagDetailsBinding.btnFollowTag.setVisibility(View.VISIBLE);
             hashtagDetailsBinding.btnFollowTag.setText(hashtagModel.getFollowing() == FollowingType.FOLLOWING
@@ -559,7 +558,9 @@ public class HashTagFragment extends Fragment implements SwipeRefreshLayout.OnRe
     }
 
     private void updateSwipeRefreshState() {
-        binding.swipeRefreshLayout.setRefreshing(binding.posts.isFetching());
+        AppExecutors.INSTANCE.getMainThread().execute(() ->
+                binding.swipeRefreshLayout.setRefreshing(binding.posts.isFetching())
+        );
     }
 
     private void navigateToProfile(final String username) {
