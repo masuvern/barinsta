@@ -37,7 +37,9 @@ class SettingsHelper(context: Context) {
     }
 
     private fun getStringDefault(@StringSettings key: String): String {
-        if (PreferenceKeys.DATE_TIME_FORMAT == key) return "hh:mm:ss a 'on' dd-MM-yyyy"
+        if (PreferenceKeys.DATE_TIME_FORMAT == key) {
+            return Constants.defaultDateTimeFormat
+        }
         return if (PreferenceKeys.DATE_TIME_SELECTION == key) "0;3;0" else ""
     }
 

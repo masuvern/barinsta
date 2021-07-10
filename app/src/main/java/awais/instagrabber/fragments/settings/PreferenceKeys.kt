@@ -11,6 +11,7 @@ object PreferenceKeys {
     const val PREF_SHOWN_COUNT_TOOLTIP = "shown_count_tooltip"
     const val PREF_SEARCH_FOCUS_KEYBOARD = "search_focus_keyboard"
     const val PREF_AUTO_BACKUP_ENABLED = "auto_backup_enabled"
+    const val PREF_DISABLE_SCREEN_TRANSITIONS = "disable_screen_transitions"
     const val PREF_STORY_SHOW_LIST = "story_show_list"
 
     // string prefs

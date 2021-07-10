@@ -40,10 +40,11 @@ import awais.instagrabber.asyncs.FeedPostFetchService;
 import awais.instagrabber.customviews.PrimaryActionModeCallback;
 import awais.instagrabber.databinding.FragmentFeedBinding;
 import awais.instagrabber.dialogs.PostsLayoutPreferencesDialogFragment;
-import awais.instagrabber.fragments.PostViewV2Fragment;
 import awais.instagrabber.models.PostsLayoutPreferences;
 import awais.instagrabber.repositories.requests.StoryViewerOptions;
+import awais.instagrabber.repositories.responses.Location;
 import awais.instagrabber.repositories.responses.Media;
+import awais.instagrabber.repositories.responses.User;
 import awais.instagrabber.repositories.responses.stories.Story;
 import awais.instagrabber.utils.AppExecutors;
 import awais.instagrabber.utils.Constants;
@@ -62,7 +63,6 @@ public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefre
     private FragmentFeedBinding binding;
     private StoriesRepository storiesRepository;
     private boolean shouldRefresh = true;
-    private final boolean isRotate = false;
     private FeedStoriesViewModel feedStoriesViewModel;
     private boolean storiesFetching;
     private ActionMode actionMode;
@@ -77,15 +77,20 @@ public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefre
                 public void onFeedStoryClick(Story model, int position) {
                     final NavController navController = NavHostFragment.findNavController(FeedFragment.this);
                     if (isSafeToNavigate(navController)) {
-                        final NavDirections action = FeedFragmentDirections
-                                .actionFeedFragmentToStoryViewerFragment(StoryViewerOptions.forFeedStoryPosition(position));
-                        navController.navigate(action);
+                        try {
+                            final NavDirections action = FeedFragmentDirections.actionToStory(StoryViewerOptions.forFeedStoryPosition(position));
+                            navController.navigate(action);
+                        } catch (Exception e) {
+                            Log.e(TAG, "onFeedStoryClick: ", e);
+                        }
                     }
                 }
 
                 @Override
                 public void onFeedStoryLongClick(Story model, int position) {
-                    navigateToProfile("@" + model.getUser().getUsername());
+                    final User user = model.getUser();
+                    if (user == null) return;
+                    navigateToProfile("@" + user.getUsername());
                 }
             }
     );
@@ -104,10 +109,12 @@ public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         @Override
         public void onCommentsClick(final Media feedModel) {
             try {
-                final NavDirections commentsAction = FeedFragmentDirections.actionGlobalCommentsViewerFragment(
+                final User user = feedModel.getUser();
+                if (user == null) return;
+                final NavDirections commentsAction = FeedFragmentDirections.actionToComments(
                         feedModel.getCode(),
                         feedModel.getPk(),
-                        feedModel.getUser().getPk()
+                        user.getPk()
                 );
                 NavHostFragment.findNavController(FeedFragment.this).navigate(commentsAction);
             } catch (Exception e) {
@@ -124,14 +131,24 @@ public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefre
 
         @Override
         public void onHashtagClick(final String hashtag) {
-            final NavDirections action = FeedFragmentDirections.actionGlobalHashTagFragment(hashtag);
-            NavHostFragment.findNavController(FeedFragment.this).navigate(action);
+            try {
+                final NavDirections action = FeedFragmentDirections.actionToHashtag(hashtag);
+                NavHostFragment.findNavController(FeedFragment.this).navigate(action);
+            } catch (Exception e) {
+                Log.e(TAG, "onHashtagClick: ", e);
+            }
         }
 
         @Override
         public void onLocationClick(final Media feedModel) {
-            final NavDirections action = FeedFragmentDirections.actionGlobalLocationFragment(feedModel.getLocation().getPk());
-            NavHostFragment.findNavController(FeedFragment.this).navigate(action);
+            final Location location = feedModel.getLocation();
+            if (location == null) return;
+            try {
+                final NavDirections action = FeedFragmentDirections.actionToLocation(location.getPk());
+                NavHostFragment.findNavController(FeedFragment.this).navigate(action);
+            } catch (Exception e) {
+                Log.e(TAG, "onLocationClick: ", e);
+            }
         }
 
         @Override
@@ -162,12 +179,9 @@ public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         }
 
         private void openPostDialog(final Media feedModel, final int position) {
-            final NavController navController = NavHostFragment.findNavController(FeedFragment.this);
-            final Bundle bundle = new Bundle();
-            bundle.putSerializable(PostViewV2Fragment.ARG_MEDIA, feedModel);
-            bundle.putInt(PostViewV2Fragment.ARG_SLIDER_POSITION, position);
             try {
-                navController.navigate(R.id.action_global_post_view, bundle);
+                final NavDirections action = FeedFragmentDirections.actionToPost(feedModel, position);
+                NavHostFragment.findNavController(FeedFragment.this).navigate(action);
             } catch (Exception e) {
                 Log.e(TAG, "openPostDialog: ", e);
             }
@@ -237,10 +251,12 @@ public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefre
     };
 
     private void navigateToProfile(final String username) {
-        final NavController navController = NavHostFragment.findNavController(this);
-        final Bundle bundle = new Bundle();
-        bundle.putString("username", username);
-        navController.navigate(R.id.action_global_profileFragment, bundle);
+        try {
+            final NavDirections action = FeedFragmentDirections.actionToProfile().setUsername(username);
+            NavHostFragment.findNavController(this).navigate(action);
+        } catch (Exception e) {
+            Log.e(TAG, "navigateToProfile: ", e);
+        }
     }
 
     @Override
@@ -301,8 +317,12 @@ public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefre
     @Override
     public boolean onOptionsItemSelected(@NonNull final MenuItem item) {
         if (item.getItemId() == R.id.storyList) {
-            final NavDirections action = FeedFragmentDirections.actionGlobalStoryListViewerFragment("feed");
-            NavHostFragment.findNavController(FeedFragment.this).navigate(action);
+            try {
+                final NavDirections action = FeedFragmentDirections.actionToStoryList("feed");
+                NavHostFragment.findNavController(FeedFragment.this).navigate(action);
+            } catch (Exception e) {
+                Log.e(TAG, "onOptionsItemSelected: ", e);
+            }
         } else if (item.getItemId() == R.id.layout) {
             showPostsLayoutPreferences();
             return true;
@@ -316,14 +336,6 @@ public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         fetchStories();
     }
 
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        if (storiesRecyclerView != null) {
-            fragmentActivity.removeCollapsingView(storiesRecyclerView);
-        }
-    }
-
     private void setupFeed() {
         binding.feedRecyclerView.setViewModelStoreOwner(this)
                                 .setLifeCycleOwner(this)
@@ -333,7 +345,6 @@ public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefre
                                 .setFeedItemCallback(feedItemCallback)
                                 .setSelectionModeCallback(selectionModeCallback)
                                 .init();
-        binding.feedSwipeRefreshLayout.setRefreshing(true);
         binding.feedRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrolled(@NonNull final RecyclerView recyclerView, final int dx, final int dy) {
@@ -397,7 +408,8 @@ public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefre
                 preferences -> {
                     layoutPreferences = preferences;
                     new Handler().postDelayed(() -> binding.feedRecyclerView.setLayoutPreferences(preferences), 200);
-                });
+                }
+        );
         fragment.show(getChildFragmentManager(), "posts_layout_preferences");
     }
 

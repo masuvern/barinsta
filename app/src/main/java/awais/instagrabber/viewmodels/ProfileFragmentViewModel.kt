@@ -16,12 +16,9 @@ import awais.instagrabber.repositories.responses.User
 import awais.instagrabber.repositories.responses.UserProfileContextLink
 import awais.instagrabber.repositories.responses.directmessages.RankedRecipient
 import awais.instagrabber.repositories.responses.stories.Story
-import awais.instagrabber.utils.Constants
 import awais.instagrabber.utils.ControlledRunner
 import awais.instagrabber.utils.Event
-import awais.instagrabber.utils.getCsrfTokenFromCookie
 import awais.instagrabber.utils.SingleRunner
-import awais.instagrabber.utils.Utils
 import awais.instagrabber.utils.extensions.TAG
 import awais.instagrabber.utils.extensions.isReallyPrivate
 import awais.instagrabber.viewmodels.ProfileFragmentViewModel.ProfileAction.*
@@ -29,29 +26,30 @@ import awais.instagrabber.viewmodels.ProfileFragmentViewModel.ProfileEvent.*
 import awais.instagrabber.webservices.*
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
 
 class ProfileFragmentViewModel(
     private val state: SavedStateHandle,
-    private val favoriteRepository: FavoriteRepository?,
+    private val csrfToken: String?,
+    private val deviceUuid: String?,
+    private val userRepository: UserRepository,
+    private val friendshipRepository: FriendshipRepository,
+    private val storiesRepository: StoriesRepository,
+    private val mediaRepository: MediaRepository,
+    private val graphQLRepository: GraphQLRepository,
+    private val favoriteRepository: FavoriteRepository,
+    private val directMessagesRepository: DirectMessagesRepository,
     private val messageManager: DirectMessagesManager?,
     ioDispatcher: CoroutineDispatcher,
 ) : ViewModel() {
-    private val cookie: String = Utils.settingsHelper.getString(Constants.COOKIE)
-    private val csrfToken: String? = getCsrfTokenFromCookie(cookie)
-    private val deviceUuid: String = Utils.settingsHelper.getString(Constants.DEVICE_UUID)
-    private val userRepository: UserRepository by lazy { UserRepository.getInstance() }
-    private val friendshipRepository: FriendshipRepository by lazy { FriendshipRepository.getInstance() }
-    private val storiesRepository: StoriesRepository by lazy { StoriesRepository.getInstance() }
-    private val mediaRepository: MediaRepository by lazy { MediaRepository.getInstance() }
-    private val graphQLRepository: GraphQLRepository by lazy { GraphQLRepository.getInstance() }
-    private val directMessagesRepository: DirectMessagesRepository by lazy { DirectMessagesRepository.getInstance() }
-
     private val _currentUser = MutableLiveData<Resource<User?>>(Resource.loading(null))
     private val _isFavorite = MutableLiveData(false)
     private val profileAction = MutableLiveData(INIT)
     private val _eventLiveData = MutableLiveData<Event<ProfileEvent>?>()
+
+    private var previousUsername: String? = null
 
     enum class ProfileAction {
         INIT,
@@ -102,8 +100,9 @@ class ProfileFragmentViewModel(
     val profile: LiveData<Resource<User?>> = currentUserStateUsernameActionLiveData.switchMap {
         val (currentUserResource, stateUsernameResource, action) = it
         liveData<Resource<User?>>(context = viewModelScope.coroutineContext + ioDispatcher) {
+            if (action == INIT && previousUsername != null && stateUsernameResource.data == previousUsername) return@liveData
             if (currentUserResource.status == Resource.Status.LOADING || stateUsernameResource.status == Resource.Status.LOADING) {
-                emit(Resource.loading(null))
+                emit(Resource.loading(profileCopy.value?.data))
                 return@liveData
             }
             val currentUser = currentUserResource.data
@@ -115,6 +114,7 @@ class ProfileFragmentViewModel(
             try {
                 when (action) {
                     INIT, REFRESH -> {
+                        previousUsername = stateUsername
                         val fetchedUser = profileFetchControlledRunner.cancelPreviousThenRun { fetchUser(currentUser, stateUsername) }
                         emit(Resource.success(fetchedUser))
                         if (fetchedUser != null) {
@@ -243,7 +243,7 @@ class ProfileFragmentViewModel(
 
     private suspend fun checkAndUpdateFavorite(fetchedUser: User) {
         try {
-            val favorite = favoriteRepository!!.getFavorite(fetchedUser.username, FavoriteType.USER)
+            val favorite = favoriteRepository.getFavorite(fetchedUser.username, FavoriteType.USER)
             if (favorite == null) {
                 _isFavorite.postValue(false)
                 return
@@ -291,7 +291,7 @@ class ProfileFragmentViewModel(
         viewModelScope.launch(Dispatchers.IO) {
             toggleFavoriteControlledRunner.afterPrevious {
                 try {
-                    val favorite = favoriteRepository!!.getFavorite(username, FavoriteType.USER)
+                    val favorite = favoriteRepository.getFavorite(username, FavoriteType.USER)
                     if (favorite == null) {
                         // insert
                         favoriteRepository.insertOrUpdateFavorite(
@@ -326,7 +326,7 @@ class ProfileFragmentViewModel(
                     val currentUserId = currentUser.value?.data?.pk ?: return@afterPrevious
                     val targetUserId = profile.value?.data?.pk ?: return@afterPrevious
                     val csrfToken = csrfToken ?: return@afterPrevious
-                    val deviceUuid = deviceUuid
+                    val deviceUuid = deviceUuid ?: return@afterPrevious
                     if (following) {
                         if (!confirmed) {
                             _eventLiveData.postValue(Event(ShowConfirmUnfollowDialog))
@@ -365,7 +365,7 @@ class ProfileFragmentViewModel(
                     val currentUserId = currentUser.value?.data?.pk ?: return@afterPrevious
                     val targetUserId = profile.value?.data?.pk ?: return@afterPrevious
                     val csrfToken = csrfToken ?: return@afterPrevious
-                    val deviceUuid = deviceUuid
+                    val deviceUuid = deviceUuid ?: return@afterPrevious
                     val username = profile.value?.data?.username ?: return@afterPrevious
                     val thread = directMessagesRepository.createThread(
                         csrfToken,
@@ -381,6 +381,7 @@ class ProfileFragmentViewModel(
                     }
                     val threadId = thread.threadId ?: return@afterPrevious
                     _eventLiveData.postValue(Event(NavigateToThread(threadId, username)))
+                    delay(200) // Add delay so that the postValue in finally does not overwrite the NavigateToThread event
                 } catch (e: Exception) {
                     Log.e(TAG, "sendDm: ", e)
                 } finally {
@@ -399,7 +400,7 @@ class ProfileFragmentViewModel(
                     val profile = profile.value?.data ?: return@afterPrevious
                     friendshipRepository.toggleRestrict(
                         csrfToken ?: return@afterPrevious,
-                        deviceUuid,
+                        deviceUuid ?: return@afterPrevious,
                         profile.pk,
                         !(profile.friendshipStatus?.isRestricted ?: false),
                     )
@@ -421,7 +422,7 @@ class ProfileFragmentViewModel(
                     friendshipRepository.changeBlock(
                         csrfToken ?: return@afterPrevious,
                         currentUser.value?.data?.pk ?: return@afterPrevious,
-                        deviceUuid,
+                        deviceUuid ?: return@afterPrevious,
                         profile.friendshipStatus?.blocking ?: return@afterPrevious,
                         profile.pk
                     )
@@ -443,7 +444,7 @@ class ProfileFragmentViewModel(
                     friendshipRepository.changeMute(
                         csrfToken ?: return@afterPrevious,
                         currentUser.value?.data?.pk ?: return@afterPrevious,
-                        deviceUuid,
+                        deviceUuid ?: return@afterPrevious,
                         profile.friendshipStatus?.isMutingReel ?: return@afterPrevious,
                         profile.pk,
                         true
@@ -466,7 +467,7 @@ class ProfileFragmentViewModel(
                     friendshipRepository.changeMute(
                         csrfToken ?: return@afterPrevious,
                         currentUser.value?.data?.pk ?: return@afterPrevious,
-                        deviceUuid,
+                        deviceUuid ?: return@afterPrevious,
                         profile.friendshipStatus?.muting ?: return@afterPrevious,
                         profile.pk,
                         false
@@ -488,7 +489,7 @@ class ProfileFragmentViewModel(
                     friendshipRepository.removeFollower(
                         csrfToken ?: return@afterPrevious,
                         currentUser.value?.data?.pk ?: return@afterPrevious,
-                        deviceUuid,
+                        deviceUuid ?: return@afterPrevious,
                         profile.value?.data?.pk ?: return@afterPrevious
                     )
                     profileAction.postValue(REFRESH_FRIENDSHIP)
@@ -597,7 +598,15 @@ class ProfileFragmentViewModel(
 
 @Suppress("UNCHECKED_CAST")
 class ProfileFragmentViewModelFactory(
-    private val favoriteRepository: FavoriteRepository?,
+    private val csrfToken: String?,
+    private val deviceUuid: String?,
+    private val userRepository: UserRepository,
+    private val friendshipRepository: FriendshipRepository,
+    private val storiesRepository: StoriesRepository,
+    private val mediaRepository: MediaRepository,
+    private val graphQLRepository: GraphQLRepository,
+    private val favoriteRepository: FavoriteRepository,
+    private val directMessagesRepository: DirectMessagesRepository,
     private val messageManager: DirectMessagesManager?,
     owner: SavedStateRegistryOwner,
     defaultArgs: Bundle? = null,
@@ -609,7 +618,15 @@ class ProfileFragmentViewModelFactory(
     ): T {
         return ProfileFragmentViewModel(
             handle,
+            csrfToken,
+            deviceUuid,
+            userRepository,
+            friendshipRepository,
+            storiesRepository,
+            mediaRepository,
+            graphQLRepository,
             favoriteRepository,
+            directMessagesRepository,
             messageManager,
             Dispatchers.IO,
         ) as T

@@ -26,7 +26,6 @@ import androidx.appcompat.app.ActionBar;
 import androidx.constraintlayout.motion.widget.MotionLayout;
 import androidx.constraintlayout.motion.widget.MotionScene;
 import androidx.fragment.app.Fragment;
-import androidx.navigation.NavController;
 import androidx.navigation.NavDirections;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.recyclerview.widget.RecyclerView;
@@ -75,13 +74,10 @@ import static awais.instagrabber.utils.Utils.settingsHelper;
 public class HashTagFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener {
     private static final String TAG = "HashTagFragment";
 
-    public static final String ARG_HASHTAG = "hashtag";
-
     private MainActivity fragmentActivity;
     private FragmentHashtagBinding binding;
     private MotionLayout root;
     private boolean shouldRefresh = true;
-//    private boolean hasStories = false;
     private boolean opening = false;
     private String hashtag;
     private Hashtag hashtagModel = null;
@@ -135,12 +131,18 @@ public class HashTagFragment extends Fragment implements SwipeRefreshLayout.OnRe
 
         @Override
         public void onCommentsClick(final Media feedModel) {
-            final NavDirections commentsAction = HashTagFragmentDirections.actionGlobalCommentsViewerFragment(
-                    feedModel.getCode(),
-                    feedModel.getCode(),
-                    feedModel.getUser().getPk()
-            );
-            NavHostFragment.findNavController(HashTagFragment.this).navigate(commentsAction);
+            final User user = feedModel.getUser();
+            if (user == null) return;
+            try {
+                final NavDirections commentsAction = HashTagFragmentDirections.actionToComments(
+                        feedModel.getCode(),
+                        feedModel.getCode(),
+                        user.getPk()
+                );
+                NavHostFragment.findNavController(HashTagFragment.this).navigate(commentsAction);
+            } catch (Exception e) {
+                Log.e(TAG, "onCommentsClick: ", e);
+            }
         }
 
         @Override
@@ -152,16 +154,24 @@ public class HashTagFragment extends Fragment implements SwipeRefreshLayout.OnRe
 
         @Override
         public void onHashtagClick(final String hashtag) {
-            final NavDirections action = HashTagFragmentDirections.actionGlobalHashTagFragment(hashtag);
-            NavHostFragment.findNavController(HashTagFragment.this).navigate(action);
+            try {
+                final NavDirections action = HashTagFragmentDirections.actionToHashtag(hashtag);
+                NavHostFragment.findNavController(HashTagFragment.this).navigate(action);
+            } catch (Exception e) {
+                Log.e(TAG, "onHashtagClick: ", e);
+            }
         }
 
         @Override
         public void onLocationClick(final Media media) {
             final Location location = media.getLocation();
             if (location == null) return;
-            final NavDirections action = HashTagFragmentDirections.actionGlobalLocationFragment(location.getPk());
-            NavHostFragment.findNavController(HashTagFragment.this).navigate(action);
+            try {
+                final NavDirections action = HashTagFragmentDirections.actionToLocation(location.getPk());
+                NavHostFragment.findNavController(HashTagFragment.this).navigate(action);
+            } catch (Exception e) {
+                Log.e(TAG, "onLocationClick: ", e);
+            }
         }
 
         @Override
@@ -171,12 +181,16 @@ public class HashTagFragment extends Fragment implements SwipeRefreshLayout.OnRe
 
         @Override
         public void onNameClick(final Media feedModel) {
-            navigateToProfile("@" + feedModel.getUser().getUsername());
+            final User user = feedModel.getUser();
+            if (user == null) return;
+            navigateToProfile("@" + user.getUsername());
         }
 
         @Override
         public void onProfilePicClick(final Media feedModel) {
-            navigateToProfile("@" + feedModel.getUser().getUsername());
+            final User user = feedModel.getUser();
+            if (user == null) return;
+            navigateToProfile("@" + user.getUsername());
         }
 
         @Override
@@ -196,7 +210,9 @@ public class HashTagFragment extends Fragment implements SwipeRefreshLayout.OnRe
             if (TextUtils.isEmpty(user.getUsername())) {
                 // this only happens for anons
                 opening = true;
-                graphQLRepository.fetchPost(feedModel.getCode(), CoroutineUtilsKt.getContinuation((media, throwable) -> {
+                final String code = feedModel.getCode();
+                if (code == null) return;
+                graphQLRepository.fetchPost(code, CoroutineUtilsKt.getContinuation((media, throwable) -> {
                     opening = false;
                     if (throwable != null) {
                         Log.e(TAG, "Error", throwable);
@@ -208,12 +224,9 @@ public class HashTagFragment extends Fragment implements SwipeRefreshLayout.OnRe
                 return;
             }
             opening = true;
-            final NavController navController = NavHostFragment.findNavController(HashTagFragment.this);
-            final Bundle bundle = new Bundle();
-            bundle.putSerializable(PostViewV2Fragment.ARG_MEDIA, feedModel);
-            bundle.putInt(PostViewV2Fragment.ARG_SLIDER_POSITION, position);
             try {
-                navController.navigate(R.id.action_global_post_view, bundle);
+                final NavDirections action = HashTagFragmentDirections.actionToPost(feedModel, position);
+                NavHostFragment.findNavController(HashTagFragment.this).navigate(action);
             } catch (Exception e) {
                 Log.e(TAG, "openPostDialog: ", e);
             }
@@ -305,7 +318,7 @@ public class HashTagFragment extends Fragment implements SwipeRefreshLayout.OnRe
     @Override
     public void onRefresh() {
         binding.posts.refresh();
-//        fetchStories();
+        //        fetchStories();
     }
 
     @Override
@@ -357,7 +370,6 @@ public class HashTagFragment extends Fragment implements SwipeRefreshLayout.OnRe
                      .setFeedItemCallback(feedItemCallback)
                      .setSelectionModeCallback(selectionModeCallback)
                      .init();
-        binding.swipeRefreshLayout.setRefreshing(true);
         binding.posts.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrolled(@NonNull final RecyclerView recyclerView, final int dx, final int dy) {
@@ -381,7 +393,6 @@ public class HashTagFragment extends Fragment implements SwipeRefreshLayout.OnRe
         }
         setTitle();
         setupPosts();
-//        fetchStories();
         if (isLoggedIn) {
             hashtagDetailsBinding.btnFollowTag.setVisibility(View.VISIBLE);
             hashtagDetailsBinding.btnFollowTag.setText(hashtagModel.getFollowing() == FollowingType.FOLLOWING
@@ -515,22 +526,23 @@ public class HashTagFragment extends Fragment implements SwipeRefreshLayout.OnRe
         );
         hashtagDetailsBinding.mainHashtagImage.setImageURI("res:/" + R.drawable.ic_hashtag);
         final String postCount = String.valueOf(hashtagModel.getMediaCount());
-        final SpannableStringBuilder span = new SpannableStringBuilder(getResources().getQuantityString(R.plurals.main_posts_count_inline,
-                                                                                                        hashtagModel.getMediaCount() > 2000000000L
-                                                                                                        ? 2000000000
-                                                                                                        : Long.valueOf(hashtagModel.getMediaCount()).intValue(),
-                                                                                                        postCount));
+        final SpannableStringBuilder span = new SpannableStringBuilder(getResources().getQuantityString(
+                R.plurals.main_posts_count_inline,
+                hashtagModel.getMediaCount() > 2000000000L ? 2000000000
+                                                           : Long.valueOf(hashtagModel.getMediaCount()).intValue(),
+                postCount)
+        );
         span.setSpan(new RelativeSizeSpan(1.2f), 0, postCount.length(), 0);
         span.setSpan(new StyleSpan(Typeface.BOLD), 0, postCount.length(), 0);
         hashtagDetailsBinding.mainTagPostCount.setText(span);
         hashtagDetailsBinding.mainTagPostCount.setVisibility(View.VISIBLE);
-//        hashtagDetailsBinding.mainHashtagImage.setOnClickListener(v -> {
-//            if (!hasStories) return;
-//            // show stories
-//            final NavDirections action = HashTagFragmentDirections
-//                    .actionHashtagFragmentToStoryViewerFragment(StoryViewerOptions.forHashtag(hashtagModel.getName()));
-//            NavHostFragment.findNavController(this).navigate(action);
-//        });
+        //        hashtagDetailsBinding.mainHashtagImage.setOnClickListener(v -> {
+        //            if (!hasStories) return;
+        //            // show stories
+        //            final NavDirections action = HashTagFragmentDirections
+        //                    .actionHashtagFragmentToStoryViewerFragment(StoryViewerOptions.forHashtag(hashtagModel.getName()));
+        //            NavHostFragment.findNavController(this).navigate(action);
+        //        });
     }
 
     private void showSnackbar(final String message) {
@@ -541,35 +553,10 @@ public class HashTagFragment extends Fragment implements SwipeRefreshLayout.OnRe
                 .show();
     }
 
-//    private void fetchStories() {
-//        if (!isLoggedIn) return;
-//        storiesFetching = true;
-//        storiesRepository.getStories(
-//                StoryViewerOptions.forHashtag(hashtagModel.getName()),
-//                CoroutineUtilsKt.getContinuation((storyModels, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
-//                    if (throwable != null) {
-//                        Log.e(TAG, "Error", throwable);
-//                        storiesFetching = false;
-//                        return;
-//                    }
-//                    if (storyModels != null && !storyModels.isEmpty()) {
-//                        hashtagDetailsBinding.mainHashtagImage.setStoriesBorder(1);
-//                        hasStories = true;
-//                    } else {
-//                        hasStories = false;
-//                    }
-//                    storiesFetching = false;
-//                }), Dispatchers.getIO())
-//        );
-//    }
-
     private void setTitle() {
         final ActionBar actionBar = fragmentActivity.getSupportActionBar();
         if (actionBar != null) {
-            // Log.d(TAG, "setting title: " + hashtag);
             actionBar.setTitle('#' + hashtag);
-            // final Handler handler = new Handler();
-            // handler.postDelayed(() -> , 1000);
         }
     }
 
@@ -580,10 +567,12 @@ public class HashTagFragment extends Fragment implements SwipeRefreshLayout.OnRe
     }
 
     private void navigateToProfile(final String username) {
-        final NavController navController = NavHostFragment.findNavController(this);
-        final Bundle bundle = new Bundle();
-        bundle.putString("username", username);
-        navController.navigate(R.id.action_global_profileFragment, bundle);
+        try {
+            final NavDirections action = HashTagFragmentDirections.actionToProfile().setUsername(username);
+            NavHostFragment.findNavController(this).navigate(action);
+        } catch (Exception e) {
+            Log.e(TAG, "navigateToProfile: ", e);
+        }
     }
 
     private void showPostsLayoutPreferences() {

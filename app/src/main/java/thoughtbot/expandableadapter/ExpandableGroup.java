@@ -1,6 +1,5 @@
 package thoughtbot.expandableadapter;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import awais.instagrabber.repositories.responses.User;

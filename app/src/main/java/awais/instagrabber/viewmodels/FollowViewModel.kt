@@ -1,10 +1,6 @@
 package awais.instagrabber.viewmodels
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MediatorLiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.*
 import awais.instagrabber.models.Resource
 import awais.instagrabber.repositories.responses.User
 import awais.instagrabber.webservices.FriendshipRepository

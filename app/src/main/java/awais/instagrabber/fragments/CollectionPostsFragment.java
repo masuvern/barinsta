@@ -28,7 +28,6 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.core.graphics.ColorUtils;
 import androidx.fragment.app.Fragment;
-import androidx.navigation.NavController;
 import androidx.navigation.NavDirections;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
@@ -53,7 +52,9 @@ import awais.instagrabber.databinding.FragmentCollectionPostsBinding;
 import awais.instagrabber.dialogs.PostsLayoutPreferencesDialogFragment;
 import awais.instagrabber.models.PostsLayoutPreferences;
 import awais.instagrabber.models.enums.PostItemType;
+import awais.instagrabber.repositories.responses.Location;
 import awais.instagrabber.repositories.responses.Media;
+import awais.instagrabber.repositories.responses.User;
 import awais.instagrabber.repositories.responses.saved.SavedCollection;
 import awais.instagrabber.utils.AppExecutors;
 import awais.instagrabber.utils.Constants;
@@ -76,7 +77,6 @@ public class CollectionPostsFragment extends Fragment implements SwipeRefreshLay
     private Set<Media> selectedFeedModels;
     private CollectionService collectionService;
     private PostsLayoutPreferences layoutPreferences = Utils.getPostsLayoutPreferences(Constants.PREF_SAVED_POSTS_LAYOUT);
-    private MenuItem deleteMenu, editMenu;
 
     private final OnBackPressedCallback onBackPressedCallback = new OnBackPressedCallback(false) {
         @Override
@@ -117,12 +117,18 @@ public class CollectionPostsFragment extends Fragment implements SwipeRefreshLay
 
         @Override
         public void onCommentsClick(final Media feedModel) {
-            final NavDirections commentsAction = CollectionPostsFragmentDirections.actionGlobalCommentsViewerFragment(
-                    feedModel.getCode(),
-                    feedModel.getPk(),
-                    feedModel.getUser().getPk()
-            );
-            NavHostFragment.findNavController(CollectionPostsFragment.this).navigate(commentsAction);
+            final User user = feedModel.getUser();
+            if (user == null) return;
+            try {
+                final NavDirections commentsAction = CollectionPostsFragmentDirections.actionToComments(
+                        feedModel.getCode(),
+                        feedModel.getPk(),
+                        user.getPk()
+                );
+                NavHostFragment.findNavController(CollectionPostsFragment.this).navigate(commentsAction);
+            } catch (Exception e) {
+                Log.e(TAG, "onCommentsClick: ", e);
+            }
         }
 
         @Override
@@ -134,14 +140,24 @@ public class CollectionPostsFragment extends Fragment implements SwipeRefreshLay
 
         @Override
         public void onHashtagClick(final String hashtag) {
-            final NavDirections action = CollectionPostsFragmentDirections.actionGlobalHashTagFragment(hashtag);
-            NavHostFragment.findNavController(CollectionPostsFragment.this).navigate(action);
+            try {
+                final NavDirections action = CollectionPostsFragmentDirections.actionToHashtag(hashtag);
+                NavHostFragment.findNavController(CollectionPostsFragment.this).navigate(action);
+            } catch (Exception e) {
+                Log.e(TAG, "onHashtagClick: ", e);
+            }
         }
 
         @Override
         public void onLocationClick(final Media feedModel) {
-            final NavDirections action = CollectionPostsFragmentDirections.actionGlobalLocationFragment(feedModel.getLocation().getPk());
-            NavHostFragment.findNavController(CollectionPostsFragment.this).navigate(action);
+            final Location location = feedModel.getLocation();
+            if (location == null) return;
+            try {
+                final NavDirections action = CollectionPostsFragmentDirections.actionToLocation(location.getPk());
+                NavHostFragment.findNavController(CollectionPostsFragment.this).navigate(action);
+            } catch (Exception e) {
+                Log.e(TAG, "onLocationClick: ", e);
+            }
         }
 
         @Override
@@ -151,12 +167,16 @@ public class CollectionPostsFragment extends Fragment implements SwipeRefreshLay
 
         @Override
         public void onNameClick(final Media feedModel) {
-            navigateToProfile("@" + feedModel.getUser().getUsername());
+            final User user = feedModel.getUser();
+            if (user == null) return;
+            navigateToProfile("@" + user.getUsername());
         }
 
         @Override
         public void onProfilePicClick(final Media feedModel) {
-            navigateToProfile("@" + feedModel.getUser().getUsername());
+            final User user = feedModel.getUser();
+            if (user == null) return;
+            navigateToProfile("@" + user.getUsername());
         }
 
         @Override
@@ -170,12 +190,9 @@ public class CollectionPostsFragment extends Fragment implements SwipeRefreshLay
         }
 
         private void openPostDialog(final Media feedModel, final int position) {
-            final NavController navController = NavHostFragment.findNavController(CollectionPostsFragment.this);
-            final Bundle bundle = new Bundle();
-            bundle.putSerializable(PostViewV2Fragment.ARG_MEDIA, feedModel);
-            bundle.putInt(PostViewV2Fragment.ARG_SLIDER_POSITION, position);
             try {
-                navController.navigate(R.id.action_global_post_view, bundle);
+                final NavDirections action = CollectionPostsFragmentDirections.actionToPost(feedModel, position);
+                NavHostFragment.findNavController(CollectionPostsFragment.this).navigate(action);
             } catch (Exception e) {
                 Log.e(TAG, "openPostDialog: ", e);
             }
@@ -262,10 +279,10 @@ public class CollectionPostsFragment extends Fragment implements SwipeRefreshLay
     @Override
     public void onCreateOptionsMenu(@NonNull final Menu menu, @NonNull final MenuInflater inflater) {
         inflater.inflate(R.menu.collection_posts_menu, menu);
-        deleteMenu = menu.findItem(R.id.delete);
+        final MenuItem deleteMenu = menu.findItem(R.id.delete);
         if (deleteMenu != null)
             deleteMenu.setVisible(savedCollection.getCollectionType().equals("MEDIA"));
-        editMenu = menu.findItem(R.id.edit);
+        final MenuItem editMenu = menu.findItem(R.id.edit);
         if (editMenu != null)
             editMenu.setVisible(savedCollection.getCollectionType().equals("MEDIA"));
     }
@@ -408,9 +425,7 @@ public class CollectionPostsFragment extends Fragment implements SwipeRefreshLay
     }
 
     private void setupCover() {
-        final String coverUrl = ResponseBodyUtils.getImageUrl(savedCollection.getCoverMediaList() == null
-                                                              ? savedCollection.getCoverMedia()
-                                                              : savedCollection.getCoverMediaList().get(0));
+        final String coverUrl = ResponseBodyUtils.getImageUrl(savedCollection.getCoverMediaList().get(0));
         final DraweeController controller = Fresco
                 .newDraweeControllerBuilder()
                 .setOldController(binding.cover.getController())
@@ -443,7 +458,6 @@ public class CollectionPostsFragment extends Fragment implements SwipeRefreshLay
                      .setFeedItemCallback(feedItemCallback)
                      .setSelectionModeCallback(selectionModeCallback)
                      .init();
-        binding.swipeRefreshLayout.setRefreshing(true);
     }
 
     private void updateSwipeRefreshState() {
@@ -453,10 +467,12 @@ public class CollectionPostsFragment extends Fragment implements SwipeRefreshLay
     }
 
     private void navigateToProfile(final String username) {
-        final NavController navController = NavHostFragment.findNavController(this);
-        final Bundle bundle = new Bundle();
-        bundle.putString("username", username);
-        navController.navigate(R.id.action_global_profileFragment, bundle);
+        try {
+            final NavDirections action = CollectionPostsFragmentDirections.actionToProfile().setUsername(username);
+            NavHostFragment.findNavController(this).navigate(action);
+        } catch (Exception e) {
+            Log.e(TAG, "navigateToProfile: ", e);
+        }
     }
 
     private void showPostsLayoutPreferences() {

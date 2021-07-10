@@ -1,51 +1,30 @@
 package awais.instagrabber.fragments
 
-import android.content.Context
-import android.content.res.Resources
 import android.os.Bundle
-import android.util.Log
-import android.view.LayoutInflater
-import android.view.Menu
-import android.view.MenuInflater
-import android.view.MenuItem
-import android.view.View
-import android.view.ViewGroup
-import android.widget.Toast
-
-import androidx.annotation.NonNull
-import androidx.annotation.Nullable
+import android.view.*
 import androidx.appcompat.app.ActionBar
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
-import androidx.navigation.fragment.NavHostFragment
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-
-import java.util.ArrayList
-
 import awais.instagrabber.R
 import awais.instagrabber.adapters.FollowAdapter
 import awais.instagrabber.customviews.helpers.RecyclerLazyLoader
 import awais.instagrabber.databinding.FragmentFollowersViewerBinding
 import awais.instagrabber.models.Resource
 import awais.instagrabber.repositories.responses.User
-import awais.instagrabber.utils.AppExecutors
 import awais.instagrabber.viewmodels.FollowViewModel
 import thoughtbot.expandableadapter.ExpandableGroup
+import java.util.*
 
 class FollowViewerFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
-    private val followModels: ArrayList<User> = ArrayList<User>()
-    private val followingModels: ArrayList<User> = ArrayList<User>()
-    private val followersModels: ArrayList<User> = ArrayList<User>()
-    private val allFollowing: ArrayList<User> = ArrayList<User>()
-    private val moreAvailable = true
     private var isFollowersList = false
     private var isCompare = false
     private var shouldRefresh = true
     private var searching = false
-    private var profileId: Long = 0
     private var username: String? = null
     private var namePost: String? = null
     private var type = 0
@@ -125,15 +104,15 @@ class FollowViewerFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         type = if (isFollowersList) R.string.followers_type_followers else R.string.followers_type_following
         setSubtitle(type)
         val layoutManager = LinearLayoutManager(context)
-        lazyLoader = RecyclerLazyLoader(layoutManager, { _, totalItemsCount ->
+        lazyLoader = RecyclerLazyLoader(layoutManager) { _, totalItemsCount ->
             binding.swipeRefreshLayout.isRefreshing = true
             val liveData = if (searching) viewModel.search(isFollowersList)
-                           else viewModel.fetch(isFollowersList, null)
+            else viewModel.fetch(isFollowersList, null)
             liveData.observe(viewLifecycleOwner) {
                 binding.swipeRefreshLayout.isRefreshing = it.status != Resource.Status.SUCCESS
                 layoutManager.scrollToPosition(totalItemsCount)
             }
-        })
+        }
         binding.rvFollow.addOnScrollListener(lazyLoader)
         binding.rvFollow.layoutManager = layoutManager
         viewModel.getList(isFollowersList).observe(viewLifecycleOwner) {
@@ -167,7 +146,7 @@ class FollowViewerFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
             }
 
             override fun onQueryTextChange(query: String): Boolean {
-                if (query.isNullOrEmpty()) {
+                if (query.isEmpty()) {
                     if (!isCompare && searching) {
                         viewModel.setQuery(null, isFollowersList)
                         viewModel.getSearch().removeObservers(viewLifecycleOwner)
@@ -216,7 +195,7 @@ class FollowViewerFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
     ) {
         val groups: ArrayList<ExpandableGroup> = ArrayList<ExpandableGroup>(1)
         if (isCompare && followingModels != null && followersModels != null && allFollowing != null) {
-            if (followingModels.size > 0) groups.add(
+            if (followingModels.isNotEmpty()) groups.add(
                 ExpandableGroup(
                     getString(
                         R.string.followers_not_following,
@@ -224,7 +203,7 @@ class FollowViewerFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
                     ), followingModels
                 )
             )
-            if (followersModels.size > 0) groups.add(
+            if (followersModels.isNotEmpty()) groups.add(
                 ExpandableGroup(
                     getString(
                         R.string.followers_not_follower,
@@ -232,7 +211,7 @@ class FollowViewerFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
                     ), followersModels
                 )
             )
-            if (allFollowing.size > 0) groups.add(
+            if (allFollowing.isNotEmpty()) groups.add(
                 ExpandableGroup(
                     getString(R.string.followers_both_following),
                     allFollowing
@@ -244,17 +223,11 @@ class FollowViewerFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         adapter = FollowAdapter({ v ->
             val tag = v.tag
             if (tag is User) {
-                val model = tag
-                val bundle = Bundle()
-                bundle.putString("username", model.username)
-                NavHostFragment.findNavController(this).navigate(R.id.action_global_profileFragment, bundle)
+                findNavController().navigate(FollowViewerFragmentDirections.actionToProfile().setUsername(tag.username))
             }
-        }, groups)
-        adapter!!.toggleGroup(0)
-        binding.rvFollow.adapter = adapter!!
-    }
-
-    companion object {
-        private const val TAG = "FollowViewerFragment"
+        }, groups).also {
+            it.toggleGroup(0)
+            binding.rvFollow.adapter = it
+        }
     }
 }
