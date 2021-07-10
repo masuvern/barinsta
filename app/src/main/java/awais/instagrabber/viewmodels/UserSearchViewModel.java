@@ -192,7 +192,7 @@ public class UserSearchViewModel extends ViewModel {
 
     private void rankedRecipientSearch() {
         directMessagesRepository.rankedRecipients(
-                searchMode.name(),
+                searchMode.getMode(),
                 showGroups,
                 currentQuery,
                 CoroutineUtilsKt.getContinuation((response, throwable) -> {

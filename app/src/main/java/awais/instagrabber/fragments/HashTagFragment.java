@@ -394,7 +394,6 @@ public class HashTagFragment extends Fragment implements SwipeRefreshLayout.OnRe
         }
         setTitle();
         setupPosts();
-        //        fetchStories();
         if (isLoggedIn) {
             hashtagDetailsBinding.btnFollowTag.setVisibility(View.VISIBLE);
             hashtagDetailsBinding.btnFollowTag.setText(hashtagModel.getFollowing() == FollowingType.FOLLOWING

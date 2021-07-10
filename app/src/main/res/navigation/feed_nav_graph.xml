@@ -2,36 +2,8 @@
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/nav_graph"
+    android:id="@+id/feed_nav_graph"
     app:startDestination="@id/feedFragment">
-
-    <action
-        android:id="@+id/action_global_hashTag"
-        app:destination="@id/hashTagFragment" />
-
-    <action
-        android:id="@+id/action_global_profile"
-        app:destination="@id/profile_non_top" />
-
-    <action
-        android:id="@+id/action_global_location"
-        app:destination="@id/locationFragment" />
-
-    <action
-        android:id="@+id/action_global_notifications"
-        app:destination="@id/notifications_viewer_non_top" />
-
-    <action
-        android:id="@+id/action_global_search"
-        app:destination="@id/searchFragment" />
-
-    <action
-        android:id="@+id/action_global_post"
-        app:destination="@id/postViewFragment" />
-
-    <action
-        android:id="@+id/action_global_direct_thread"
-        app:destination="@id/directMessagesThreadFragment" />
 
     <fragment
         android:id="@+id/feedFragment"
@@ -97,25 +69,6 @@
         <action
             android:id="@+id/action_to_user_search"
             app:destination="@id/user_search" />
-    </fragment>
-
-    <fragment
-        android:id="@+id/searchFragment"
-        android:name="awais.instagrabber.fragments.search.SearchFragment"
-        android:label="@string/search"
-        tools:layout="@layout/fragment_search">
-
-        <action
-            android:id="@+id/action_to_profile"
-            app:destination="@id/profile_non_top" />
-
-        <action
-            android:id="@+id/action_to_hashtag"
-            app:destination="@id/hashTagFragment" />
-
-        <action
-            android:id="@+id/action_to_location"
-            app:destination="@id/locationFragment" />
     </fragment>
 
     <fragment
@@ -266,63 +219,6 @@
             app:destination="@id/profile_non_top" />
     </dialog>
 
-    <fragment
-        android:id="@+id/profileFragment"
-        android:name="awais.instagrabber.fragments.main.ProfileFragment"
-        android:label="@string/profile"
-        tools:layout="@layout/fragment_profile">
-
-        <argument
-            android:name="username"
-            android:defaultValue=""
-            app:argType="string"
-            app:nullable="true" />
-
-        <action
-            android:id="@+id/action_to_saved"
-            app:destination="@id/savedViewerFragment" />
-
-        <action
-            android:id="@+id/action_to_saved_collections"
-            app:destination="@id/savedCollectionsFragment" />
-
-        <action
-            android:id="@+id/action_to_location"
-            app:destination="@id/locationFragment" />
-
-        <action
-            android:id="@+id/action_to_hashtag"
-            app:destination="@id/hashTagFragment" />
-
-        <action
-            android:id="@+id/action_to_follow_viewer"
-            app:destination="@id/followViewerFragment" />
-
-        <action
-            android:id="@+id/action_to_story"
-            app:destination="@id/storyViewerFragment" />
-
-        <action
-            android:id="@+id/action_to_post"
-            app:destination="@id/postViewFragment" />
-
-        <action
-            android:id="@+id/action_to_comments"
-            app:destination="@id/commentsViewerFragment" />
-
-        <action
-            android:id="@+id/action_to_user_search"
-            app:destination="@id/user_search" />
-
-        <action
-            android:id="@+id/action_to_notifications"
-            app:destination="@id/notifications_viewer_non_top" />
-
-        <action
-            android:id="@+id/action_to_profile"
-            app:destination="@id/profile_non_top" />
-    </fragment>
-
     <!-- Copy of profile fragment tag -->
     <!-- Required to get back arrow in action bar -->
     <!-- See https://issuetracker.google.com/issues/192395936 -->
@@ -470,126 +366,6 @@
             app:destination="@id/profile_non_top" />
     </dialog>
 
-    <fragment
-        android:id="@+id/discoverFragment"
-        android:name="awais.instagrabber.fragments.main.DiscoverFragment"
-        android:label="@string/title_discover"
-        tools:layout="@layout/fragment_discover">
-
-        <action
-            android:id="@+id/action_to_topic_posts"
-            app:destination="@id/topicPostsFragment" />
-
-        <action
-            android:id="@+id/action_to_post"
-            app:destination="@id/postViewFragment" />
-    </fragment>
-
-    <fragment
-        android:id="@+id/topicPostsFragment"
-        android:name="awais.instagrabber.fragments.TopicPostsFragment"
-        tools:layout="@layout/fragment_topic_posts">
-
-        <argument
-            android:name="topicCluster"
-            app:argType="awais.instagrabber.repositories.responses.discover.TopicCluster" />
-
-        <argument
-            android:name="titleColor"
-            app:argType="integer" />
-
-        <argument
-            android:name="backgroundColor"
-            app:argType="integer" />
-
-        <action
-            android:id="@+id/action_to_comments"
-            app:destination="@id/commentsViewerFragment" />
-
-        <action
-            android:id="@+id/action_to_hashtag"
-            app:destination="@id/hashTagFragment" />
-
-        <action
-            android:id="@+id/action_to_location"
-            app:destination="@id/locationFragment" />
-
-        <action
-            android:id="@+id/action_to_profile"
-            app:destination="@id/profile_non_top" />
-    </fragment>
-
-    <fragment
-        android:id="@+id/favoritesFragment"
-        android:name="awais.instagrabber.fragments.FavoritesFragment"
-        android:label="@string/title_favorites"
-        tools:layout="@layout/fragment_favorites">
-
-        <action
-            android:id="@+id/action_to_profile"
-            app:destination="@id/profile_non_top" />
-
-        <action
-            android:id="@+id/action_to_location"
-            app:destination="@id/locationFragment" />
-
-        <action
-            android:id="@+id/action_to_hashtag"
-            app:destination="@id/hashTagFragment" />
-    </fragment>
-
-    <!-- Copy of favorites fragment tag -->
-    <!-- Required to get back arrow in action bar -->
-    <!-- See https://issuetracker.google.com/issues/192395936 -->
-    <fragment
-        android:id="@+id/favorites_non_top"
-        android:name="awais.instagrabber.fragments.FavoritesFragment"
-        android:label="@string/title_favorites"
-        tools:layout="@layout/fragment_favorites">
-
-        <action
-            android:id="@+id/action_to_profile"
-            app:destination="@id/profile_non_top" />
-
-        <action
-            android:id="@+id/action_to_location"
-            app:destination="@id/locationFragment" />
-
-        <action
-            android:id="@+id/action_to_hashtag"
-            app:destination="@id/hashTagFragment" />
-    </fragment>
-
-    <fragment
-        android:id="@+id/notificationsViewer"
-        android:name="awais.instagrabber.fragments.NotificationsViewerFragment"
-        android:label="@string/title_notifications"
-        tools:layout="@layout/fragment_notifications_viewer">
-
-        <argument
-            android:name="type"
-            android:defaultValue="notif"
-            app:argType="string"
-            app:nullable="false" />
-
-        <argument
-            android:name="targetId"
-            android:defaultValue="0L"
-            app:argType="long" />
-
-        <action
-            android:id="@+id/action_to_story"
-            app:destination="@id/storyViewerFragment" />
-
-        <action
-            android:id="@+id/action_to_profile"
-            app:destination="@id/profile_non_top" />
-
-        <action
-            android:id="@+id/action_to_post"
-            app:destination="@id/postViewFragment" />
-    </fragment>
-
     <!-- Copy of notification viewer fragment tag -->
     <!-- Required to get back arrow in action bar -->
     <!-- See https://issuetracker.google.com/issues/192395936 -->
@@ -698,128 +474,6 @@
     </fragment>
 
     <fragment
-        android:id="@+id/directMessagesInboxFragment"
-        android:name="awais.instagrabber.fragments.directmessages.DirectMessageInboxFragment"
-        android:label="@string/action_dms"
-        tools:layout="@layout/fragment_direct_messages_inbox">
-
-        <action
-            android:id="@+id/action_to_thread"
-            app:destination="@id/directMessagesThreadFragment" />
-
-        <action
-            android:id="@+id/action_to_pending_inbox"
-            app:destination="@id/directPendingInboxFragment" />
-    </fragment>
-
-    <fragment
-        android:id="@+id/directMessagesThreadFragment"
-        android:name="awais.instagrabber.fragments.directmessages.DirectMessageThreadFragment"
-        tools:layout="@layout/fragment_direct_messages_thread">
-
-        <argument
-            android:name="threadId"
-            app:argType="string" />
-
-        <argument
-            android:name="title"
-            app:argType="string" />
-
-        <argument
-            android:name="pending"
-            android:defaultValue="false"
-            app:argType="boolean" />
-
-        <action
-            android:id="@+id/action_to_settings"
-            app:destination="@id/directMessagesSettingsFragment" />
-
-        <action
-            android:id="@+id/action_to_image_edit"
-            app:destination="@id/imageEditFragment" />
-
-        <action
-            android:id="@+id/action_to_story"
-            app:destination="@id/storyViewerFragment" />
-
-        <action
-            android:id="@+id/action_to_hashtag"
-            app:destination="@id/hashTagFragment" />
-
-        <action
-            android:id="@+id/action_to_location"
-            app:destination="@id/locationFragment" />
-
-        <action
-            android:id="@+id/action_to_post"
-            app:destination="@id/postViewFragment" />
-
-        <action
-            android:id="@+id/action_to_user_search"
-            app:destination="@id/user_search" />
-
-        <action
-            android:id="@+id/action_to_profile"
-            app:destination="@id/profile_non_top" />
-    </fragment>
-
-    <fragment
-        android:id="@+id/directMessagesSettingsFragment"
-        android:name="awais.instagrabber.fragments.directmessages.DirectMessageSettingsFragment"
-        android:label="@string/details"
-        tools:layout="@layout/fragment_direct_messages_settings">
-        <argument
-            android:name="threadId"
-            app:argType="string"
-            app:nullable="false" />
-
-        <argument
-            android:name="title"
-            app:argType="string"
-            app:nullable="true" />
-
-        <argument
-            android:name="pending"
-            android:defaultValue="false"
-            app:argType="boolean" />
-
-        <action
-            android:id="@+id/action_to_inbox"
-            app:destination="@id/directMessagesInboxFragment"
-            app:popUpTo="@+id/directMessagesInboxFragment"
-            app:popUpToInclusive="true" />
-
-        <action
-            android:id="@+id/action_to_user_search"
-            app:destination="@id/user_search" />
-
-        <action
-            android:id="@+id/action_to_profile"
-            app:destination="@id/profile_non_top" />
-    </fragment>
-
-    <fragment
-        android:id="@+id/imageEditFragment"
-        android:name="awais.instagrabber.fragments.imageedit.ImageEditFragment"
-        android:label="Edit Photo"
-        tools:layout="@layout/fragment_image_edit">
-        <argument
-            android:name="uri"
-            app:argType="android.net.Uri"
-            app:nullable="false" />
-    </fragment>
-
-    <fragment
-        android:id="@+id/directPendingInboxFragment"
-        android:name="awais.instagrabber.fragments.directmessages.DirectPendingInboxFragment"
-        android:label="@string/pending_requests"
-        tools:layout="@layout/fragment_direct_pending_inbox">
-        <action
-            android:id="@+id/action_to_thread"
-            app:destination="@id/directMessagesThreadFragment" />
-    </fragment>
-
-    <fragment
         android:id="@+id/user_search"
         android:name="awais.instagrabber.fragments.UserSearchFragment"
         android:label="@string/search"
@@ -862,37 +516,5 @@
             android:defaultValue="@null"
             app:argType="string[]"
             app:nullable="true" />
-    </fragment>
-
-    <include app:graph="@navigation/settings_nav_graph" />
-
-    <fragment
-        android:id="@+id/morePreferencesFragment"
-        android:name="awais.instagrabber.fragments.settings.MorePreferencesFragment"
-        android:label="@string/more">
-
-        <action
-            android:id="@+id/action_to_settings"
-            app:destination="@id/settings_nav_graph" />
-
-        <action
-            android:id="@+id/action_to_about"
-            app:destination="@id/aboutFragment" />
-
-        <action
-            android:id="@+id/action_to_favorites"
-            app:destination="@id/favorites_non_top" />
-
-        <action
-            android:id="@+id/action_to_backup"
-            app:destination="@id/backupPreferencesFragment" />
-
-        <action
-            android:id="@+id/action_to_notifications"
-            app:destination="@id/notifications_viewer_non_top" />
-
-        <action
-            android:id="@+id/action_to_story_list"
-            app:destination="@id/storyListViewerFragment" />
     </fragment>
 </navigation>

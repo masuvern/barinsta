@@ -11,15 +11,6 @@
 
     <item name="root_nav_graph" type="id" />
 
-    <!-- Navigation top level root ids -->
-    <item name="feed_nav_graph" type="id" />
-    <item name="profile_nav_graph" type="id" />
-    <item name="direct_messages_nav_graph" type="id" />
-    <item name="notification_viewer_nav_graph" type="id" />
-    <item name="discover_nav_graph" type="id" />
-    <item name="favorites_nav_graph" type="id" />
-    <item name="more_nav_graph" type="id" />
-    
     <!-- story stickers -->
     <item name="mentions" type="id" />
     <item name="spotify" type="id" />

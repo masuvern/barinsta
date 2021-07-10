@@ -758,17 +758,18 @@ public class PostViewV2Fragment extends Fragment implements EditTextDialogFragme
                 popupMenu.setOnMenuItemClickListener(item -> {
                     final int itemId = item.getItemId();
                     if (itemId == R.id.share_dm) {
-                        if (profileModel.isPrivate())
+                        if (profileModel.isPrivate()) {
                             Toast.makeText(context, R.string.share_private_post, Toast.LENGTH_SHORT).show();
+                        final UserSearchNavGraphDirections.ActionGlobalUserSearch actionGlobalUserSearch = UserSearchFragmentDirections
+                                .actionGlobalUserSearch()
+                                .setTitle(getString(R.string.share))
+                                .setActionLabel(getString(R.string.send))
+                                .setShowGroups(true)
+                                .setMultiple(true)
+                                .setSearchMode(UserSearchFragment.SearchMode.RAVEN);
+                        final NavController navController = NavHostFragment.findNavController(PostViewV2Fragment.this);
                         try {
-                            final NavDirections actionGlobalUserSearch = PostViewV2FragmentDirections
-                                    .actionToUserSearch()
-                                    .setTitle(getString(R.string.share))
-                                    .setActionLabel(getString(R.string.send))
-                                    .setShowGroups(true)
-                                    .setMultiple(true)
-                                    .setSearchMode(UserSearchMode.RAVEN);
-                            NavHostFragment.findNavController(this).navigate(actionGlobalUserSearch);
+                            navController.navigate(actionGlobalUserSearch);
                         } catch (Exception e) {
                             Log.e(TAG, "setupShare: ", e);
                         }

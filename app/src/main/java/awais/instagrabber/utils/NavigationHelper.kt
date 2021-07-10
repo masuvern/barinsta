@@ -28,7 +28,8 @@ private fun getTabs(
     navRootIds: IntArray,
     isAnon: Boolean = false,
 ): Pair<List<Tab>, MutableList<Tab>> {
-    val navGraphNames = getResIdsForNavRootIds(navRootIds, ::geNavGraphNameForNavRootId)
+    val navGraphNames = getResIdsForNavRootIds(navRootIds, ::getNavGraphNameForNavRootId)
+    val navGraphResIds = getResIdsForNavRootIds(navRootIds, ::getNavGraphResIdForNavRootId)
     val titleArray = getResIdsForNavRootIds(navRootIds, ::getTitleResIdForNavRootId)
     val iconIds = getResIdsForNavRootIds(navRootIds, ::getIconResIdForNavRootId)
     val startDestFragIds = getResIdsForNavRootIds(navRootIds, ::getStartDestFragIdForNavRootId)
@@ -37,15 +38,15 @@ private fun getTabs(
     val otherTabs = mutableListOf<Tab>() // Will contain tabs not in current list
     for (i in navRootIds.indices) {
         val navRootId = navRootIds[i]
-        val navGraphName = navGraphNames[i]
         val tab = Tab(
             iconIds[i],
             context.getString(titleArray[i]),
-            if(isAnon) false else !NON_REMOVABLE_NAV_ROOT_IDS.contains(navRootId),
+            if (isAnon) false else !NON_REMOVABLE_NAV_ROOT_IDS.contains(navRootId),
+            navGraphResIds[i],
             navRootId,
             startDestFragIds[i]
         )
-        if (!isAnon && !orderedGraphNames.contains(navGraphName)) {
+        if (!isAnon && !orderedGraphNames.contains(navGraphNames[i])) {
             otherTabs.add(tab)
             continue
         }
@@ -109,7 +110,7 @@ private fun getStartDestFragIdForNavRootId(id: Int): Int = when (id) {
     else -> 0
 }
 
-fun geNavGraphNameForNavRootId(id: Int): String = when (id) {
+fun getNavGraphNameForNavRootId(id: Int): String = when (id) {
     R.id.direct_messages_nav_graph -> "direct_messages_nav_graph"
     R.id.feed_nav_graph -> "feed_nav_graph"
     R.id.profile_nav_graph -> "profile_nav_graph"
@@ -120,7 +121,18 @@ fun geNavGraphNameForNavRootId(id: Int): String = when (id) {
     else -> ""
 }
 
-private fun geNavGraphNameForNavRootId(navGraphName: String): Int = when (navGraphName) {
+fun getNavGraphResIdForNavRootId(id: Int): Int = when (id) {
+    R.id.direct_messages_nav_graph -> R.navigation.direct_messages_nav_graph
+    R.id.feed_nav_graph -> R.navigation.feed_nav_graph
+    R.id.profile_nav_graph -> R.navigation.profile_nav_graph
+    R.id.discover_nav_graph -> R.navigation.discover_nav_graph
+    R.id.more_nav_graph -> R.navigation.more_nav_graph
+    R.id.favorites_nav_graph -> R.navigation.favorites_nav_graph
+    R.id.notification_viewer_nav_graph -> R.navigation.notification_viewer_nav_graph
+    else -> 0
+}
+
+private fun getNavRootIdForGraphName(navGraphName: String): Int = when (navGraphName) {
     "direct_messages_nav_graph" -> R.id.direct_messages_nav_graph
     "feed_nav_graph" -> R.id.feed_nav_graph
     "profile_nav_graph" -> R.id.profile_nav_graph
@@ -139,9 +151,9 @@ private fun getOrderedNavRootIdsFromPref(navGraphNames: List<String>): Pair<List
         val newOrderString = top5navGraphNames.joinToString(",")
         Utils.settingsHelper.putString(PreferenceKeys.PREF_TAB_ORDER, newOrderString)
         tabOrderString = newOrderString
-        return top5navGraphNames to top5navGraphNames.map(::geNavGraphNameForNavRootId)
+        return top5navGraphNames to top5navGraphNames.map(::getNavRootIdForGraphName)
     }
-    val orderString = tabOrderString ?: return navGraphNames to navGraphNames.subList(0, 5).map(::geNavGraphNameForNavRootId)
+    val orderString = tabOrderString ?: return navGraphNames to navGraphNames.subList(0, 5).map(::getNavRootIdForGraphName)
     // Make sure that the list from preference does not contain any invalid values
     val orderGraphNames = orderString
         .split(",")
@@ -153,7 +165,7 @@ private fun getOrderedNavRootIdsFromPref(navGraphNames: List<String>): Pair<List
         // Use top 5 entries for default list
         navGraphNames.subList(0, 5)
     } else orderGraphNames
-    return graphNames to graphNames.map(::geNavGraphNameForNavRootId)
+    return graphNames to graphNames.map(::getNavRootIdForGraphName)
 }
 
 fun isNavRootInCurrentTabs(navRootString: String?): Boolean {

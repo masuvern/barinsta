@@ -59,7 +59,7 @@ public class GeneralPreferencesFragment extends BasePreferencesFragment implemen
                                     .map(Tab::getTitle)
                                     .toArray(String[]::new);
         final String[] navGraphFileNames = tabs.stream()
-                                               .map(tab -> NavigationHelperKt.geNavGraphNameForNavRootId(tab.getNavigationRootId()))
+                                               .map(tab -> NavigationHelperKt.getNavGraphNameForNavRootId(tab.getNavigationRootId()))
                                                .toArray(String[]::new);
         preference.setKey(Constants.DEFAULT_TAB);
         preference.setTitle(R.string.pref_start_screen);

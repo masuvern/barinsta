@@ -171,7 +171,7 @@ public class TopicPostsFragment extends Fragment implements SwipeRefreshLayout.O
 
         private void openPostDialog(final Media feedModel, final int position) {
             try {
-                final NavDirections action = TopicPostsFragmentDirections.actionGlobalPost(feedModel, position);
+                final NavDirections action = TopicPostsFragmentDirections.actionToPost(feedModel, position);
                 NavHostFragment.findNavController(TopicPostsFragment.this).navigate(action);
             } catch (Exception e) {
                 Log.e(TAG, "openPostDialog: ", e);

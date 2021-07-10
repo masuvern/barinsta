@@ -14,8 +14,6 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.view.WindowManager
-import android.widget.Toast
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.Toolbar
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.app.NotificationManagerCompat
@@ -26,9 +24,7 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.emoji.text.EmojiCompat
 import androidx.emoji.text.EmojiCompat.InitCallback
 import androidx.emoji.text.FontRequestEmojiCompatConfig
-import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination
 import androidx.navigation.NavGraph
@@ -36,7 +32,6 @@ import androidx.navigation.NavGraphNavigator
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.*
 import awais.instagrabber.BuildConfig
-import awais.instagrabber.NavGraphDirections
 import awais.instagrabber.R
 import awais.instagrabber.customviews.emoji.EmojiVariantManager
 import awais.instagrabber.customviews.helpers.RootViewDeferringInsetsCallback
@@ -54,37 +49,28 @@ import awais.instagrabber.utils.*
 import awais.instagrabber.utils.AppExecutors.tasksThread
 import awais.instagrabber.utils.DownloadUtils.ReselectDocumentTreeException
 import awais.instagrabber.utils.TextUtils.isEmpty
-import awais.instagrabber.utils.TextUtils.shortcodeToId
 import awais.instagrabber.utils.emoji.EmojiParser
 import awais.instagrabber.viewmodels.AppStateViewModel
 import awais.instagrabber.viewmodels.DirectInboxViewModel
-import awais.instagrabber.webservices.GraphQLRepository
-import awais.instagrabber.webservices.MediaRepository
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.appbar.AppBarLayout.ScrollingViewBehavior
 import com.google.android.material.appbar.CollapsingToolbarLayout
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.textfield.TextInputLayout
 import com.google.common.collect.ImmutableList
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import java.util.*
 
 
-class MainActivity : BaseLanguageActivity(), FragmentManager.OnBackStackChangedListener {
+class MainActivity : BaseLanguageActivity() {
     private lateinit var binding: ActivityMainBinding
     private lateinit var navController: NavController
     private lateinit var appBarConfiguration: AppBarConfiguration
 
-    // private var currentNavControllerLiveData: LiveData<NavController>? = null
     private var searchMenuItem: MenuItem? = null
     private var startNavRootId: Int = 0
 
-    // private var firstFragmentGraphIndex = 0
     private var lastSelectedNavMenuId = 0
     private var isActivityCheckerServiceBound = false
-    private var isBackStackEmpty = false
     private var isLoggedIn = false
     private var deviceUuid: String? = null
     private var csrfToken: String? = null
@@ -106,8 +92,6 @@ class MainActivity : BaseLanguageActivity(), FragmentManager.OnBackStackChangedL
             isActivityCheckerServiceBound = false
         }
     }
-    private val mediaRepository: MediaRepository by lazy { MediaRepository.getInstance() }
-    private val graphQLRepository: GraphQLRepository by lazy { GraphQLRepository.getInstance() }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         try {
@@ -156,7 +140,6 @@ class MainActivity : BaseLanguageActivity(), FragmentManager.OnBackStackChangedL
         if (isLoggedIn && Utils.settingsHelper.getBoolean(PreferenceKeys.CHECK_ACTIVITY)) {
             bindActivityCheckerService()
         }
-        supportFragmentManager.addOnBackStackChangedListener(this)
         // Initialise the internal map
         tasksThread.execute {
             EmojiParser.getInstance(this)
@@ -235,7 +218,6 @@ class MainActivity : BaseLanguageActivity(), FragmentManager.OnBackStackChangedL
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.main_menu, menu)
         searchMenuItem = menu.findItem(R.id.search)
-        // val navController = currentNavControllerLiveData?.value
         val currentDestination = navController.currentDestination
         if (currentDestination != null) {
             val backStack = navController.backQueue
@@ -246,9 +228,8 @@ class MainActivity : BaseLanguageActivity(), FragmentManager.OnBackStackChangedL
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if (item.itemId == R.id.search) {
-            // val navController = currentNavControllerLiveData?.value ?: return false
             try {
-                navController.navigate(R.id.action_global_search)
+                navController.navigate(getSearchDeepLink())
                 return true
             } catch (e: Exception) {
                 Log.e(TAG, "onOptionsItemSelected: ", e)
@@ -301,27 +282,24 @@ class MainActivity : BaseLanguageActivity(), FragmentManager.OnBackStackChangedL
         instance = null
     }
 
-    override fun onBackPressed() {
-        val backStack = navController.backQueue
-        val currentNavControllerBackStack = backStack.size
-        if (isTaskRoot && isBackStackEmpty && currentNavControllerBackStack == 2) {
-            finishAfterTransition()
-            return
-        }
-        if (!isFinishing) {
-            try {
-                super.onBackPressed()
-            } catch (e: Exception) {
-                Log.e(TAG, "onBackPressed: ", e)
-                finish()
-            }
-        }
-    }
-
-    override fun onBackStackChanged() {
-        val backStackEntryCount = supportFragmentManager.backStackEntryCount
-        isBackStackEmpty = backStackEntryCount == 0
-    }
+    // override fun onBackPressed() {
+    // Log.d(TAG, "onBackPressed: ")
+    // navController.navigateUp()
+    //     val backStack = navController.backQueue
+    //     val currentNavControllerBackStack = backStack.size
+    //     if (isTaskRoot && isBackStackEmpty && currentNavControllerBackStack == 2) {
+    //         finishAfterTransition()
+    //         return
+    //     }
+    //     if (!isFinishing) {
+    //         try {
+    //             super.onBackPressed()
+    //         } catch (e: Exception) {
+    //             Log.e(TAG, "onBackPressed: ", e)
+    //             finish()
+    //         }
+    //     }
+    // }
 
     private fun createNotificationChannels() {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
@@ -374,16 +352,10 @@ class MainActivity : BaseLanguageActivity(), FragmentManager.OnBackStackChangedL
         val navigator = navigatorProvider.getNavigator<NavGraphNavigator>("navigation")
         val rootNavGraph = NavGraph(navigator)
         val navInflater = navController.navInflater
-        val destinations = currentTabs.map {
-            val navGraph = navInflater.inflate(R.navigation.nav_graph)
-            navGraph.id = it.navigationRootId
-            navGraph.label = "${it.title}_nav_graph".lowercase(Locale.getDefault())
-            navGraph.setStartDestination(it.startDestinationFragmentId)
-            return@map navGraph
-        }
+        val topLevelDestinations = currentTabs.map { navInflater.inflate(it.navigationResId) }
         rootNavGraph.id = R.id.root_nav_graph
         rootNavGraph.label = "root_nav_graph"
-        rootNavGraph.addDestinations(destinations)
+        rootNavGraph.addDestinations(topLevelDestinations)
         rootNavGraph.setStartDestination(if (startNavRootId != 0) startNavRootId else R.id.profile_nav_graph)
         navController.graph = rootNavGraph
         binding.bottomNavView.setupWithNavController(navController)
@@ -536,8 +508,7 @@ class MainActivity : BaseLanguageActivity(), FragmentManager.OnBackStackChangedL
     fun navigateToThread(threadId: String?, threadTitle: String?) {
         if (threadId == null || threadTitle == null) return
         try {
-            val action = NavGraphDirections.actionGlobalDirectThread(threadId, threadTitle)
-            navController.navigate(action)
+            navController.navigate(getDirectThreadDeepLink(threadId, threadTitle))
         } catch (e: Exception) {
             Log.e(TAG, "navigateToThread: ", e)
         }
@@ -564,8 +535,7 @@ class MainActivity : BaseLanguageActivity(), FragmentManager.OnBackStackChangedL
     private fun showProfileView(intentModel: IntentModel) {
         try {
             val username = intentModel.text
-            val action = NavGraphDirections.actionGlobalProfile().setUsername(username)
-            navController.navigate(action)
+            navController.navigate(getProfileDeepLink(username))
         } catch (e: Exception) {
             Log.e(TAG, "showProfileView: ", e)
         }
@@ -574,33 +544,10 @@ class MainActivity : BaseLanguageActivity(), FragmentManager.OnBackStackChangedL
     private fun showPostView(intentModel: IntentModel) {
         val shortCode = intentModel.text
         // Log.d(TAG, "shortCode: " + shortCode);
-        val alertDialog = AlertDialog.Builder(this)
-            .setCancelable(false)
-            .setView(R.layout.dialog_opening_post)
-            .create()
-        alertDialog.show()
-        lifecycleScope.launch(Dispatchers.IO) {
-            try {
-                val media = if (isLoggedIn) mediaRepository.fetch(shortcodeToId(shortCode)) else graphQLRepository.fetchPost(shortCode)
-                withContext(Dispatchers.Main) {
-                    if (media == null) {
-                        Toast.makeText(applicationContext, R.string.post_not_found, Toast.LENGTH_SHORT).show()
-                        return@withContext
-                    }
-                    try {
-                        val action = NavGraphDirections.actionGlobalPost(media, 0)
-                        navController.navigate(action)
-                    } catch (e: Exception) {
-                        Log.e(TAG, "showPostView: ", e)
-                    }
-                }
-            } catch (e: Exception) {
-                Log.e(TAG, "showPostView: ", e)
-            } finally {
-                withContext(Dispatchers.Main) {
-                    alertDialog.dismiss()
-                }
-            }
+        try {
+            navController.navigate(getPostDeepLink(shortCode))
+        } catch (e: Exception) {
+            Log.e(TAG, "showPostView: ", e)
         }
     }
 
@@ -608,8 +555,7 @@ class MainActivity : BaseLanguageActivity(), FragmentManager.OnBackStackChangedL
         val locationId = intentModel.text
         // Log.d(TAG, "locationId: " + locationId);
         try {
-            val action = NavGraphDirections.actionGlobalLocation(locationId.toLong())
-            navController.navigate(action)
+            navController.navigate(getLocationDeepLink(locationId))
         } catch (e: Exception) {
             Log.e(TAG, "showLocationView: ", e)
         }
@@ -619,8 +565,7 @@ class MainActivity : BaseLanguageActivity(), FragmentManager.OnBackStackChangedL
         val hashtag = intentModel.text
         // Log.d(TAG, "hashtag: " + hashtag);
         try {
-            val action = NavGraphDirections.actionGlobalHashTag(hashtag)
-            navController.navigate(action)
+            navController.navigate(getHashtagDeepLink(hashtag))
         } catch (e: Exception) {
             Log.e(TAG, "showHashtagView: ", e)
         }
@@ -628,8 +573,7 @@ class MainActivity : BaseLanguageActivity(), FragmentManager.OnBackStackChangedL
 
     private fun showActivityView() {
         try {
-            val action = NavGraphDirections.actionGlobalNotifications().apply { type = "notif" }
-            navController.navigate(action)
+            navController.navigate(getNotificationsDeepLink("notif"))
         } catch (e: Exception) {
             Log.e(TAG, "showActivityView: ", e)
         }
@@ -649,21 +593,21 @@ class MainActivity : BaseLanguageActivity(), FragmentManager.OnBackStackChangedL
     val bottomNavView: BottomNavigationView
         get() = binding.bottomNavView
 
-    fun setCollapsingView(view: View) {
-        try {
-            binding.collapsingToolbarLayout.addView(view, 0)
-        } catch (e: Exception) {
-            Log.e(TAG, "setCollapsingView: ", e)
-        }
-    }
-
-    fun removeCollapsingView(view: View) {
-        try {
-            binding.collapsingToolbarLayout.removeView(view)
-        } catch (e: Exception) {
-            Log.e(TAG, "removeCollapsingView: ", e)
-        }
-    }
+    // fun setCollapsingView(view: View) {
+    //     try {
+    //         binding.collapsingToolbarLayout.addView(view, 0)
+    //     } catch (e: Exception) {
+    //         Log.e(TAG, "setCollapsingView: ", e)
+    //     }
+    // }
+    //
+    // fun removeCollapsingView(view: View) {
+    //     try {
+    //         binding.collapsingToolbarLayout.removeView(view)
+    //     } catch (e: Exception) {
+    //         Log.e(TAG, "removeCollapsingView: ", e)
+    //     }
+    // }
 
     fun resetToolbar() {
         binding.appBarLayout.visibility = View.VISIBLE
