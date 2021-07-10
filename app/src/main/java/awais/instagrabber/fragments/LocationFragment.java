@@ -350,7 +350,6 @@ public class LocationFragment extends Fragment implements SwipeRefreshLayout.OnR
                      .setFeedItemCallback(feedItemCallback)
                      .setSelectionModeCallback(selectionModeCallback)
                      .init();
-        binding.swipeRefreshLayout.setRefreshing(true);
         binding.posts.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrolled(@NonNull final RecyclerView recyclerView, final int dx, final int dy) {

@@ -458,7 +458,6 @@ public class CollectionPostsFragment extends Fragment implements SwipeRefreshLay
                      .setFeedItemCallback(feedItemCallback)
                      .setSelectionModeCallback(selectionModeCallback)
                      .init();
-        binding.swipeRefreshLayout.setRefreshing(true);
     }
 
     private void updateSwipeRefreshState() {

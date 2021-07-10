@@ -370,7 +370,6 @@ public class HashTagFragment extends Fragment implements SwipeRefreshLayout.OnRe
                      .setFeedItemCallback(feedItemCallback)
                      .setSelectionModeCallback(selectionModeCallback)
                      .init();
-        binding.swipeRefreshLayout.setRefreshing(true);
         binding.posts.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrolled(@NonNull final RecyclerView recyclerView, final int dx, final int dy) {

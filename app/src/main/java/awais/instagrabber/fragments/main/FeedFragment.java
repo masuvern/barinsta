@@ -345,7 +345,6 @@ public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefre
                                 .setFeedItemCallback(feedItemCallback)
                                 .setSelectionModeCallback(selectionModeCallback)
                                 .init();
-        binding.feedSwipeRefreshLayout.setRefreshing(true);
         binding.feedRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrolled(@NonNull final RecyclerView recyclerView, final int dx, final int dy) {
