@@ -26,6 +26,7 @@ import awais.instagrabber.viewmodels.ProfileFragmentViewModel.ProfileEvent.*
 import awais.instagrabber.webservices.*
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
 
@@ -380,6 +381,7 @@ class ProfileFragmentViewModel(
                     }
                     val threadId = thread.threadId ?: return@afterPrevious
                     _eventLiveData.postValue(Event(NavigateToThread(threadId, username)))
+                    delay(200) // Add delay so that the postValue in finally does not overwrite the NavigateToThread event
                 } catch (e: Exception) {
                     Log.e(TAG, "sendDm: ", e)
                 } finally {

@@ -238,7 +238,7 @@ public class TabOrderPreferenceDialogFragment extends DialogFragment {
     private void saveNewOrder() {
         final String newOrderString = newOrderTabs
                 .stream()
-                .map(tab -> NavigationHelperKt.geNavGraphNameForNavRootId(tab.getNavigationRootId()))
+                .map(tab -> NavigationHelperKt.getNavGraphNameForNavRootId(tab.getNavigationRootId()))
                 .collect(Collectors.joining(","));
         Utils.settingsHelper.putString(PreferenceKeys.PREF_TAB_ORDER, newOrderString);
     }

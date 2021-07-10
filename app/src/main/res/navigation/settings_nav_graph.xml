@@ -4,110 +4,6 @@
     android:id="@+id/settings_nav_graph"
     app:startDestination="@id/settingsPreferencesFragment">
 
-    <!--<include app:graph="@navigation/profile_nav_graph" />-->
-    <!--<include app:graph="@navigation/hashtag_nav_graph" />-->
-    <!--<include app:graph="@navigation/location_nav_graph" />-->
-    <!--<include app:graph="@navigation/comments_nav_graph" />-->
-    <!--<include app:graph="@navigation/likes_nav_graph" />-->
-    <!--<include app:graph="@navigation/notification_viewer_nav_graph" />-->
-    <!--<include app:graph="@navigation/story_list_nav_graph" />-->
-    <!--<include app:graph="@navigation/discover_nav_graph" />-->
-
-    <!--<action-->
-    <!--    android:id="@+id/action_global_commentsViewerFragment"-->
-    <!--    app:destination="@id/comments_nav_graph">-->
-    <!--    <argument-->
-    <!--        android:name="shortCode"-->
-    <!--        app:argType="string"-->
-    <!--        app:nullable="false" />-->
-    <!--    <argument-->
-    <!--        android:name="postId"-->
-    <!--        app:argType="string"-->
-    <!--        app:nullable="false" />-->
-    <!--    <argument-->
-    <!--        android:name="postUserId"-->
-    <!--        app:argType="long" />-->
-    <!--</action>-->
-
-    <!--<action-->
-    <!--    android:id="@+id/action_global_likesViewerFragment"-->
-    <!--    app:destination="@id/likes_nav_graph">-->
-    <!--    <argument-->
-    <!--        android:name="postId"-->
-    <!--        app:argType="string"-->
-    <!--        app:nullable="false" />-->
-    <!--    <argument-->
-    <!--        android:name="isComment"-->
-    <!--        app:argType="boolean"-->
-    <!--        app:nullable="false" />-->
-    <!--</action>-->
-
-    <!--<action-->
-    <!--    android:id="@+id/action_global_profileFragment"-->
-    <!--    app:destination="@id/profile_nav_graph">-->
-    <!--    <argument-->
-    <!--        android:name="username"-->
-    <!--        app:argType="string"-->
-    <!--        app:nullable="true" />-->
-    <!--</action>-->
-
-    <!--<action-->
-    <!--    android:id="@+id/action_global_hashTagFragment"-->
-    <!--    app:destination="@id/hashtag_nav_graph">-->
-    <!--    <argument-->
-    <!--        android:name="hashtag"-->
-    <!--        app:argType="string"-->
-    <!--        app:nullable="false" />-->
-    <!--</action>-->
-
-    <!--<action-->
-    <!--    android:id="@+id/action_global_locationFragment"-->
-    <!--    app:destination="@id/location_nav_graph">-->
-    <!--    <argument-->
-    <!--        android:name="locationId"-->
-    <!--        app:argType="long" />-->
-    <!--</action>-->
-
-    <!--<action-->
-    <!--    android:id="@+id/action_global_storyListViewerFragment"-->
-    <!--    app:destination="@id/story_list_nav_graph">-->
-    <!--    <argument-->
-    <!--        android:name="type"-->
-    <!--        app:argType="string"-->
-    <!--        app:nullable="false" />-->
-    <!--</action>-->
-
-    <!--<action-->
-    <!--    android:id="@+id/action_global_notificationsViewerFragment"-->
-    <!--    app:destination="@id/notification_viewer_nav_graph">-->
-    <!--    <argument-->
-    <!--        android:name="type"-->
-    <!--        app:argType="string"-->
-    <!--        app:nullable="false" />-->
-    <!--    <argument-->
-    <!--        android:name="targetId"-->
-    <!--        android:defaultValue="0L"-->
-    <!--        app:argType="long" />-->
-    <!--</action>-->
-
-    <!--<action-->
-    <!--    android:id="@+id/action_global_post_view"-->
-    <!--    app:destination="@id/postViewFragment">-->
-    <!--    <argument-->
-    <!--        android:name="media"-->
-    <!--        app:argType="awais.instagrabber.repositories.responses.Media"-->
-    <!--        app:nullable="false" />-->
-    <!--    <argument-->
-    <!--        android:name="position"-->
-    <!--        app:argType="integer" />-->
-    <!--</action>-->
-
-    <!--<include app:graph="@navigation/user_search_nav_graph" />-->
-
-    <!--<action-->
-    <!--    android:id="@+id/action_global_user_search"-->
-    <!--    app:destination="@id/user_search_nav_graph" />-->
-
     <fragment
         android:id="@+id/settingsPreferencesFragment"
         android:name="awais.instagrabber.fragments.settings.SettingsPreferencesFragment"
@@ -181,8 +77,4 @@
         android:id="@+id/postPreferencesFragment"
         android:name="awais.instagrabber.fragments.settings.PostPreferencesFragment"
         android:label="@string/pref_category_post" />
-    <!--<fragment-->
-    <!--    android:id="@+id/postViewFragment"-->
-    <!--    android:name="awais.instagrabber.fragments.PostViewV2Fragment"-->
-    <!--    android:label="@string/post" />-->
 </navigation>

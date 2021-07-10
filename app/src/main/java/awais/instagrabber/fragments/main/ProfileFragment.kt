@@ -13,7 +13,6 @@ import android.view.*
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.content.res.AppCompatResources
-import androidx.constraintlayout.motion.widget.MotionLayout
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentTransaction
 import androidx.lifecycle.MutableLiveData
@@ -75,12 +74,14 @@ class ProfileFragment : Fragment(), OnRefreshListener, ConfirmDialogFragmentCall
     private var selectedMedia: List<Media>? = null
     private var actionMode: ActionMode? = null
     private var disableDm: Boolean = false
-    private var shouldRefresh: Boolean = true
+
+    // private var shouldRefresh: Boolean = true
     private var highlightsAdapter: HighlightsAdapter? = null
     private var layoutPreferences = Utils.getPostsLayoutPreferences(Constants.PREF_PROFILE_POSTS_LAYOUT)
 
     private lateinit var mainActivity: MainActivity
-    private lateinit var root: MotionLayout
+
+    // private lateinit var root: MotionLayout
     private lateinit var binding: FragmentProfileBinding
     private lateinit var appStateViewModel: AppStateViewModel
     private lateinit var viewModel: ProfileFragmentViewModel
@@ -335,23 +336,12 @@ class ProfileFragment : Fragment(), OnRefreshListener, ConfirmDialogFragmentCall
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        if (this::root.isInitialized) {
-            shouldRefresh = false
-            return root
-        }
-        appStateViewModel.currentUserLiveData.observe(viewLifecycleOwner, viewModel::setCurrentUser)
         binding = FragmentProfileBinding.inflate(inflater, container, false)
-        root = binding.root
-        return root
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        if (!shouldRefresh) {
-            setupObservers()
-            return
-        }
         init()
-        shouldRefresh = false
     }
 
     override fun onRefresh() {
@@ -399,6 +389,11 @@ class ProfileFragment : Fragment(), OnRefreshListener, ConfirmDialogFragmentCall
         }
     }
 
+    override fun onDestroyView() {
+        super.onDestroyView()
+        setupPostsDone = false
+    }
+
     private fun shareProfileViaDm() {
         try {
             val actionToUserSearch = ProfileFragmentDirections.actionToUserSearch().apply {
@@ -444,7 +439,11 @@ class ProfileFragment : Fragment(), OnRefreshListener, ConfirmDialogFragmentCall
     }
 
     private fun setupObservers() {
-        viewModel.isLoggedIn.observe(viewLifecycleOwner) {} // observe so that `isLoggedIn.value` is correct
+        appStateViewModel.currentUserLiveData.observe(viewLifecycleOwner, viewModel::setCurrentUser)
+        viewModel.isLoggedIn.observe(viewLifecycleOwner) {
+            // observe so that `isLoggedIn.value` is correct
+            Log.d(TAG, "setupObservers: $it")
+        }
         viewModel.currentUserProfileActionLiveData.observe(viewLifecycleOwner) {
             val (currentUserResource, profileResource) = it
             if (currentUserResource.status == Resource.Status.ERROR || profileResource.status == Resource.Status.ERROR) {
@@ -469,7 +468,7 @@ class ProfileFragment : Fragment(), OnRefreshListener, ConfirmDialogFragmentCall
                 context?.let { ctx -> Toast.makeText(ctx, R.string.error_loading_profile, Toast.LENGTH_LONG).show() }
                 return@observe
             }
-            root.loadLayoutDescription(R.xml.header_list_scene)
+            binding.root.loadLayoutDescription(R.xml.header_list_scene)
             setupFavChip(profile, currentUser)
             setupFavButton(currentUser, profile)
             setupSavedButton(currentUser, profile)
@@ -549,7 +548,7 @@ class ProfileFragment : Fragment(), OnRefreshListener, ConfirmDialogFragmentCall
         binding.privatePage2.visibility = VISIBLE
         binding.postsRecyclerView.visibility = GONE
         binding.swipeRefreshLayout.isRefreshing = false
-        root.getTransition(R.id.transition)?.setEnable(false)
+        binding.root.getTransition(R.id.transition)?.setEnable(false)
     }
 
     private fun setupProfileContext(contextPair: Pair<String?, List<UserProfileContextLink>?>) {
@@ -853,7 +852,7 @@ class ProfileFragment : Fragment(), OnRefreshListener, ConfirmDialogFragmentCall
     }
 
     private fun showDefaultMessage() {
-        root.loadLayoutDescription(R.xml.profile_fragment_no_acc_layout)
+        binding.root.loadLayoutDescription(R.xml.profile_fragment_no_acc_layout)
         binding.privatePage1.visibility = View.VISIBLE
         binding.privatePage2.visibility = View.VISIBLE
         binding.privatePage1.setImageResource(R.drawable.ic_outline_info_24)
@@ -884,7 +883,7 @@ class ProfileFragment : Fragment(), OnRefreshListener, ConfirmDialogFragmentCall
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
                 val canScrollVertically = recyclerView.canScrollVertically(-1)
-                root.getTransition(R.id.transition)?.setEnable(!canScrollVertically)
+                binding.root.getTransition(R.id.transition)?.setEnable(!canScrollVertically)
             }
         })
         setupPostsDone = true
