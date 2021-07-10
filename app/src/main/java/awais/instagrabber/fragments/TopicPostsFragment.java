@@ -52,6 +52,7 @@ import awais.instagrabber.repositories.responses.Location;
 import awais.instagrabber.repositories.responses.Media;
 import awais.instagrabber.repositories.responses.User;
 import awais.instagrabber.repositories.responses.discover.TopicCluster;
+import awais.instagrabber.utils.AppExecutors;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.DownloadUtils;
 import awais.instagrabber.utils.ResponseBodyUtils;
@@ -99,7 +100,7 @@ public class TopicPostsFragment extends Fragment implements SwipeRefreshLayout.O
     });
     private final FeedAdapterV2.FeedItemCallback feedItemCallback = new FeedAdapterV2.FeedItemCallback() {
         @Override
-        public void onPostClick(final Media feedModel, final View profilePicView, final View mainPostImage) {
+        public void onPostClick(final Media feedModel) {
             openPostDialog(feedModel, -1);
         }
 
@@ -147,12 +148,12 @@ public class TopicPostsFragment extends Fragment implements SwipeRefreshLayout.O
         }
 
         @Override
-        public void onNameClick(final Media feedModel, final View profilePicView) {
+        public void onNameClick(final Media feedModel) {
             navigateToProfile("@" + feedModel.getUser().getUsername());
         }
 
         @Override
-        public void onProfilePicClick(final Media feedModel, final View profilePicView) {
+        public void onProfilePicClick(final Media feedModel) {
             final User user = feedModel.getUser();
             if (user == null) return;
             navigateToProfile("@" + user.getUsername());
@@ -377,7 +378,9 @@ public class TopicPostsFragment extends Fragment implements SwipeRefreshLayout.O
     }
 
     private void updateSwipeRefreshState() {
-        binding.swipeRefreshLayout.setRefreshing(binding.posts.isFetching());
+        AppExecutors.INSTANCE.getMainThread().execute(() ->
+                binding.swipeRefreshLayout.setRefreshing(binding.posts.isFetching())
+        );
     }
 
     private void navigateToProfile(final String username) {

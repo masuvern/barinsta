@@ -51,6 +51,7 @@ import awais.instagrabber.dialogs.PostsLayoutPreferencesDialogFragment;
 import awais.instagrabber.models.PostsLayoutPreferences;
 import awais.instagrabber.models.enums.FavoriteType;
 import awais.instagrabber.models.enums.FollowingType;
+//import awais.instagrabber.repositories.requests.StoryViewerOptions;
 import awais.instagrabber.repositories.responses.Hashtag;
 import awais.instagrabber.repositories.responses.Location;
 import awais.instagrabber.repositories.responses.Media;
@@ -64,6 +65,7 @@ import awais.instagrabber.utils.TextUtils;
 import awais.instagrabber.utils.Utils;
 import awais.instagrabber.webservices.GraphQLRepository;
 import awais.instagrabber.webservices.ServiceCallback;
+//import awais.instagrabber.webservices.StoriesRepository;
 import awais.instagrabber.webservices.TagsService;
 import kotlinx.coroutines.Dispatchers;
 
@@ -80,9 +82,11 @@ public class HashTagFragment extends Fragment implements SwipeRefreshLayout.OnRe
     private String hashtag;
     private Hashtag hashtagModel = null;
     private ActionMode actionMode;
+//    private StoriesRepository storiesRepository;
     private boolean isLoggedIn;
     private TagsService tagsService;
     private GraphQLRepository graphQLRepository;
+//    private boolean storiesFetching;
     private Set<Media> selectedFeedModels;
     private PostsLayoutPreferences layoutPreferences = Utils.getPostsLayoutPreferences(Constants.PREF_HASHTAG_POSTS_LAYOUT);
     private LayoutHashtagDetailsBinding hashtagDetailsBinding;
@@ -116,7 +120,7 @@ public class HashTagFragment extends Fragment implements SwipeRefreshLayout.OnRe
             });
     private final FeedAdapterV2.FeedItemCallback feedItemCallback = new FeedAdapterV2.FeedItemCallback() {
         @Override
-        public void onPostClick(final Media feedModel, final View profilePicView, final View mainPostImage) {
+        public void onPostClick(final Media feedModel) {
             openPostDialog(feedModel, -1);
         }
 
@@ -176,14 +180,14 @@ public class HashTagFragment extends Fragment implements SwipeRefreshLayout.OnRe
         }
 
         @Override
-        public void onNameClick(final Media feedModel, final View profilePicView) {
+        public void onNameClick(final Media feedModel) {
             final User user = feedModel.getUser();
             if (user == null) return;
             navigateToProfile("@" + user.getUsername());
         }
 
         @Override
-        public void onProfilePicClick(final Media feedModel, final View profilePicView) {
+        public void onProfilePicClick(final Media feedModel) {
             final User user = feedModel.getUser();
             if (user == null) return;
             navigateToProfile("@" + user.getUsername());
@@ -199,8 +203,7 @@ public class HashTagFragment extends Fragment implements SwipeRefreshLayout.OnRe
             Utils.openEmailAddress(getContext(), emailId);
         }
 
-        private void openPostDialog(@NonNull final Media feedModel,
-                                    final int position) {
+        private void openPostDialog(@NonNull final Media feedModel, final int position) {
             if (opening) return;
             final User user = feedModel.getUser();
             if (user == null) return;
@@ -286,6 +289,7 @@ public class HashTagFragment extends Fragment implements SwipeRefreshLayout.OnRe
         final String cookie = settingsHelper.getString(Constants.COOKIE);
         isLoggedIn = !TextUtils.isEmpty(cookie) && CookieUtils.getUserIdFromCookie(cookie) > 0;
         tagsService = isLoggedIn ? TagsService.getInstance() : null;
+//        storiesRepository = isLoggedIn ? StoriesRepository.Companion.getInstance() : null;
         graphQLRepository = isLoggedIn ? null : GraphQLRepository.Companion.getInstance();
         setHasOptionsMenu(true);
     }
@@ -559,7 +563,9 @@ public class HashTagFragment extends Fragment implements SwipeRefreshLayout.OnRe
     }
 
     private void updateSwipeRefreshState() {
-        binding.swipeRefreshLayout.setRefreshing(binding.posts.isFetching());
+        AppExecutors.INSTANCE.getMainThread().execute(() ->
+                binding.swipeRefreshLayout.setRefreshing(binding.posts.isFetching())
+        );
     }
 
     private void navigateToProfile(final String username) {

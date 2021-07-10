@@ -237,7 +237,6 @@
     <string name="action_ayml">Usuaris suggerits</string>
     <string name="select_picture">Seleccionar imatge</string>
     <string name="uploading">S\'està pujant…</string>
-    <string name="activity_count_prefix">Tens:</string>
     <string name="activity_count_relationship">%d seguidors</string>
     <string name="activity_count_comments">%d comentaris</string>
     <string name="activity_count_commentlikes">%d m\'agrades al comentari</string>

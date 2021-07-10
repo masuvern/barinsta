@@ -39,6 +39,7 @@ import awais.instagrabber.models.enums.PostItemType;
 import awais.instagrabber.repositories.responses.Location;
 import awais.instagrabber.repositories.responses.Media;
 import awais.instagrabber.repositories.responses.User;
+import awais.instagrabber.utils.AppExecutors;
 import awais.instagrabber.utils.Constants;
 import awais.instagrabber.utils.CookieUtils;
 import awais.instagrabber.utils.DownloadUtils;
@@ -89,7 +90,7 @@ public final class SavedViewerFragment extends Fragment implements SwipeRefreshL
             });
     private final FeedAdapterV2.FeedItemCallback feedItemCallback = new FeedAdapterV2.FeedItemCallback() {
         @Override
-        public void onPostClick(final Media feedModel, final View profilePicView, final View mainPostImage) {
+        public void onPostClick(final Media feedModel) {
             openPostDialog(feedModel, -1);
         }
 
@@ -149,14 +150,12 @@ public final class SavedViewerFragment extends Fragment implements SwipeRefreshL
         }
 
         @Override
-        public void onNameClick(final Media feedModel, final View profilePicView) {
-            final User user = feedModel.getUser();
-            if (user == null) return;
-            navigateToProfile("@" + user.getUsername());
+        public void onNameClick(final Media feedModel) {
+            navigateToProfile("@" + feedModel.getUser().getUsername());
         }
 
         @Override
-        public void onProfilePicClick(final Media feedModel, final View profilePicView) {
+        public void onProfilePicClick(final Media feedModel) {
             final User user = feedModel.getUser();
             if (user == null) return;
             navigateToProfile("@" + user.getUsername());
@@ -327,7 +326,9 @@ public final class SavedViewerFragment extends Fragment implements SwipeRefreshL
     }
 
     private void updateSwipeRefreshState() {
-        binding.swipeRefreshLayout.setRefreshing(binding.posts.isFetching());
+        AppExecutors.INSTANCE.getMainThread().execute(() ->
+                binding.swipeRefreshLayout.setRefreshing(binding.posts.isFetching())
+        );
     }
 
     private void navigateToProfile(final String username) {

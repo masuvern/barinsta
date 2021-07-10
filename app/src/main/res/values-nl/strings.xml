@@ -237,7 +237,6 @@
     <string name="action_ayml">Voorgestelde gebruikers</string>
     <string name="select_picture">Selecteer Afbeelding</string>
     <string name="uploading">Bezig met uploaden…</string>
-    <string name="activity_count_prefix">Je hebt:</string>
     <string name="activity_count_relationship">%d volgers</string>
     <string name="activity_count_comments">%d opmerkingen</string>
     <string name="activity_count_commentlikes">%d opmerking-likes</string>
