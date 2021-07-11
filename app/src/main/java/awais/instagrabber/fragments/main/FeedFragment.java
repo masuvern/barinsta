@@ -16,8 +16,7 @@ import androidx.activity.OnBackPressedCallback;
 import androidx.activity.OnBackPressedDispatcher;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.constraintlayout.motion.widget.MotionLayout;
-import androidx.constraintlayout.motion.widget.MotionScene;
+import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
@@ -59,7 +58,7 @@ public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefre
     private static final String TAG = "FeedFragment";
 
     private MainActivity fragmentActivity;
-    private MotionLayout root;
+    private CoordinatorLayout root;
     private FragmentFeedBinding binding;
     private StoriesRepository storiesRepository;
     private boolean shouldRefresh = true;
@@ -68,7 +67,6 @@ public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefre
     private ActionMode actionMode;
     private Set<Media> selectedFeedModels;
     private PostsLayoutPreferences layoutPreferences = Utils.getPostsLayoutPreferences(Constants.PREF_POSTS_LAYOUT);
-    private RecyclerView storiesRecyclerView;
     private MenuItem storyListMenu;
 
     private final FeedStoriesAdapter feedStoriesAdapter = new FeedStoriesAdapter(
@@ -282,6 +280,7 @@ public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefre
 
     @Override
     public void onViewCreated(@NonNull final View view, @Nullable final Bundle savedInstanceState) {
+        fragmentActivity.setToolbar(binding.toolbar, this);
         if (!shouldRefresh) return;
         binding.feedSwipeRefreshLayout.setOnRefreshListener(this);
         /*
@@ -336,6 +335,12 @@ public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         fetchStories();
     }
 
+    @Override
+    public void onDestroyView() {
+        fragmentActivity.resetToolbar(this);
+        super.onDestroyView();
+    }
+
     private void setupFeed() {
         binding.feedRecyclerView.setViewModelStoreOwner(this)
                                 .setLifeCycleOwner(this)
@@ -345,17 +350,17 @@ public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefre
                                 .setFeedItemCallback(feedItemCallback)
                                 .setSelectionModeCallback(selectionModeCallback)
                                 .init();
-        binding.feedRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
-            @Override
-            public void onScrolled(@NonNull final RecyclerView recyclerView, final int dx, final int dy) {
-                super.onScrolled(recyclerView, dx, dy);
-                final boolean canScrollVertically = recyclerView.canScrollVertically(-1);
-                final MotionScene.Transition transition = root.getTransition(R.id.transition);
-                if (transition != null) {
-                    transition.setEnable(!canScrollVertically);
-                }
-            }
-        });
+        // binding.feedRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+        //     @Override
+        //     public void onScrolled(@NonNull final RecyclerView recyclerView, final int dx, final int dy) {
+        //         super.onScrolled(recyclerView, dx, dy);
+        //         final boolean canScrollVertically = recyclerView.canScrollVertically(-1);
+        //         final MotionScene.Transition transition = root.getTransition(R.id.transition);
+        //         if (transition != null) {
+        //             transition.setEnable(!canScrollVertically);
+        //         }
+        //     }
+        // });
         // if (shouldAutoPlay) {
         //     videoAwareRecyclerScroller = new VideoAwareRecyclerScroller();
         //     binding.feedRecyclerView.addOnScrollListener(videoAwareRecyclerScroller);
@@ -363,8 +368,8 @@ public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefre
     }
 
     private void updateSwipeRefreshState() {
-        AppExecutors.INSTANCE.getMainThread().execute(() ->
-                binding.feedSwipeRefreshLayout.setRefreshing(binding.feedRecyclerView.isFetching() || storiesFetching)
+        AppExecutors.INSTANCE.getMainThread().execute(() -> binding.feedSwipeRefreshLayout
+                .setRefreshing(binding.feedRecyclerView.isFetching() || storiesFetching)
         );
     }
 
@@ -373,7 +378,7 @@ public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefre
         feedStoriesViewModel = new ViewModelProvider(fragmentActivity).get(FeedStoriesViewModel.class);
         final Context context = getContext();
         if (context == null) return;
-        storiesRecyclerView = binding.header;
+        final RecyclerView storiesRecyclerView = binding.header;
         storiesRecyclerView.setLayoutManager(new LinearLayoutManager(context, RecyclerView.HORIZONTAL, false));
         storiesRecyclerView.setAdapter(feedStoriesAdapter);
         feedStoriesViewModel.getList().observe(fragmentActivity, feedStoriesAdapter::submitList);

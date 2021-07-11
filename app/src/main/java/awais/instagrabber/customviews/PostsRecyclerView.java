@@ -171,7 +171,7 @@ public class PostsRecyclerView extends RecyclerView {
         final LiveData<List<Media>> mediaListLiveData = mediaViewModel.getList();
         mediaListLiveData.observe(lifeCycleOwner, list -> feedAdapter.submitList(list, () -> {
             dispatchFetchStatus();
-            // postDelayed(this::fetchMoreIfPossible, 1000);
+            postDelayed(this::fetchMoreIfPossible, 1000);
             if (!shouldScrollToTop) return;
             shouldScrollToTop = false;
             post(() -> smoothScrollToPosition(0));

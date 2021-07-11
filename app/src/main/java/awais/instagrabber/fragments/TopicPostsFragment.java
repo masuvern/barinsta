@@ -269,7 +269,7 @@ public class TopicPostsFragment extends Fragment implements SwipeRefreshLayout.O
     @Override
     public void onResume() {
         super.onResume();
-        fragmentActivity.setToolbar(binding.toolbar);
+        fragmentActivity.setToolbar(binding.toolbar, this);
     }
 
     @Override
@@ -290,7 +290,7 @@ public class TopicPostsFragment extends Fragment implements SwipeRefreshLayout.O
     }
 
     private void resetToolbar() {
-        fragmentActivity.resetToolbar();
+        fragmentActivity.resetToolbar(this);
     }
 
     private void init() {
@@ -306,7 +306,7 @@ public class TopicPostsFragment extends Fragment implements SwipeRefreshLayout.O
             return;
         }
         binding.cover.setTransitionName("cover-" + topicCluster.getId());
-        fragmentActivity.setToolbar(binding.toolbar);
+        fragmentActivity.setToolbar(binding.toolbar, this);
         binding.collapsingToolbarLayout.setTitle(topicCluster.getTitle());
         final int collapsedTitleTextColor = ColorUtils.setAlphaComponent(titleColor, 0xFF);
         final int expandedTitleTextColor = ColorUtils.setAlphaComponent(titleColor, 0x99);

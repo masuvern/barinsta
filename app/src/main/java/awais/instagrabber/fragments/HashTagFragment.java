@@ -23,12 +23,10 @@ import androidx.activity.OnBackPressedDispatcher;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
-import androidx.constraintlayout.motion.widget.MotionLayout;
-import androidx.constraintlayout.motion.widget.MotionScene;
+import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.NavDirections;
 import androidx.navigation.fragment.NavHostFragment;
-import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.google.android.material.snackbar.BaseTransientBottomBar;
@@ -51,7 +49,6 @@ import awais.instagrabber.dialogs.PostsLayoutPreferencesDialogFragment;
 import awais.instagrabber.models.PostsLayoutPreferences;
 import awais.instagrabber.models.enums.FavoriteType;
 import awais.instagrabber.models.enums.FollowingType;
-//import awais.instagrabber.repositories.requests.StoryViewerOptions;
 import awais.instagrabber.repositories.responses.Hashtag;
 import awais.instagrabber.repositories.responses.Location;
 import awais.instagrabber.repositories.responses.Media;
@@ -65,7 +62,6 @@ import awais.instagrabber.utils.TextUtils;
 import awais.instagrabber.utils.Utils;
 import awais.instagrabber.webservices.GraphQLRepository;
 import awais.instagrabber.webservices.ServiceCallback;
-//import awais.instagrabber.webservices.StoriesRepository;
 import awais.instagrabber.webservices.TagsService;
 import kotlinx.coroutines.Dispatchers;
 
@@ -76,17 +72,17 @@ public class HashTagFragment extends Fragment implements SwipeRefreshLayout.OnRe
 
     private MainActivity fragmentActivity;
     private FragmentHashtagBinding binding;
-    private MotionLayout root;
+    private CoordinatorLayout root;
     private boolean shouldRefresh = true;
     private boolean opening = false;
     private String hashtag;
     private Hashtag hashtagModel = null;
     private ActionMode actionMode;
-//    private StoriesRepository storiesRepository;
+    //    private StoriesRepository storiesRepository;
     private boolean isLoggedIn;
     private TagsService tagsService;
     private GraphQLRepository graphQLRepository;
-//    private boolean storiesFetching;
+    //    private boolean storiesFetching;
     private Set<Media> selectedFeedModels;
     private PostsLayoutPreferences layoutPreferences = Utils.getPostsLayoutPreferences(Constants.PREF_HASHTAG_POSTS_LAYOUT);
     private LayoutHashtagDetailsBinding hashtagDetailsBinding;
@@ -289,7 +285,7 @@ public class HashTagFragment extends Fragment implements SwipeRefreshLayout.OnRe
         final String cookie = settingsHelper.getString(Constants.COOKIE);
         isLoggedIn = !TextUtils.isEmpty(cookie) && CookieUtils.getUserIdFromCookie(cookie) > 0;
         tagsService = isLoggedIn ? TagsService.getInstance() : null;
-//        storiesRepository = isLoggedIn ? StoriesRepository.Companion.getInstance() : null;
+        //        storiesRepository = isLoggedIn ? StoriesRepository.Companion.getInstance() : null;
         graphQLRepository = isLoggedIn ? null : GraphQLRepository.Companion.getInstance();
         setHasOptionsMenu(true);
     }
@@ -309,6 +305,7 @@ public class HashTagFragment extends Fragment implements SwipeRefreshLayout.OnRe
 
     @Override
     public void onViewCreated(@NonNull final View view, @Nullable final Bundle savedInstanceState) {
+        fragmentActivity.setToolbar(binding.toolbar, this);
         if (!shouldRefresh) return;
         binding.swipeRefreshLayout.setOnRefreshListener(this);
         init();
@@ -341,6 +338,12 @@ public class HashTagFragment extends Fragment implements SwipeRefreshLayout.OnRe
         return super.onOptionsItemSelected(item);
     }
 
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        fragmentActivity.resetToolbar(this);
+    }
+
     private void init() {
         if (getArguments() == null) return;
         final HashTagFragmentArgs fragmentArgs = HashTagFragmentArgs.fromBundle(getArguments());
@@ -370,17 +373,17 @@ public class HashTagFragment extends Fragment implements SwipeRefreshLayout.OnRe
                      .setFeedItemCallback(feedItemCallback)
                      .setSelectionModeCallback(selectionModeCallback)
                      .init();
-        binding.posts.addOnScrollListener(new RecyclerView.OnScrollListener() {
-            @Override
-            public void onScrolled(@NonNull final RecyclerView recyclerView, final int dx, final int dy) {
-                super.onScrolled(recyclerView, dx, dy);
-                final boolean canScrollVertically = recyclerView.canScrollVertically(-1);
-                final MotionScene.Transition transition = root.getTransition(R.id.transition);
-                if (transition != null) {
-                    transition.setEnable(!canScrollVertically);
-                }
-            }
-        });
+        // binding.posts.addOnScrollListener(new RecyclerView.OnScrollListener() {
+        //     @Override
+        //     public void onScrolled(@NonNull final RecyclerView recyclerView, final int dx, final int dy) {
+        //         super.onScrolled(recyclerView, dx, dy);
+        //         final boolean canScrollVertically = recyclerView.canScrollVertically(-1);
+        //         final MotionScene.Transition transition = root.getTransition(R.id.transition);
+        //         if (transition != null) {
+        //             transition.setEnable(!canScrollVertically);
+        //         }
+        //     }
+        // });
     }
 
     private void setHashtagDetails() {
@@ -562,7 +565,7 @@ public class HashTagFragment extends Fragment implements SwipeRefreshLayout.OnRe
 
     private void updateSwipeRefreshState() {
         AppExecutors.INSTANCE.getMainThread().execute(() ->
-                binding.swipeRefreshLayout.setRefreshing(binding.posts.isFetching())
+                                                              binding.swipeRefreshLayout.setRefreshing(binding.posts.isFetching())
         );
     }
 

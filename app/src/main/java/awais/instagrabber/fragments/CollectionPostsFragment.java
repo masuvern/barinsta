@@ -355,7 +355,7 @@ public class CollectionPostsFragment extends Fragment implements SwipeRefreshLay
     @Override
     public void onResume() {
         super.onResume();
-        fragmentActivity.setToolbar(binding.toolbar);
+        fragmentActivity.setToolbar(binding.toolbar, this);
     }
 
     @Override
@@ -376,7 +376,7 @@ public class CollectionPostsFragment extends Fragment implements SwipeRefreshLay
     }
 
     private void resetToolbar() {
-        fragmentActivity.resetToolbar();
+        fragmentActivity.resetToolbar(this);
     }
 
     private void init() {
@@ -392,7 +392,7 @@ public class CollectionPostsFragment extends Fragment implements SwipeRefreshLay
             return;
         }
         binding.cover.setTransitionName("collection-" + savedCollection.getCollectionId());
-        fragmentActivity.setToolbar(binding.toolbar);
+        fragmentActivity.setToolbar(binding.toolbar, this);
         binding.collapsingToolbarLayout.setTitle(savedCollection.getCollectionName());
         final int collapsedTitleTextColor = ColorUtils.setAlphaComponent(titleColor, 0xFF);
         final int expandedTitleTextColor = ColorUtils.setAlphaComponent(titleColor, 0x99);

@@ -24,6 +24,7 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.emoji.text.EmojiCompat
 import androidx.emoji.text.EmojiCompat.InitCallback
 import androidx.emoji.text.FontRequestEmojiCompatConfig
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination
@@ -75,8 +76,11 @@ class MainActivity : BaseLanguageActivity() {
     private var deviceUuid: String? = null
     private var csrfToken: String? = null
     private var userId: Long = 0
+    private var toolbarOwner: Fragment? = null
 
-    // private var behavior: HideBottomViewOnScrollBehavior<BottomNavigationView>? = null
+    lateinit var toolbar: Toolbar
+        private set
+
     var currentTabs: List<Tab> = emptyList()
         private set
     private var showBottomViewDestinations: List<Int> = emptyList()
@@ -102,7 +106,9 @@ class MainActivity : BaseLanguageActivity() {
         } catch (e: ReselectDocumentTreeException) {
             super.onCreate(savedInstanceState)
             val intent = Intent(this, DirectorySelectActivity::class.java)
-            intent.putExtra(EXTRA_INITIAL_URI, e.initialUri)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                intent.putExtra(EXTRA_INITIAL_URI, e.initialUri)
+            }
             startActivity(intent)
             finish()
             return
@@ -110,6 +116,7 @@ class MainActivity : BaseLanguageActivity() {
         super.onCreate(savedInstanceState)
         instance = this
         binding = ActivityMainBinding.inflate(layoutInflater)
+        toolbar = binding.toolbar
         setupCookie()
         if (Utils.settingsHelper.getBoolean(PreferenceKeys.FLAG_SECURE)) {
             window.setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE)
@@ -118,13 +125,6 @@ class MainActivity : BaseLanguageActivity() {
         setSupportActionBar(binding.toolbar)
         setupInsetsCallback()
         createNotificationChannels()
-        // try {
-        //     val layoutParams = binding.bottomNavView.layoutParams as CoordinatorLayout.LayoutParams
-        //     @Suppress("UNCHECKED_CAST")
-        //     behavior = layoutParams.behavior as HideBottomViewOnScrollBehavior<BottomNavigationView>
-        // } catch (e: Exception) {
-        //     Log.e(TAG, "onCreate: ", e)
-        // }
         val navHostFragment = supportFragmentManager.findFragmentById(R.id.main_nav_host) as NavHostFragment
         navController = navHostFragment.navController
         if (savedInstanceState == null) {
@@ -610,11 +610,14 @@ class MainActivity : BaseLanguageActivity() {
     //     }
     // }
 
-    fun resetToolbar() {
+    @Synchronized
+    fun resetToolbar(owner: Fragment) {
+        if (owner != toolbarOwner) return
         binding.appBarLayout.visibility = View.VISIBLE
         setScrollingBehaviour()
         setSupportActionBar(binding.toolbar)
         setupActionBarWithNavController(navController, appBarConfiguration)
+        toolbarOwner = null
     }
 
     val collapsingToolbarView: CollapsingToolbarLayout
@@ -652,16 +655,18 @@ class MainActivity : BaseLanguageActivity() {
         EmojiCompat.init(config)
     }
 
-    var toolbar: Toolbar
-        get() = binding.toolbar
-        set(toolbar) {
-            binding.appBarLayout.visibility = View.GONE
-            removeScrollingBehaviour()
-            setSupportActionBar(toolbar)
-            NavigationUI.setupWithNavController(toolbar, navController, appBarConfiguration)
-        }
     val rootView: View
         get() = binding.root
+
+    @Synchronized
+    fun setToolbar(toolbar: Toolbar, owner: Fragment) {
+        toolbarOwner = owner
+        binding.appBarLayout.visibility = View.GONE
+        removeScrollingBehaviour()
+        setSupportActionBar(toolbar)
+        this.toolbar = toolbar
+        NavigationUI.setupWithNavController(toolbar, navController, appBarConfiguration)
+    }
 
     private fun setNavBarDMUnreadCountBadge(unseenCount: Int) {
         val badge = binding.bottomNavView.getOrCreateBadge(R.id.direct_messages_nav_graph)

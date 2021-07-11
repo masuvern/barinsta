@@ -60,6 +60,7 @@ import awais.instagrabber.viewmodels.ProfileFragmentViewModel.ProfileEvent.*
 import awais.instagrabber.viewmodels.ProfileFragmentViewModelFactory
 import awais.instagrabber.webservices.*
 
+
 class ProfileFragment : Fragment(), OnRefreshListener, ConfirmDialogFragmentCallback, MultiOptionDialogSingleCallback<String> {
     private var backStackSavedStateResultLiveData: MutableLiveData<Any?>? = null
     private var shareDmMenuItem: MenuItem? = null
@@ -100,15 +101,15 @@ class ProfileFragment : Fragment(), OnRefreshListener, ConfirmDialogFragmentCall
     private val translationDialogRequestCode = 103
     private val feedItemCallback: FeedAdapterV2.FeedItemCallback = object : FeedAdapterV2.FeedItemCallback {
         override fun onPostClick(media: Media) {
-            openPostDialog(media ?: return, -1)
+            openPostDialog(media, -1)
         }
 
         override fun onProfilePicClick(media: Media) {
-            navigateToProfile(media?.user?.username)
+            navigateToProfile(media.user?.username)
         }
 
         override fun onNameClick(media: Media) {
-            navigateToProfile(media?.user?.username)
+            navigateToProfile(media.user?.username)
         }
 
         override fun onLocationClick(media: Media?) {
@@ -390,6 +391,7 @@ class ProfileFragment : Fragment(), OnRefreshListener, ConfirmDialogFragmentCall
     }
 
     override fun onDestroyView() {
+        mainActivity.resetToolbar(this)
         super.onDestroyView()
         setupPostsDone = false
     }
@@ -432,6 +434,7 @@ class ProfileFragment : Fragment(), OnRefreshListener, ConfirmDialogFragmentCall
     }
 
     private fun init() {
+        mainActivity.setToolbar(binding.toolbar, this)
         binding.swipeRefreshLayout.setOnRefreshListener(this)
         disableDm = !isNavRootInCurrentTabs("direct_messages_nav_graph")
         setupHighlights()
@@ -468,7 +471,6 @@ class ProfileFragment : Fragment(), OnRefreshListener, ConfirmDialogFragmentCall
                 context?.let { ctx -> Toast.makeText(ctx, R.string.error_loading_profile, Toast.LENGTH_LONG).show() }
                 return@observe
             }
-            binding.root.loadLayoutDescription(R.xml.header_list_scene)
             setupFavChip(profile, currentUser)
             setupFavButton(currentUser, profile)
             setupSavedButton(currentUser, profile)
@@ -541,6 +543,8 @@ class ProfileFragment : Fragment(), OnRefreshListener, ConfirmDialogFragmentCall
     private fun showPrivateAccountMessage() {
         binding.header.mainFollowers.isClickable = false
         binding.header.mainFollowing.isClickable = false
+        binding.privatePage.visibility = VISIBLE
+        binding.privatePage.layoutParams.height = ViewGroup.LayoutParams.WRAP_CONTENT
         binding.privatePage1.setImageResource(R.drawable.lock)
         binding.privatePage2.setText(R.string.priv_acc)
         binding.privatePage.visibility = VISIBLE
@@ -548,7 +552,6 @@ class ProfileFragment : Fragment(), OnRefreshListener, ConfirmDialogFragmentCall
         binding.privatePage2.visibility = VISIBLE
         binding.postsRecyclerView.visibility = GONE
         binding.swipeRefreshLayout.isRefreshing = false
-        binding.root.getTransition(R.id.transition)?.setEnable(false)
     }
 
     private fun setupProfileContext(contextPair: Pair<String?, List<UserProfileContextLink>?>) {
@@ -852,9 +855,11 @@ class ProfileFragment : Fragment(), OnRefreshListener, ConfirmDialogFragmentCall
     }
 
     private fun showDefaultMessage() {
-        binding.root.loadLayoutDescription(R.xml.profile_fragment_no_acc_layout)
-        binding.privatePage1.visibility = View.VISIBLE
-        binding.privatePage2.visibility = View.VISIBLE
+        binding.header.root.visibility = GONE
+        binding.swipeRefreshLayout.visibility = GONE
+        binding.privatePage.visibility = VISIBLE
+        binding.privatePage1.visibility = VISIBLE
+        binding.privatePage2.visibility = VISIBLE
         binding.privatePage1.setImageResource(R.drawable.ic_outline_info_24)
         binding.privatePage2.setText(R.string.no_acc)
     }
@@ -883,13 +888,15 @@ class ProfileFragment : Fragment(), OnRefreshListener, ConfirmDialogFragmentCall
             .setFeedItemCallback(feedItemCallback)
             .setSelectionModeCallback(selectionModeCallback)
             .init()
-        binding.postsRecyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-                super.onScrolled(recyclerView, dx, dy)
-                val canScrollVertically = recyclerView.canScrollVertically(-1)
-                binding.root.getTransition(R.id.transition)?.setEnable(!canScrollVertically)
-            }
-        })
+        // binding.postsRecyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+        //     override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+        //         super.onScrolled(recyclerView, dx, dy)
+        //         val canScrollVertically = recyclerView.canScrollVertically(-1)
+        //         if (!canScrollVertically) {
+        //             (binding.collapsingToolbarLayout.layoutParams as AppBarLayout.LayoutParams).scrollFlags = 0
+        //         }
+        //     }
+        // })
         setupPostsDone = true
     }
 

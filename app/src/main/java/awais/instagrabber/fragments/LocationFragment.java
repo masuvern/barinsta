@@ -1,5 +1,6 @@
 package awais.instagrabber.fragments;
 
+import android.annotation.SuppressLint;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
@@ -21,12 +22,10 @@ import androidx.activity.OnBackPressedDispatcher;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
-import androidx.constraintlayout.motion.widget.MotionLayout;
-import androidx.constraintlayout.motion.widget.MotionScene;
+import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.NavDirections;
 import androidx.navigation.fragment.NavHostFragment;
-import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.google.android.material.snackbar.BaseTransientBottomBar;
@@ -48,7 +47,6 @@ import awais.instagrabber.db.repositories.FavoriteRepository;
 import awais.instagrabber.dialogs.PostsLayoutPreferencesDialogFragment;
 import awais.instagrabber.models.PostsLayoutPreferences;
 import awais.instagrabber.models.enums.FavoriteType;
-//import awais.instagrabber.repositories.requests.StoryViewerOptions;
 import awais.instagrabber.repositories.responses.Location;
 import awais.instagrabber.repositories.responses.Media;
 import awais.instagrabber.repositories.responses.User;
@@ -71,18 +69,15 @@ public class LocationFragment extends Fragment implements SwipeRefreshLayout.OnR
 
     private MainActivity fragmentActivity;
     private FragmentLocationBinding binding;
-    private MotionLayout root;
+    private CoordinatorLayout root;
     private boolean shouldRefresh = true;
-    //    private boolean hasStories = false;
     private boolean opening = false;
     private long locationId;
     private Location locationModel;
     private ActionMode actionMode;
-//    private StoriesRepository storiesRepository;
     private GraphQLRepository graphQLRepository;
     private LocationService locationService;
     private boolean isLoggedIn;
-//    private boolean storiesFetching;
     private Set<Media> selectedFeedModels;
     private PostsLayoutPreferences layoutPreferences = Utils.getPostsLayoutPreferences(Constants.PREF_LOCATION_POSTS_LAYOUT);
     private LayoutLocationDetailsBinding locationDetailsBinding;
@@ -173,12 +168,16 @@ public class LocationFragment extends Fragment implements SwipeRefreshLayout.OnR
 
         @Override
         public void onNameClick(final Media feedModel) {
-            navigateToProfile("@" + feedModel.getUser().getUsername());
+            final User user = feedModel.getUser();
+            if (user == null) return;
+            navigateToProfile("@" + user.getUsername());
         }
 
         @Override
         public void onProfilePicClick(final Media feedModel) {
-            navigateToProfile("@" + feedModel.getUser().getUsername());
+            final User user = feedModel.getUser();
+            if (user == null) return;
+            navigateToProfile("@" + user.getUsername());
         }
 
         @Override
@@ -197,8 +196,10 @@ public class LocationFragment extends Fragment implements SwipeRefreshLayout.OnR
             if (user == null) return;
             if (TextUtils.isEmpty(user.getUsername())) {
                 opening = true;
+                final String code = feedModel.getCode();
+                if (code == null) return;
                 graphQLRepository.fetchPost(
-                        feedModel.getCode(),
+                        code,
                         CoroutineUtilsKt.getContinuation((media, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
                             opening = false;
                             if (throwable != null) {
@@ -277,7 +278,7 @@ public class LocationFragment extends Fragment implements SwipeRefreshLayout.OnR
         final String cookie = settingsHelper.getString(Constants.COOKIE);
         isLoggedIn = !TextUtils.isEmpty(cookie) && CookieUtils.getUserIdFromCookie(cookie) > 0;
         locationService = isLoggedIn ? LocationService.getInstance() : null;
-//        storiesRepository = StoriesRepository.Companion.getInstance();
+        // storiesRepository = StoriesRepository.Companion.getInstance();
         graphQLRepository = isLoggedIn ? null : GraphQLRepository.Companion.getInstance();
         setHasOptionsMenu(true);
     }
@@ -299,6 +300,7 @@ public class LocationFragment extends Fragment implements SwipeRefreshLayout.OnR
 
     @Override
     public void onViewCreated(@NonNull final View view, @Nullable final Bundle savedInstanceState) {
+        fragmentActivity.setToolbar(binding.toolbar, this);
         if (!shouldRefresh) return;
         binding.swipeRefreshLayout.setOnRefreshListener(this);
         init();
@@ -308,7 +310,6 @@ public class LocationFragment extends Fragment implements SwipeRefreshLayout.OnR
     @Override
     public void onRefresh() {
         binding.posts.refresh();
-        //        fetchStories();
     }
 
     @Override
@@ -331,6 +332,12 @@ public class LocationFragment extends Fragment implements SwipeRefreshLayout.OnR
         return super.onOptionsItemSelected(item);
     }
 
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        fragmentActivity.resetToolbar(this);
+    }
+
     private void init() {
         if (getArguments() == null) return;
         final LocationFragmentArgs fragmentArgs = LocationFragmentArgs.fromBundle(getArguments());
@@ -350,17 +357,17 @@ public class LocationFragment extends Fragment implements SwipeRefreshLayout.OnR
                      .setFeedItemCallback(feedItemCallback)
                      .setSelectionModeCallback(selectionModeCallback)
                      .init();
-        binding.posts.addOnScrollListener(new RecyclerView.OnScrollListener() {
-            @Override
-            public void onScrolled(@NonNull final RecyclerView recyclerView, final int dx, final int dy) {
-                super.onScrolled(recyclerView, dx, dy);
-                final boolean canScrollVertically = recyclerView.canScrollVertically(-1);
-                final MotionScene.Transition transition = root.getTransition(R.id.transition);
-                if (transition != null) {
-                    transition.setEnable(!canScrollVertically);
-                }
-            }
-        });
+        // binding.posts.addOnScrollListener(new RecyclerView.OnScrollListener() {
+        //     @Override
+        //     public void onScrolled(@NonNull final RecyclerView recyclerView, final int dx, final int dy) {
+        //         super.onScrolled(recyclerView, dx, dy);
+        //         final boolean canScrollVertically = recyclerView.canScrollVertically(-1);
+        //         final MotionScene.Transition transition = root.getTransition(R.id.transition);
+        //         if (transition != null) {
+        //             transition.setEnable(!canScrollVertically);
+        //         }
+        //     }
+        // });
     }
 
     private void fetchLocationModel() {
@@ -533,44 +540,15 @@ public class LocationFragment extends Fragment implements SwipeRefreshLayout.OnR
                     );
                 }), Dispatchers.getIO())
         ));
-        //        locationDetailsBinding.mainLocationImage.setOnClickListener(v -> {
-        //            if (hasStories) {
-        //                // show stories
-        //                final NavDirections action = LocationFragmentDirections
-        //                        .actionLocationFragmentToStoryViewerFragment(StoryViewerOptions.forLocation(locationId, locationModel.getName()));
-        //                NavHostFragment.findNavController(this).navigate(action);
-        //            }
-        //        });
     }
 
     private void showSnackbar(final String message) {
-        final Snackbar snackbar = Snackbar.make(root, message, BaseTransientBottomBar.LENGTH_LONG);
+        @SuppressLint("ShowToast") final Snackbar snackbar = Snackbar.make(root, message, BaseTransientBottomBar.LENGTH_LONG);
         snackbar.setAction(R.string.ok, v1 -> snackbar.dismiss())
                 .setAnimationMode(BaseTransientBottomBar.ANIMATION_MODE_SLIDE)
                 .setAnchorView(fragmentActivity.getBottomNavView())
                 .show();
     }
-
-    //    private void fetchStories() {
-    //        if (isLoggedIn) {
-    //            storiesFetching = true;
-    //            storiesRepository.getStories(
-    //                    StoryViewerOptions.forLocation(locationId, locationModel.getName()),
-    //                    CoroutineUtilsKt.getContinuation((storyModels, throwable) -> AppExecutors.INSTANCE.getMainThread().execute(() -> {
-    //                        if (throwable != null) {
-    //                            Log.e(TAG, "Error", throwable);
-    //                            storiesFetching = false;
-    //                            return;
-    //                        }
-    //                        if (storyModels != null && !storyModels.isEmpty()) {
-    //                            locationDetailsBinding.mainLocationImage.setStoriesBorder(1);
-    //                            hasStories = true;
-    //                        }
-    //                        storiesFetching = false;
-    //                    }), Dispatchers.getIO())
-    //            );
-    //        }
-    //    }
 
     private void setTitle() {
         final ActionBar actionBar = fragmentActivity.getSupportActionBar();
@@ -580,9 +558,7 @@ public class LocationFragment extends Fragment implements SwipeRefreshLayout.OnR
     }
 
     private void updateSwipeRefreshState() {
-        AppExecutors.INSTANCE.getMainThread().execute(() ->
-                binding.swipeRefreshLayout.setRefreshing(binding.posts.isFetching())
-        );
+        AppExecutors.INSTANCE.getMainThread().execute(() -> binding.swipeRefreshLayout.setRefreshing(binding.posts.isFetching()));
     }
 
     private void navigateToProfile(final String username) {
