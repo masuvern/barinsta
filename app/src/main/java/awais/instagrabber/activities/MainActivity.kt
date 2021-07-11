@@ -357,7 +357,7 @@ class MainActivity : BaseLanguageActivity() {
         rootNavGraph.id = R.id.root_nav_graph
         rootNavGraph.label = "root_nav_graph"
         rootNavGraph.addDestinations(topLevelDestinations)
-        rootNavGraph.startDestination = if (startNavRootId != 0) startNavRootId else R.id.profile_nav_graph
+        rootNavGraph.setStartDestination(if (startNavRootId != 0) startNavRootId else R.id.profile_nav_graph)
         navController.graph = rootNavGraph
         binding.bottomNavView.setupWithNavController(navController)
         appBarConfiguration = AppBarConfiguration(currentTabs.map { it.startDestinationFragmentId }.toSet())
