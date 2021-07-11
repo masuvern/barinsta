@@ -1,46 +1,40 @@
-package awaisomereport;
+package awaisomereport
 
-import android.app.Application;
+import android.app.Application
 
-import androidx.annotation.NonNull;
+class CrashReporter private constructor(application: Application) : Thread.UncaughtExceptionHandler {
 
-public final class CrashReporter implements Thread.UncaughtExceptionHandler {
-    private static final String TAG = CrashReporter.class.getSimpleName();
+    private val crashHandler: CrashHandler?
+    private var startAttempted = false
+    private var defaultExceptionHandler: Thread.UncaughtExceptionHandler? = null
 
-    private static CrashReporter reporterInstance;
-
-    // private final File crashLogsZip;
-    private final CrashHandler crashHandler;
-
-    private boolean startAttempted = false;
-    private Thread.UncaughtExceptionHandler defaultEH;
-
-    public static CrashReporter get(final Application application) {
-        if (reporterInstance == null) {
-            reporterInstance = new CrashReporter(application);
-        }
-        return reporterInstance;
+    init {
+        crashHandler = CrashHandler(application)
     }
 
-    private CrashReporter(@NonNull final Application application) {
-        crashHandler = new CrashHandler(application);
-        // this.crashLogsZip = new File(application.getExternalCacheDir(), "crash_logs.zip");
+    fun start() {
+        if (startAttempted) return
+        defaultExceptionHandler = Thread.getDefaultUncaughtExceptionHandler()
+        Thread.setDefaultUncaughtExceptionHandler(this)
+        startAttempted = true
     }
 
-    public void start() {
-        if (!startAttempted) {
-            defaultEH = Thread.getDefaultUncaughtExceptionHandler();
-            Thread.setDefaultUncaughtExceptionHandler(this);
-            startAttempted = true;
-        }
-    }
-
-    @Override
-    public void uncaughtException(@NonNull final Thread t, @NonNull final Throwable exception) {
+    override fun uncaughtException(t: Thread, exception: Throwable) {
         if (crashHandler == null) {
-            defaultEH.uncaughtException(t, exception);
-            return;
+            defaultExceptionHandler?.uncaughtException(t, exception)
+            return
         }
-        crashHandler.uncaughtException(t, exception, defaultEH);
+        crashHandler.uncaughtException(t, exception, defaultExceptionHandler ?: return)
+    }
+
+    companion object {
+        @Volatile
+        private var INSTANCE: CrashReporter? = null
+
+        fun getInstance(application: Application): CrashReporter {
+            return INSTANCE ?: synchronized(this) {
+                CrashReporter(application).also { INSTANCE = it }
+            }
+        }
     }
 }
