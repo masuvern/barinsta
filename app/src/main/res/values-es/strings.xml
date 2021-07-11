@@ -31,6 +31,8 @@
     <string name="dm_mark_as_seen_setting">Marcar Mensaje Directo como visto después de verlo</string>
     <string name="dm_mark_as_seen_setting_summary">Otros miembros sabrán que lo has visto</string>
     <string name="autoplay_stories_setting">Autorreproducir vídeohistorias</string>
+    <string name="story_list_setting">Mostrar lista de historias por defecto</string>
+    <string name="story_list_setting_summary">Para ver historias</string>
     <string name="activity_setting">Activar notificaciones de actividad</string>
     <string name="story_sort_setting">Orden de las historias</string>
     <string name="error_loading_profile">¡Error al cargar el perfil! ¿Es el nombre de usuario válido? Si es así, puede que su conexión esté baneada en el servidor.</string>
@@ -237,6 +239,10 @@
     <string name="action_ayml">Usuarios sugeridos</string>
     <string name="select_picture">Seleccionar imagen</string>
     <string name="uploading">Subiendo…</string>
+    <plurals name="activity_count_total">
+        <item quantity="one">Tienes %d notificación</item>
+        <item quantity="other">Tienes %d notificaciones</item>
+    </plurals>
     <string name="activity_count_relationship">%d sigue</string>
     <string name="activity_count_comments">%d comentarios</string>
     <string name="activity_count_commentlikes">%d me gustas en comentarios</string>
@@ -471,7 +477,7 @@
     <string name="crash_report_subject">Informe de fallos de Barinsta</string>
     <string name="crash_report_title">Seleccione una aplicación de correo electrónico para enviar registros de errores</string>
     <string name="not_found">¡No encontrado!</string>
-    <string name="rate_limit">Tu IP ha sido limitada por Instagram. Espera una hora e inténtalo de nuevo. &lt;a href=\"https://redd.it/msxlko\"&gt;Más información.&lt;/a&gt;</string>
+    <string name="rate_limit">Tu IP ha sido limitada por Instagram. &lt;a href=\"https://barinsta.austinhuang.me/en/latest/faq.html#ratelimits\"&gt;Más información&lt;/a&gt;</string>
     <string name="skip_update">Omitir esta actualización</string>
     <string name="on_latest_version">Ya tienes la última versión</string>
     <string name="tab_order">Orden de pantalla</string>
@@ -502,4 +508,7 @@
     <string name="share_via_dm">Compartir por MD</string>
     <string name="share_link">Compartir enlace…</string>
     <string name="slide_to_cancel">Desliza para cancelar</string>
+    <string name="disable_screen_transitions">Desactivar transiciones de pantalla</string>
+    <string name="invalid_format">Formato no válido</string>
+    <string name="no_directory_picker_activity">No se encontró ninguna actividad para seleccionar el directorio</string>
 </resources>

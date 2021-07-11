@@ -31,6 +31,8 @@
     <string name="dm_mark_as_seen_setting">Επισήμανση μηνυμάτων ως αναγνωσμένων μετά την προβολή</string>
     <string name="dm_mark_as_seen_setting_summary">Τα υπόλοιπα μέλη θα γνωρίζουν ότι προβλήθηκε</string>
     <string name="autoplay_stories_setting">Αυτόματη αναπαραγωγή ιστοριών με βίντεο</string>
+    <string name="story_list_setting">Εμφάνιση λίστας ιστοριών από προεπιλογή</string>
+    <string name="story_list_setting_summary">Για την προβολή ιστοριών</string>
     <string name="activity_setting">Ενεργοποίηση ειδοποιήσεων δραστηριότητας</string>
     <string name="story_sort_setting">Ταξινόμηση ροής ιστορίων</string>
     <string name="error_loading_profile">Σφάλμα κατά τη φόρτωση προφίλ! Είναι το όνομα χρήστη έγκυρο; Αν ναι, μπορεί να είστε περιορισμένος.</string>
@@ -237,6 +239,10 @@
     <string name="action_ayml">Προτεινόμενοι χρήστες</string>
     <string name="select_picture">Επιλογή εικόνας</string>
     <string name="uploading">Μεταφόρτωση…</string>
+    <plurals name="activity_count_total">
+        <item quantity="one">Εχετε %d ειδοποίηση</item>
+        <item quantity="other">Έχετε %d ειδοποιήσεις</item>
+    </plurals>
     <string name="activity_count_relationship">%d ακόλουθοι</string>
     <string name="activity_count_comments">%d σχόλια</string>
     <string name="activity_count_commentlikes">Το σχόλιο αρέσει σε %d</string>
@@ -471,7 +477,7 @@
     <string name="crash_report_subject">Αναφορά Κατάρρευσης Barinsta</string>
     <string name="crash_report_title">Επιλέξτε μια εφαρμογή ηλ. ταχυδρομείου για αποστολή αρχείων καταγραφής κατάρρευσης</string>
     <string name="not_found">Δε βρέθηκε!</string>
-    <string name="rate_limit">Η διεύθυνση IP σας έχει περιοριστεί από το Instagram. Περιμένετε για μια ώρα και προσπαθήστε ξανά. &lt;a href=\"https://redd.it/msxlko\"&gt;Μάθετε περισσότερα.&lt;/a&gt;</string>
+    <string name="rate_limit">Η διεύθυνση IP σας έχει περιοριστεί από το Instagram. &lt;a href=\"https://barinsta.austinhuang.me/en/latest/faq.html#ratelimits\"&gt;Μάθετε περισσότερα.&lt;/a&gt;</string>
     <string name="skip_update">Παράλειψη της ενημέρωσης</string>
     <string name="on_latest_version">Η εφαρμογή είναι ήδη στην τελευταία έκδοση</string>
     <string name="tab_order">Σειρά της οθόνης</string>
@@ -502,4 +508,7 @@
     <string name="share_via_dm">Κοινοποίηση μέσω μηνύματος</string>
     <string name="share_link">Κοινοποίηση συνδέσμου…</string>
     <string name="slide_to_cancel">Σύρετε για ακύρωση</string>
+    <string name="disable_screen_transitions">Απενεργοποίηση μεταβάσεων οθόνης</string>
+    <string name="invalid_format">Μη έγκυρη μορφή</string>
+    <string name="no_directory_picker_activity">Δεν βρέθηκε δραστηριότητα για επιλογή καταλόγου</string>
 </resources>

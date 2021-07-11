@@ -31,6 +31,8 @@
     <string name="dm_mark_as_seen_setting">Segna il DM come visto dopo la visualizzazione</string>
     <string name="dm_mark_as_seen_setting_summary">Altri membri sapranno che lo hai visualizzato</string>
     <string name="autoplay_stories_setting">Riproduci automaticamente le storie video</string>
+    <string name="story_list_setting">Mostra di default l\'elenco delle storie</string>
+    <string name="story_list_setting_summary">Per visualizzare le storie</string>
     <string name="activity_setting">Abilita notifiche attività</string>
     <string name="story_sort_setting">Ordinamento storie feed</string>
     <string name="error_loading_profile">Errore nel caricamento del profilo! Il nome utente è valido? Se sì, potresti essere considerato limitato.</string>
@@ -68,7 +70,7 @@
     <string name="be_patient">Sii paziente!</string>
     <string name="view_story_post">Visualizza Post</string>
     <string name="view_post">Visualizza Post</string>
-    <string name="story_poll">Poll</string>
+    <string name="story_poll">Sondaggio</string>
     <string name="votef_story_poll">Votazione riuscita!</string>
     <string name="voted_story_poll">Hai già votato!</string>
     <string name="respond_story">Rispondi</string>
@@ -85,7 +87,7 @@
     <string name="story_slider">Scorrimento</string>
     <string name="story_quizzed">Hai già risposto!</string>
     <string name="story_mentions">Menzioni</string>
-    <string name="story_question">Question</string>
+    <string name="story_question">Domanda</string>
     <string name="priv_acc">Questo Profilo è Privato</string>
     <string name="priv_acc_confirm">Non potrai accederei ai post dopo aver smesso di seguire! Sei sicuro?</string>
     <string name="are_you_sure">Sei sicuro?</string>
@@ -103,7 +105,7 @@
     <string name="delete_collection">Elimina raccolta</string>
     <string name="delete_collection_confirm">Sei sicuro di voler eliminare questa raccolta?</string>
     <string name="delete_collection_note">Tutti i media contenuti rimarranno in altre raccolte.</string>
-    <string name="add_to_collection">Add to collection…</string>
+    <string name="add_to_collection">Aggiungi alla raccolta…</string>
     <string name="remove_from_collection">Rimuovi dalla raccolta</string>
     <string name="liked">Piaciuti</string>
     <string name="saved">Salvati</string>
@@ -182,9 +184,9 @@
     <string name="dms_inbox_raven_media_screenshot">Catturato</string>
     <string name="dms_inbox_raven_media_cant_deliver">Impossibile consegnare</string>
     <string name="dms_inbox_error_null_count">Il responso del conteggio non visto è nullo!</string>
-    <string name="dms_thread_message_hint">Message…</string>
+    <string name="dms_thread_message_hint">Messaggio…</string>
     <string name="dms_thread_audio_hint">Tieni premuto per registrare l\'audio</string>
-    <string name="dms_thread_updating">Updating…</string>
+    <string name="dms_thread_updating">Aggiornando…</string>
     <string name="dms_action_leave">Lascia chat</string>
     <string name="dms_action_leave_question">Lasciare questa chat?</string>
     <string name="dms_action_kick">Espelli</string>
@@ -237,6 +239,10 @@
     <string name="action_ayml">Utenti suggeriti</string>
     <string name="select_picture">Seleziona Immagine</string>
     <string name="uploading">Caricamento…</string>
+    <plurals name="activity_count_total">
+        <item quantity="one">Hai %d notifica</item>
+        <item quantity="other">Hai %d notifiche</item>
+    </plurals>
     <string name="activity_count_relationship">%d seguaci</string>
     <string name="activity_count_comments">%d commenti</string>
     <string name="activity_count_commentlikes">%d mi piace al commento</string>
@@ -320,7 +326,7 @@
     <string name="comment">Commento</string>
     <string name="layout">Disposizione</string>
     <string name="feed_stories">Feed storie</string>
-    <string name="opening_post">Opening post…</string>
+    <string name="opening_post">Aprendo il post…</string>
     <string name="share">Condividi</string>
     <string name="layout_style">Stile disposizione</string>
     <string name="column_count">Conteggio colonne</string>
@@ -471,7 +477,7 @@
     <string name="crash_report_subject">Rapporto sugli errori di Barinsta</string>
     <string name="crash_report_title">Selezionare un\'applicazione di posta elettronica per inviare i registri di errori</string>
     <string name="not_found">Non trovato!</string>
-    <string name="rate_limit">Il tuo IP è stato limitato da Instagram. Attendere per un\'ora e riprovare. &lt;a href=\"https://redd.it/msxlko\"&gt;Per saperne di più.&lt;/a&gt;</string>
+    <string name="rate_limit">L\'intervallo del tuo IP è stato limitato da Instagram. &lt;a href=\"https://barinsta.austinhuang.me/en/latest/faq.html#ratelimits\"&gt;Scopri di più.&lt;/a&gt;</string>
     <string name="skip_update">Salta questo aggiornamento</string>
     <string name="on_latest_version">Hai già l\'ultima versione</string>
     <string name="tab_order">Ordine schermata</string>
@@ -498,8 +504,11 @@
     <string name="click_to_show_full">Clicca per mostrare il conteggio completo</string>
     <string name="no_profile_pic_found">Nessuna foto profilo trovata!</string>
     <string name="swipe_up_confirmation">Sei sicuro di voler aprire questo link?</string>
-    <string name="sending">Sending…</string>
+    <string name="sending">Inviando…</string>
     <string name="share_via_dm">Condividi tramite DM</string>
     <string name="share_link">Condivisione link…</string>
     <string name="slide_to_cancel">Trascinare per cancellare</string>
+    <string name="disable_screen_transitions">Disable screen transitions</string>
+    <string name="invalid_format">Invalid format</string>
+    <string name="no_directory_picker_activity">No activity found to select directory</string>
 </resources>

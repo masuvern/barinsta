@@ -31,6 +31,8 @@
     <string name="dm_mark_as_seen_setting">Отметить ЛС как увиденные после просмотра</string>
     <string name="dm_mark_as_seen_setting_summary">Другие участники узнают, что вы просмотрели его</string>
     <string name="autoplay_stories_setting">Автозапуск видео историй</string>
+    <string name="story_list_setting">Display story list by default</string>
+    <string name="story_list_setting_summary">For viewing stories</string>
     <string name="activity_setting">Включить уведомления об активности</string>
     <string name="story_sort_setting">Сортировка историй ленты</string>
     <string name="error_loading_profile">Ошибка при загрузке профиля! Верно ли имя пользователя? Если это так, то ваш запрос мог быть ограничен сервером.</string>
@@ -245,6 +247,12 @@
     <string name="action_ayml">Предлагаемые пользователи</string>
     <string name="select_picture">Выберите изображение</string>
     <string name="uploading">Загрузка…</string>
+    <plurals name="activity_count_total">
+        <item quantity="one">You have %d notification</item>
+        <item quantity="few">You have %d notifications</item>
+        <item quantity="many">You have %d notifications</item>
+        <item quantity="other">You have %d notifications</item>
+    </plurals>
     <string name="activity_count_relationship">%d подписано</string>
     <string name="activity_count_comments">%d комментариев</string>
     <string name="activity_count_commentlikes">%d симпатий к комментарию</string>
@@ -489,7 +497,7 @@
     <string name="crash_report_subject">Barinsta Crash Report</string>
     <string name="crash_report_title">Выберите приложение для отправки логов ошибки</string>
     <string name="not_found">Не найдено!</string>
-    <string name="rate_limit">Ваш IP-адрес был ограничен Instagram. Повторите попытку через час. &lt;a href=\"https://redd.it/msxlko\"&gt;Узнать больше.&lt;/a&gt;</string>
+    <string name="rate_limit">Your IP has been rate limited by Instagram. &lt;a href=\"https://barinsta.austinhuang.me/en/latest/faq.html#ratelimits\"&gt;Learn more.&lt;/a&gt;</string>
     <string name="skip_update">Пропустить это обновление</string>
     <string name="on_latest_version">Вы уже используете последнюю версию</string>
     <string name="tab_order">Порядок экрана</string>
@@ -520,4 +528,7 @@
     <string name="share_via_dm">Поделиться в ЛС</string>
     <string name="share_link">Поделиться ссылкой…</string>
     <string name="slide_to_cancel">Сдвиньте для отмены</string>
+    <string name="disable_screen_transitions">Disable screen transitions</string>
+    <string name="invalid_format">Invalid format</string>
+    <string name="no_directory_picker_activity">No activity found to select directory</string>
 </resources>

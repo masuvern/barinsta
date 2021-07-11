@@ -31,6 +31,8 @@
     <string name="dm_mark_as_seen_setting">Marquer les messages privés comme vus après consultation</string>
     <string name="dm_mark_as_seen_setting_summary">Les autres utilisateurs saurons que vous l\'avez vu</string>
     <string name="autoplay_stories_setting">Autoplay video stories</string>
+    <string name="story_list_setting">Display story list by default</string>
+    <string name="story_list_setting_summary">For viewing stories</string>
     <string name="activity_setting">Activer les notifications d\'activités</string>
     <string name="story_sort_setting">Tri du flux de stories</string>
     <string name="error_loading_profile">Erreur lors du chargement du profil! Le nom d\'utilisateur est-il valide? Si c\'est le cas, vous êtes peut-être limité à un débit.</string>
@@ -237,6 +239,10 @@
     <string name="action_ayml">Utilisateurs suggérés</string>
     <string name="select_picture">Sélectionnez une image</string>
     <string name="uploading">Envoi en cours…</string>
+    <plurals name="activity_count_total">
+        <item quantity="one">You have %d notification</item>
+        <item quantity="other">You have %d notifications</item>
+    </plurals>
     <string name="activity_count_relationship">%d abonné(e)s</string>
     <string name="activity_count_comments">%d commentaires</string>
     <string name="activity_count_commentlikes">%d j\'aime(s) sur le commentaire</string>
@@ -471,7 +477,7 @@
     <string name="crash_report_subject">Rapport d\'erreur de Barinsta</string>
     <string name="crash_report_title">Sélectionnez une application de messagerie pour envoyer les journaux d\'erreurs</string>
     <string name="not_found">Aucun résultat!</string>
-    <string name="rate_limit">Votre adresse IP a été limitée par Instagram. Attendez une heure et réessayez. &lt;a href=\"https://redd.it/msxlko\"&gt;En savoir plus.&lt;/a&gt;</string>
+    <string name="rate_limit">Your IP has been rate limited by Instagram. &lt;a href=\"https://barinsta.austinhuang.me/en/latest/faq.html#ratelimits\"&gt;Learn more.&lt;/a&gt;</string>
     <string name="skip_update">Ignorer cette mise à jour</string>
     <string name="on_latest_version">Vous avez déjà la dernière version</string>
     <string name="tab_order">Ordre d\'écran</string>
@@ -502,4 +508,7 @@
     <string name="share_via_dm">Partager via MP</string>
     <string name="share_link">Partager le lien…</string>
     <string name="slide_to_cancel">Glisser pour annuler</string>
+    <string name="disable_screen_transitions">Disable screen transitions</string>
+    <string name="invalid_format">Invalid format</string>
+    <string name="no_directory_picker_activity">No activity found to select directory</string>
 </resources>

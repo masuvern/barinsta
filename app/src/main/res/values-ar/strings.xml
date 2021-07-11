@@ -31,6 +31,8 @@
     <string name="dm_mark_as_seen_setting">تحديد DM كما هو بعد المشاهدة</string>
     <string name="dm_mark_as_seen_setting_summary">الأعضاء الآخرون سيعلمون أنك شاهدتها</string>
     <string name="autoplay_stories_setting">تشغيل تلقائي لقصص الفيديو</string>
+    <string name="story_list_setting">Display story list by default</string>
+    <string name="story_list_setting_summary">For viewing stories</string>
     <string name="activity_setting">تمكين تنبيهات النشاط</string>
     <string name="story_sort_setting">تصنيف قصص التغذية</string>
     <string name="error_loading_profile">خطأ في تحميل الملف الشخصي! هل اسم المستخدم صحيح؟ إذا كان الأمر كذلك، قد تكون مقيدا.</string>
@@ -253,6 +255,14 @@
     <string name="action_ayml">Suggested users</string>
     <string name="select_picture">Select Picture</string>
     <string name="uploading">Uploading…</string>
+    <plurals name="activity_count_total">
+        <item quantity="zero">You have %d notifications</item>
+        <item quantity="one">You have %d notification</item>
+        <item quantity="two">You have %d notifications</item>
+        <item quantity="few">You have %d notifications</item>
+        <item quantity="many">You have %d notifications</item>
+        <item quantity="other">You have %d notifications</item>
+    </plurals>
     <string name="activity_count_relationship">%d follows</string>
     <string name="activity_count_comments">%d comments</string>
     <string name="activity_count_commentlikes">%d comment likes</string>
@@ -507,7 +517,7 @@
     <string name="crash_report_subject">تقرير انهيار Barinsta</string>
     <string name="crash_report_title">حدد تطبيق البريد الإلكتروني لإرسال سجلات الأعطال</string>
     <string name="not_found">غير موجود!</string>
-    <string name="rate_limit">تم منع عنوان IP الخاص بك بواسطة إنستاجرام. انتظر لمدة ساعة وحاول مرة أخرى. &lt;a href=\"https://redd.it/msxlko\"&gt;اعرف المزيد&lt;/a&gt;</string>
+    <string name="rate_limit">Your IP has been rate limited by Instagram. &lt;a href=\"https://barinsta.austinhuang.me/en/latest/faq.html#ratelimits\"&gt;Learn more.&lt;/a&gt;</string>
     <string name="skip_update">تخطى هذا التحديث</string>
     <string name="on_latest_version">أنت بالفعل في الإصدار الأخير</string>
     <string name="tab_order">ترتيب الشاشة</string>
@@ -538,4 +548,7 @@
     <string name="share_via_dm">مشاركة عبر DM</string>
     <string name="share_link">مشاركة الرابط…</string>
     <string name="slide_to_cancel">Slide to Cancel</string>
+    <string name="disable_screen_transitions">Disable screen transitions</string>
+    <string name="invalid_format">Invalid format</string>
+    <string name="no_directory_picker_activity">No activity found to select directory</string>
 </resources>
