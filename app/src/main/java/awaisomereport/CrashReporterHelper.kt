@@ -126,4 +126,20 @@ object CrashReporterHelper {
             Log.e(TAG, "", e)
         }
     }
+
+    @JvmStatic
+    fun deleteAllStacktraceFiles(context: Context) {
+        val filePath = context.filesDir.absolutePath
+        val errorFileList: Array<File>? = try {
+            val dir = File(filePath)
+            if (dir.exists() && !dir.isDirectory) {
+                dir.delete()
+            }
+            dir.mkdirs()
+            dir.listFiles { _: File?, name: String -> name.endsWith(".stacktrace") }
+        } catch (e: Exception) {
+            null
+        }
+        errorFileList?.forEach { it.delete() }
+    }
 }
