@@ -211,11 +211,9 @@ public class SearchFragment extends Fragment implements SearchCategoryFragment.O
             switch (type) {
                 case USER:
                     action = SearchFragmentDirections.actionToProfile().setUsername(searchItem.getUser().getUsername());
-                    NavHostFragment.findNavController(this).navigate(action);
                     break;
                 case HASHTAG:
                     action = SearchFragmentDirections.actionToHashtag(searchItem.getHashtag().getName());
-                    NavHostFragment.findNavController(this).navigate(action);
                     break;
                 case LOCATION:
                     action = SearchFragmentDirections.actionToLocation(searchItem.getPlace().getLocation().getPk());
