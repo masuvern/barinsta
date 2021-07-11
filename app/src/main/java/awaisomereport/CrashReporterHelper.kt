@@ -1,135 +1,129 @@
-package awaisomereport;
+package awaisomereport
 
-import android.app.Application;
-import android.content.Context;
-import android.content.Intent;
-import android.content.res.Resources;
-import android.os.Build;
-import android.util.Log;
+import android.app.Application
+import android.content.Context
+import android.content.Intent
+import android.os.Build
+import android.util.Log
+import awais.instagrabber.BuildConfig
+import awais.instagrabber.R
+import awais.instagrabber.utils.Constants
+import awais.instagrabber.utils.extensions.TAG
+import java.io.*
+import java.time.LocalDateTime
 
-import androidx.annotation.NonNull;
+object CrashReporterHelper {
+    private val shortBorder = "=".repeat(14)
+    private val longBorder = "=".repeat(21)
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.io.Writer;
-import java.time.LocalDateTime;
-
-import awais.instagrabber.BuildConfig;
-import awais.instagrabber.R;
-import awais.instagrabber.utils.Constants;
-
-public final class CrashReporterHelper {
-    private static final String TAG = CrashReporterHelper.class.getSimpleName();
-
-    public static void startErrorReporterActivity(@NonNull final Application application,
-                                                  @NonNull final Throwable exception) {
-        final StringBuilder reportBuilder = new StringBuilder();
-        reportBuilder.append("IMPORTANT: If sending by email, your email address and the entire content will be made public at")
-                     .append("\r\nIMPORTANT: https://github.com/austinhuang0131/barinsta/issues")
-                     .append("\r\nIMPORTANT: When possible, please describe the steps leading to this crash. Thank you for your cooperation.")
-                     .append("\r\n\r\nError report collected on: ").append(LocalDateTime.now().toString())
-                     .append("\r\n\r\nInformation:\r\n==============")
-                     .append("\r\nVERSION		: ").append(BuildConfig.VERSION_NAME)
-                     .append("\r\nVERSION_CODE	: ").append(BuildConfig.VERSION_CODE)
-                     .append("\r\nPHONE-MODEL	: ").append(Build.MODEL)
-                     .append("\r\nANDROID_VERS	: ").append(Build.VERSION.RELEASE)
-                     .append("\r\nANDROID_REL	: ").append(Build.VERSION.SDK_INT)
-                     .append("\r\nBRAND			: ").append(Build.BRAND)
-                     .append("\r\nMANUFACTURER	: ").append(Build.MANUFACTURER)
-                     .append("\r\nBOARD			: ").append(Build.BOARD)
-                     .append("\r\nDEVICE			: ").append(Build.DEVICE)
-                     .append("\r\nPRODUCT		: ").append(Build.PRODUCT)
-                     .append("\r\nHOST			: ").append(Build.HOST)
-                     .append("\r\nTAGS			: ").append(Build.TAGS);
-
-        reportBuilder.append("\r\n\r\nStack:\r\n==============\r\n");
-        final Writer result = new StringWriter();
-        try (final PrintWriter printWriter = new PrintWriter(result)) {
-            exception.printStackTrace(printWriter);
-            reportBuilder.append(result.toString());
-            reportBuilder.append("\r\nCause:\r\n==============");
-            // for AsyncTask crashes
-            Throwable cause = exception.getCause();
-            while (cause != null) {
-                cause.printStackTrace(printWriter);
-                reportBuilder.append(result.toString());
-                cause = cause.getCause();
-            }
+    fun startErrorReporterActivity(
+        application: Application,
+        exception: Throwable
+    ) {
+        val errorContent = getReportContent(exception)
+        try {
+            application.openFileOutput("stack-" + System.currentTimeMillis() + ".stacktrace", Context.MODE_PRIVATE)
+                .use { trace -> trace.write(errorContent.toByteArray()) }
+        } catch (ex: Exception) {
+            if (BuildConfig.DEBUG) Log.e(TAG, "", ex)
         }
-        reportBuilder.append("\r\n\r\n**** End of current Report ***");
-
-        final String errorContent = reportBuilder.toString();
-        try (final FileOutputStream trace = application.openFileOutput("stack-" + System.currentTimeMillis() + ".stacktrace", Context.MODE_PRIVATE)) {
-            trace.write(errorContent.getBytes());
-        } catch (final Exception ex) {
-            if (BuildConfig.DEBUG) Log.e(TAG, "", ex);
-        }
-
-        application.startActivity(new Intent(application, ErrorReporterActivity.class).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+        application.startActivity(Intent(application, ErrorReporterActivity::class.java).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
     }
 
-    public static void startCrashEmailIntent(final Context context) {
+    fun getReportContent(exception: Throwable): String {
+        var reportContent =
+            """
+                IMPORTANT: If sending by email, your email address and the entire content will be made public at
+                IMPORTANT: https://github.com/austinhuang0131/barinsta/issues
+                IMPORTANT: When possible, please describe the steps leading to this crash. Thank you for your cooperation.
+
+                Error report collected on: ${LocalDateTime.now()}
+
+                Information:
+                $shortBorder
+                VERSION		    : ${BuildConfig.VERSION_NAME}
+                VERSION_CODE	: ${BuildConfig.VERSION_CODE}
+                PHONE-MODEL	    : ${Build.MODEL}
+                ANDROID_VERS	: ${Build.VERSION.RELEASE}
+                ANDROID_REL	    : ${Build.VERSION.SDK_INT}
+                BRAND			: ${Build.BRAND}
+                MANUFACTURER	: ${Build.MANUFACTURER}
+                BOARD			: ${Build.BOARD}
+                DEVICE			: ${Build.DEVICE}
+                PRODUCT		    : ${Build.PRODUCT}
+                HOST			: ${Build.HOST}
+                TAGS			: ${Build.TAGS}
+
+                Stack:
+                $shortBorder
+            """.trimIndent()
+        reportContent = "$reportContent${getStackStrace(exception)}\n\n*** End of current Report ***"
+        return reportContent.replace("\n", "\r\n")
+    }
+
+    private fun getStackStrace(exception: Throwable): String {
+        val writer = StringWriter()
+        return PrintWriter(writer).use {
+            val reportBuilder = StringBuilder("\n")
+            exception.printStackTrace(it)
+            reportBuilder.append(writer.toString())
+            var cause = exception.cause
+            if (cause != null) reportBuilder.append("\nCause:\n$shortBorder")
+            while (cause != null) {
+                cause.printStackTrace(it)
+                reportBuilder.append(writer.toString())
+                cause = cause.cause
+            }
+            return@use reportBuilder.toString()
+        }
+    }
+
+    @JvmStatic
+    fun startCrashEmailIntent(context: Context) {
         try {
-            final String filePath = context.getFilesDir().getAbsolutePath();
-
-            String[] errorFileList;
-
-            try {
-                final File dir = new File(filePath);
-                if (dir.exists() && !dir.isDirectory()) {
-                    //noinspection ResultOfMethodCallIgnored
-                    dir.delete();
+            val filePath = context.filesDir.absolutePath
+            val errorFileList: Array<String>? = try {
+                val dir = File(filePath)
+                if (dir.exists() && !dir.isDirectory) {
+                    dir.delete()
                 }
-                //noinspection ResultOfMethodCallIgnored
-                dir.mkdirs();
-                errorFileList = dir.list((d, name) -> name.endsWith(".stacktrace"));
-            } catch (final Exception e) {
-                errorFileList = null;
+                dir.mkdirs()
+                dir.list { _: File?, name: String -> name.endsWith(".stacktrace") }
+            } catch (e: Exception) {
+                null
             }
-
-            if (errorFileList == null || errorFileList.length <= 0) {
-                return;
+            if (errorFileList == null || errorFileList.isEmpty()) {
+                return
             }
-            final StringBuilder errorStringBuilder;
-
-            errorStringBuilder = new StringBuilder("\r\n\r\n");
-            final int maxSendMail = 5;
-            int curIndex = 0;
-            for (final String curString : errorFileList) {
-                final File file = new File(filePath + '/' + curString);
-
-                if (curIndex++ <= maxSendMail) {
-                    errorStringBuilder.append("New Trace collected:\r\n=====================\r\n");
-                    try (final BufferedReader input = new BufferedReader(new FileReader(file))) {
-                        String line;
-                        while ((line = input.readLine()) != null)
-                            errorStringBuilder.append(line).append("\r\n");
+            val errorStringBuilder: StringBuilder = StringBuilder("\n\n")
+            val maxSendMail = 5
+            for ((curIndex, curString) in errorFileList.withIndex()) {
+                val file = File("$filePath/$curString")
+                if (curIndex <= maxSendMail) {
+                    errorStringBuilder.append("New Trace collected:\n$longBorder\n")
+                    BufferedReader(FileReader(file)).use { input ->
+                        var line: String?
+                        while (input.readLine().also { line = it } != null) errorStringBuilder.append(line).append("\n")
                     }
                 }
-                //noinspection ResultOfMethodCallIgnored
-                file.delete();
+                file.delete()
             }
-
-            errorStringBuilder.append("\r\n\r\n");
-            final Resources resources = context.getResources();
-            context.startActivity(Intent.createChooser(
-                    new Intent(Intent.ACTION_SEND)
-                            .setType("message/rfc822")
-                            .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
-                                              | Intent.FLAG_GRANT_READ_URI_PERMISSION
-                                              | Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
-                            .putExtra(Intent.EXTRA_EMAIL, new String[]{Constants.CRASH_REPORT_EMAIL})
-                            // .putExtra(Intent.EXTRA_STREAM, FileProvider.getUriForFile(application, BuildConfig.APPLICATION_ID + ".provider", crashLogsZip))
-                            .putExtra(Intent.EXTRA_SUBJECT, resources.getString(R.string.crash_report_subject))
-                            .putExtra(Intent.EXTRA_TEXT, errorStringBuilder.toString()),
-                    context.getResources().getString(R.string.crash_report_title))
-            );
-        } catch (final Exception e) {
-            Log.e(TAG, "", e);
+            errorStringBuilder.append("\n\n")
+            val resources = context.resources
+            context.startActivity(
+                Intent.createChooser(
+                    Intent(Intent.ACTION_SEND).apply {
+                        type = "message/rfc822"
+                        flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+                        putExtra(Intent.EXTRA_EMAIL, arrayOf(Constants.CRASH_REPORT_EMAIL))
+                        putExtra(Intent.EXTRA_SUBJECT, resources.getString(R.string.crash_report_subject))
+                        putExtra(Intent.EXTRA_TEXT, errorStringBuilder.toString().replace("\n", "\r\n"))
+                    },
+                    context.resources.getString(R.string.crash_report_title)
+                )
+            )
+        } catch (e: Exception) {
+            Log.e(TAG, "", e)
         }
     }
 }
