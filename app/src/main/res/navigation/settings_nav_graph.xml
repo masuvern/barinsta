@@ -42,10 +42,6 @@
         android:name="awais.instagrabber.fragments.settings.ThemePreferencesFragment"
         android:label="@string/theme_settings" />
     <fragment
-        android:id="@+id/favoritesFragment"
-        android:name="awais.instagrabber.fragments.FavoritesFragment"
-        android:label="@string/title_favorites" />
-    <fragment
         android:id="@+id/backupPreferencesFragment"
         android:name="awais.instagrabber.fragments.settings.BackupPreferencesFragment"
         android:label="@string/backup_and_restore" />

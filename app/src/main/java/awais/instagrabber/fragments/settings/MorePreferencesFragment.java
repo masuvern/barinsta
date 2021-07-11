@@ -194,7 +194,12 @@ public class MorePreferencesFragment extends BasePreferencesFragment {
             if (showExplore) {
                 screen.addPreference(getPreference(R.string.title_discover, R.drawable.ic_explore_24, preference -> {
                     if (isSafeToNavigate(navController)) {
-                        navController.navigate(R.id.discover_nav_graph);
+                        try {
+                            final NavDirections navDirections = MorePreferencesFragmentDirections.actionToDiscover();
+                            navController.navigate(navDirections);
+                        } catch (Exception e) {
+                            Log.e(TAG, "setupPreferenceScreen: ", e);
+                        }
                     }
                     return true;
                 }));

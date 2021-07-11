@@ -15,6 +15,10 @@
             app:destination="@id/settings_nav_graph" />
 
         <action
+            android:id="@+id/action_to_discover"
+            app:destination="@id/discover_nav_graph" />
+
+        <action
             android:id="@+id/action_to_about"
             app:destination="@id/aboutFragment" />
 
@@ -516,6 +520,8 @@
     </fragment>
 
     <include app:graph="@navigation/settings_nav_graph" />
+
+    <include app:graph="@navigation/discover_nav_graph" />
 
     <fragment
         android:id="@+id/storyListViewerFragment"
