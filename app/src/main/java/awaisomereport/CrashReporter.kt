@@ -14,9 +14,9 @@ class CrashReporter private constructor(application: Application) : Thread.Uncau
 
     fun start() {
         if (startAttempted) return
+        startAttempted = true
         defaultExceptionHandler = Thread.getDefaultUncaughtExceptionHandler()
         Thread.setDefaultUncaughtExceptionHandler(this)
-        startAttempted = true
     }
 
     override fun uncaughtException(t: Thread, exception: Throwable) {
