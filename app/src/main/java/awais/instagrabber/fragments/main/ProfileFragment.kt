@@ -13,6 +13,7 @@ import android.view.*
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.content.res.AppCompatResources
+import androidx.appcompat.widget.TooltipCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentTransaction
 import androidx.lifecycle.MutableLiveData
@@ -680,6 +681,9 @@ class ProfileFragment : Fragment(), OnRefreshListener, ConfirmDialogFragmentCall
         }
         binding.header.mainPostCount.visibility = View.VISIBLE
         binding.header.mainPostCount.text = getCountSpan(R.plurals.main_posts_count, abbreviate(count, null), count)
+        if (count >= 1000) {
+            TooltipCompat.setTooltipText(binding.header.mainPostCount, count.toString(10))
+        }
     }
 
     private fun setupFollowing(count: Long?) {
@@ -696,6 +700,9 @@ class ProfileFragment : Fragment(), OnRefreshListener, ConfirmDialogFragmentCall
             return
         }
         binding.header.mainFollowing.setOnClickListener(onFollowingClickListener)
+        if (count >= 1000) {
+            TooltipCompat.setTooltipText(binding.header.mainFollowing, count.toString(10))
+        }
     }
 
     private fun setupFollowers(count: Long?) {
@@ -710,6 +717,9 @@ class ProfileFragment : Fragment(), OnRefreshListener, ConfirmDialogFragmentCall
             return
         }
         binding.header.mainFollowers.setOnClickListener(onFollowersClickListener)
+        if (count >= 1000) {
+            TooltipCompat.setTooltipText(binding.header.mainFollowers, count.toString(10))
+        }
     }
 
     private fun setupDMButton(currentUser: User?, profile: User?) {
