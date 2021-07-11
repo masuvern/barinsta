@@ -15,15 +15,18 @@ import java.time.LocalDateTime
 object CrashReporterHelper {
     private val shortBorder = "=".repeat(14)
     private val longBorder = "=".repeat(21)
+    private const val prefix = "stack-"
+    private const val suffix = ".stacktrace"
 
     fun startErrorReporterActivity(
         application: Application,
         exception: Throwable
     ) {
-        val errorContent = getReportContent(exception)
         try {
-            application.openFileOutput("stack-" + System.currentTimeMillis() + ".stacktrace", Context.MODE_PRIVATE)
-                .use { trace -> trace.write(errorContent.toByteArray()) }
+            application.openFileOutput(
+                "$prefix${System.currentTimeMillis()}$suffix",
+                Context.MODE_PRIVATE
+            ).use { it.write(getReportContent(exception).toByteArray()) }
         } catch (ex: Exception) {
             if (BuildConfig.DEBUG) Log.e(TAG, "", ex)
         }
@@ -88,7 +91,7 @@ object CrashReporterHelper {
                     dir.delete()
                 }
                 dir.mkdirs()
-                dir.list { _: File?, name: String -> name.endsWith(".stacktrace") }
+                dir.list { _: File?, name: String -> name.endsWith(suffix) }
             } catch (e: Exception) {
                 null
             }
@@ -136,7 +139,7 @@ object CrashReporterHelper {
                 dir.delete()
             }
             dir.mkdirs()
-            dir.listFiles { _: File?, name: String -> name.endsWith(".stacktrace") }
+            dir.listFiles { _: File?, name: String -> name.endsWith(suffix) }
         } catch (e: Exception) {
             null
         }
