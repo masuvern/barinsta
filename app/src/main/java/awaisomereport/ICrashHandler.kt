@@ -1,7 +1,9 @@
-package awaisomereport;
+package awaisomereport
 
-public interface ICrashHandler {
-    void uncaughtException(Thread t,
-                           Throwable exception,
-                           Thread.UncaughtExceptionHandler defaultEH);
+interface ICrashHandler {
+    fun uncaughtException(
+        t: Thread,
+        exception: Throwable,
+        defaultExceptionHandler: Thread.UncaughtExceptionHandler
+    )
 }
