@@ -91,7 +91,7 @@
     <string name="saved_create_collection">새 컬렉션 만들기</string>
     <string name="edit_collection">컬렉션 이름 수정</string>
     <string name="delete_collection">컬렉션 삭제</string>
-    <string name="delete_collection_note">All contained media will remain in other collections.</string>
+    <string name="delete_collection_note">All posts contained in the deleted collection will remain in other collections.</string>
     <string name="add_to_collection">Add to collection…</string>
     <string name="remove_from_collection">컬렉션에서 제거</string>
     <string name="liked">좋아하는 게시물</string>
@@ -311,7 +311,7 @@
     <string name="corners">모서리</string>
     <string name="show_grid_gap">그리드 간격 표시</string>
     <string name="post_not_found">게시글을 찾지 못했습니다.</string>
-    <string name="no_external_app_url">URL을 여는 앱이 없습니다.</string>
+    <string name="no_external_app_url">No apps for opening URLs found</string>
     <string name="gallery">갤러리</string>
     <string name="camera">카메라</string>
     <string name="all_photos">모든 사진</string>
@@ -337,15 +337,6 @@
     <string name="reset">리셋</string>
     <string name="crop">잘라내기</string>
     <string name="normal">보통</string>
-    <plurals name="likes_count">
-        <item quantity="other">좋아요 %d개</item>
-    </plurals>
-    <plurals name="replies_count">
-        <item quantity="other">답장 %d개</item>
-    </plurals>
-    <plurals name="comments_count">
-        <item quantity="other">댓글 %d개</item>
-    </plurals>
     <plurals name="views_count">
         <item quantity="other">조회수 %d</item>
     </plurals>
@@ -475,5 +466,7 @@
     <string name="slide_to_cancel">Slide to Cancel</string>
     <string name="disable_screen_transitions">Disable screen transitions</string>
     <string name="invalid_format">Invalid format</string>
-    <string name="no_directory_picker_activity">No activity found to select directory</string>
+    <string name="no_directory_picker_activity">Barinsta cannot launch Android\'s file manager. Please make sure it is installed and enabled on your device.</string>
+    <string name="story_stickers">Stickers</string>
+    <string name="story_list">Story list</string>
 </resources>

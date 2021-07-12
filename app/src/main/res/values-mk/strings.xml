@@ -95,7 +95,7 @@
     <string name="saved_create_collection">Креирај нова колекција</string>
     <string name="edit_collection">Уреди го името на колекцијата</string>
     <string name="delete_collection">Избриши колекција</string>
-    <string name="delete_collection_note">Сите медиуми ќе останат во други колекции.</string>
+    <string name="delete_collection_note">All posts contained in the deleted collection will remain in other collections.</string>
     <string name="add_to_collection">Add to collection…</string>
     <string name="remove_from_collection">Одстрани од колекција</string>
     <string name="liked">Лајкнато</string>
@@ -316,7 +316,7 @@
     <string name="corners">Ќошеви</string>
     <string name="show_grid_gap">Прикажи растојание меѓу слики</string>
     <string name="post_not_found">Објавата не беше пронајдена!</string>
-    <string name="no_external_app_url">Но беше пронајдена апликација за отварање линкови</string>
+    <string name="no_external_app_url">No apps for opening URLs found</string>
     <string name="gallery">Галерија</string>
     <string name="camera">Камера</string>
     <string name="all_photos">Сите слики</string>
@@ -342,18 +342,6 @@
     <string name="reset">Ресетирај</string>
     <string name="crop">Скрати</string>
     <string name="normal">Нормално</string>
-    <plurals name="likes_count">
-        <item quantity="one">%d лајк</item>
-        <item quantity="other">%d лајкови</item>
-    </plurals>
-    <plurals name="replies_count">
-        <item quantity="one">%d одговор</item>
-        <item quantity="other">%d одговори</item>
-    </plurals>
-    <plurals name="comments_count">
-        <item quantity="one">%d коментар</item>
-        <item quantity="other">%d коментари</item>
-    </plurals>
     <plurals name="views_count">
         <item quantity="one">%d преглед</item>
         <item quantity="other">%d прегледи</item>
@@ -485,5 +473,7 @@
     <string name="slide_to_cancel">Повлечете за да Откажите</string>
     <string name="disable_screen_transitions">Disable screen transitions</string>
     <string name="invalid_format">Invalid format</string>
-    <string name="no_directory_picker_activity">No activity found to select directory</string>
+    <string name="no_directory_picker_activity">Barinsta cannot launch Android\'s file manager. Please make sure it is installed and enabled on your device.</string>
+    <string name="story_stickers">Stickers</string>
+    <string name="story_list">Story list</string>
 </resources>

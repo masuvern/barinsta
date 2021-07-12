@@ -103,7 +103,7 @@
     <string name="saved_create_collection">Utwórz nową kolekcję</string>
     <string name="edit_collection">Wpisz nazwę kolekcji</string>
     <string name="delete_collection">Usunąć kolekcję</string>
-    <string name="delete_collection_note">Wszystkie media pozostaną w innych kolekcjach.</string>
+    <string name="delete_collection_note">All posts contained in the deleted collection will remain in other collections.</string>
     <string name="add_to_collection">Dodać do kolekcji…</string>
     <string name="remove_from_collection">Usuń z kolekcji</string>
     <string name="liked">Polubione</string>
@@ -326,7 +326,7 @@
     <string name="corners">Narożniki</string>
     <string name="show_grid_gap">Pokaż widok siatki</string>
     <string name="post_not_found">Nie znaleziono posta!</string>
-    <string name="no_external_app_url">Nie znaleziono aplikacji, która otwiera adresy URL</string>
+    <string name="no_external_app_url">No apps for opening URLs found</string>
     <string name="gallery">Galeria</string>
     <string name="camera">Aparat</string>
     <string name="all_photos">Wszystkie zdjęcia</string>
@@ -352,24 +352,6 @@
     <string name="reset">Reset</string>
     <string name="crop">Wytnij</string>
     <string name="normal">Normalny</string>
-    <plurals name="likes_count">
-        <item quantity="one">%d polubienie</item>
-        <item quantity="few">%d polubień</item>
-        <item quantity="many">%d polubień</item>
-        <item quantity="other">%d polubień</item>
-    </plurals>
-    <plurals name="replies_count">
-        <item quantity="one">%d odpowiedź</item>
-        <item quantity="few">%d odpowiedzi</item>
-        <item quantity="many">%d odpowiedzi</item>
-        <item quantity="other">%d odpowiedzi</item>
-    </plurals>
-    <plurals name="comments_count">
-        <item quantity="one">%d komentarz</item>
-        <item quantity="few">%d komentarzy</item>
-        <item quantity="many">%d komentarzy</item>
-        <item quantity="other">%d komentarzy</item>
-    </plurals>
     <plurals name="views_count">
         <item quantity="one">%d wyświetlenie</item>
         <item quantity="few">%d wyświetleń</item>
@@ -505,5 +487,7 @@
     <string name="slide_to_cancel">Przesuń, by anulować</string>
     <string name="disable_screen_transitions">Wyłącz przejścia ekranu</string>
     <string name="invalid_format">Nieprawidłowy format</string>
-    <string name="no_directory_picker_activity">No activity found to select directory</string>
+    <string name="no_directory_picker_activity">Barinsta cannot launch Android\'s file manager. Please make sure it is installed and enabled on your device.</string>
+    <string name="story_stickers">Stickers</string>
+    <string name="story_list">Story list</string>
 </resources>

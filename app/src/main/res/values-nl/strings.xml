@@ -95,7 +95,7 @@
     <string name="saved_create_collection">Nieuwe collectie maken</string>
     <string name="edit_collection">Verander collectienaam</string>
     <string name="delete_collection">Verwijder collectie</string>
-    <string name="delete_collection_note">Alle opgenomen media blijven in andere collecties.</string>
+    <string name="delete_collection_note">All posts contained in the deleted collection will remain in other collections.</string>
     <string name="add_to_collection">Add to collection…</string>
     <string name="remove_from_collection">Uit collectie verwijderen</string>
     <string name="liked">Leuk gevonden</string>
@@ -316,7 +316,7 @@
     <string name="corners">Hoeken</string>
     <string name="show_grid_gap">Rasterruimte weergeven</string>
     <string name="post_not_found">Bericht niet gevonden!</string>
-    <string name="no_external_app_url">Geen app gevonden om URL\'s te openen</string>
+    <string name="no_external_app_url">No apps for opening URLs found</string>
     <string name="gallery">Galerij</string>
     <string name="camera">Camera</string>
     <string name="all_photos">Alle Foto\'s</string>
@@ -342,18 +342,6 @@
     <string name="reset">Opnieuw</string>
     <string name="crop">Knip af</string>
     <string name="normal">Normaal</string>
-    <plurals name="likes_count">
-        <item quantity="one">%d vind-ik-leuk</item>
-        <item quantity="other">%d vind-ik-leuks</item>
-    </plurals>
-    <plurals name="replies_count">
-        <item quantity="one">%d antwoord</item>
-        <item quantity="other">%d antwoorden</item>
-    </plurals>
-    <plurals name="comments_count">
-        <item quantity="one">%d opmerking</item>
-        <item quantity="other">%d opmerkingen</item>
-    </plurals>
     <plurals name="views_count">
         <item quantity="one">%d bekijken</item>
         <item quantity="other">%d bekeken</item>
@@ -485,5 +473,7 @@
     <string name="slide_to_cancel">Schuif om te annuleren</string>
     <string name="disable_screen_transitions">Disable screen transitions</string>
     <string name="invalid_format">Invalid format</string>
-    <string name="no_directory_picker_activity">No activity found to select directory</string>
+    <string name="no_directory_picker_activity">Barinsta cannot launch Android\'s file manager. Please make sure it is installed and enabled on your device.</string>
+    <string name="story_stickers">Stickers</string>
+    <string name="story_list">Story list</string>
 </resources>

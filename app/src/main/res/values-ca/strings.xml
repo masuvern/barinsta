@@ -95,7 +95,7 @@
     <string name="saved_create_collection">Crear una nova col·lecció</string>
     <string name="edit_collection">Editar el nom de la col·lecció</string>
     <string name="delete_collection">Suprimeix la col·lecció</string>
-    <string name="delete_collection_note">Tots els mitjans continguts romandran en altres col·leccions.</string>
+    <string name="delete_collection_note">All posts contained in the deleted collection will remain in other collections.</string>
     <string name="add_to_collection">Add to collection…</string>
     <string name="remove_from_collection">Eliminar de la coŀlecció</string>
     <string name="liked">M\'agrada</string>
@@ -316,7 +316,7 @@
     <string name="corners">Cantonades</string>
     <string name="show_grid_gap">Mostrar la separació de la graella</string>
     <string name="post_not_found">Publicació no trobada!</string>
-    <string name="no_external_app_url">No s\'ha trobat cap aplicació que obri l\'enllaç</string>
+    <string name="no_external_app_url">No apps for opening URLs found</string>
     <string name="gallery">Galeria</string>
     <string name="camera">Càmera</string>
     <string name="all_photos">Totes les fotografies</string>
@@ -342,18 +342,6 @@
     <string name="reset">Restablir</string>
     <string name="crop">Escapçar</string>
     <string name="normal">Normal</string>
-    <plurals name="likes_count">
-        <item quantity="one">%d m\'agrada</item>
-        <item quantity="other">%d m\'agrades</item>
-    </plurals>
-    <plurals name="replies_count">
-        <item quantity="one">%d resposta</item>
-        <item quantity="other">%d respostes</item>
-    </plurals>
-    <plurals name="comments_count">
-        <item quantity="one">%d comentari</item>
-        <item quantity="other">%d comentaris</item>
-    </plurals>
     <plurals name="views_count">
         <item quantity="one">%d vista</item>
         <item quantity="other">%d vistes</item>
@@ -485,5 +473,7 @@
     <string name="slide_to_cancel">Slide to Cancel</string>
     <string name="disable_screen_transitions">Disable screen transitions</string>
     <string name="invalid_format">Invalid format</string>
-    <string name="no_directory_picker_activity">No activity found to select directory</string>
+    <string name="no_directory_picker_activity">Barinsta cannot launch Android\'s file manager. Please make sure it is installed and enabled on your device.</string>
+    <string name="story_stickers">Stickers</string>
+    <string name="story_list">Story list</string>
 </resources>

@@ -95,7 +95,7 @@
     <string name="saved_create_collection">Bilduma berria sortu</string>
     <string name="edit_collection">Editatu bildumaren izena</string>
     <string name="delete_collection">Ezabatu bilduma</string>
-    <string name="delete_collection_note">All contained media will remain in other collections.</string>
+    <string name="delete_collection_note">All posts contained in the deleted collection will remain in other collections.</string>
     <string name="add_to_collection">Add to collection…</string>
     <string name="remove_from_collection">Kendu bildumatik</string>
     <string name="liked">Atsegiteak</string>
@@ -316,7 +316,7 @@
     <string name="corners">Ertzak</string>
     <string name="show_grid_gap">Erakutsi sareta-tartea</string>
     <string name="post_not_found">Bidalketa ez da aurkitu!</string>
-    <string name="no_external_app_url">URLak irekiko dituen aplikaziorik ez da aurkitu</string>
+    <string name="no_external_app_url">No apps for opening URLs found</string>
     <string name="gallery">Galeria</string>
     <string name="camera">Kamera</string>
     <string name="all_photos">Argazki guztiak</string>
@@ -342,18 +342,6 @@
     <string name="reset">Berrezarri</string>
     <string name="crop">Ebaki</string>
     <string name="normal">Normala</string>
-    <plurals name="likes_count">
-        <item quantity="one">atsegite %d</item>
-        <item quantity="other">%d atsegite</item>
-    </plurals>
-    <plurals name="replies_count">
-        <item quantity="one">Erantzun %d</item>
-        <item quantity="other">%d erantzun</item>
-    </plurals>
-    <plurals name="comments_count">
-        <item quantity="one">Iruzkin %d</item>
-        <item quantity="other">%d iruzkin</item>
-    </plurals>
     <plurals name="views_count">
         <item quantity="one">Ikusaldi %d</item>
         <item quantity="other">%d ikusaldi</item>
@@ -485,5 +473,7 @@
     <string name="slide_to_cancel">Irristatu uzteko</string>
     <string name="disable_screen_transitions">Disable screen transitions</string>
     <string name="invalid_format">Invalid format</string>
-    <string name="no_directory_picker_activity">No activity found to select directory</string>
+    <string name="no_directory_picker_activity">Barinsta cannot launch Android\'s file manager. Please make sure it is installed and enabled on your device.</string>
+    <string name="story_stickers">Stickers</string>
+    <string name="story_list">Story list</string>
 </resources>

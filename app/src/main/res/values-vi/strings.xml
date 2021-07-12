@@ -91,7 +91,7 @@
     <string name="saved_create_collection">Tạo bộ sưu tập mới</string>
     <string name="edit_collection">Chỉnh sửa tên bộ sưu tập</string>
     <string name="delete_collection">Xoá bộ sưu tập</string>
-    <string name="delete_collection_note">Tất cả những phương tiện đã lưu sẽ được giữ lại trong bộ sưu tập khác.</string>
+    <string name="delete_collection_note">All posts contained in the deleted collection will remain in other collections.</string>
     <string name="add_to_collection">Add to collection…</string>
     <string name="remove_from_collection">Xoá khỏi bộ sưu tập</string>
     <string name="liked">Đã thích</string>
@@ -311,7 +311,7 @@
     <string name="corners">Góc</string>
     <string name="show_grid_gap">Hiển thị khoảng trống lưới</string>
     <string name="post_not_found">Không tìm thấy bài viết!</string>
-    <string name="no_external_app_url">Không có app nào để mở link này</string>
+    <string name="no_external_app_url">No apps for opening URLs found</string>
     <string name="gallery">Thư viện</string>
     <string name="camera">Máy ảnh</string>
     <string name="all_photos">Tất cả ảnh</string>
@@ -337,15 +337,6 @@
     <string name="reset">Đặt lại</string>
     <string name="crop">Cắt</string>
     <string name="normal">Bình thường</string>
-    <plurals name="likes_count">
-        <item quantity="other">%d thích</item>
-    </plurals>
-    <plurals name="replies_count">
-        <item quantity="other">%d phản hồi</item>
-    </plurals>
-    <plurals name="comments_count">
-        <item quantity="other">%d bình luận</item>
-    </plurals>
     <plurals name="views_count">
         <item quantity="other">%d lượt xem</item>
     </plurals>
@@ -475,5 +466,7 @@
     <string name="slide_to_cancel">Slide to Cancel</string>
     <string name="disable_screen_transitions">Disable screen transitions</string>
     <string name="invalid_format">Invalid format</string>
-    <string name="no_directory_picker_activity">No activity found to select directory</string>
+    <string name="no_directory_picker_activity">Barinsta cannot launch Android\'s file manager. Please make sure it is installed and enabled on your device.</string>
+    <string name="story_stickers">Stickers</string>
+    <string name="story_list">Story list</string>
 </resources>

@@ -103,7 +103,7 @@
     <string name="saved_create_collection">Создать новую коллекцию</string>
     <string name="edit_collection">Изменить название коллекции</string>
     <string name="delete_collection">Удалить коллекцию</string>
-    <string name="delete_collection_note">Всё медиа содержимое сохранится в других коллекциях.</string>
+    <string name="delete_collection_note">All posts contained in the deleted collection will remain in other collections.</string>
     <string name="add_to_collection">Add to collection…</string>
     <string name="remove_from_collection">Удалить из коллекции</string>
     <string name="liked">Понравилось</string>
@@ -326,7 +326,7 @@
     <string name="corners">Углы</string>
     <string name="show_grid_gap">Показать разрыв сетки</string>
     <string name="post_not_found">Публикация не найдена!</string>
-    <string name="no_external_app_url">Нет приложения, чтоб открыть ссылку</string>
+    <string name="no_external_app_url">No apps for opening URLs found</string>
     <string name="gallery">Галерея</string>
     <string name="camera">Камера</string>
     <string name="all_photos">Все фото</string>
@@ -352,24 +352,6 @@
     <string name="reset">Сброс</string>
     <string name="crop">Кадрировать</string>
     <string name="normal">Исходный</string>
-    <plurals name="likes_count">
-        <item quantity="one">%d нравится</item>
-        <item quantity="few">%d нравится</item>
-        <item quantity="many">%d понравилось</item>
-        <item quantity="other">%d понравилось</item>
-    </plurals>
-    <plurals name="replies_count">
-        <item quantity="one">%d ответ</item>
-        <item quantity="few">%d ответа</item>
-        <item quantity="many">%d ответов</item>
-        <item quantity="other">%d ответы</item>
-    </plurals>
-    <plurals name="comments_count">
-        <item quantity="one">%d комментарий</item>
-        <item quantity="few">%d комментария</item>
-        <item quantity="many">%d комментариев</item>
-        <item quantity="other">%d комментарии</item>
-    </plurals>
     <plurals name="views_count">
         <item quantity="one">%d просмотр</item>
         <item quantity="few">%d просмотра</item>
@@ -505,5 +487,7 @@
     <string name="slide_to_cancel">Сдвиньте для отмены</string>
     <string name="disable_screen_transitions">Disable screen transitions</string>
     <string name="invalid_format">Invalid format</string>
-    <string name="no_directory_picker_activity">No activity found to select directory</string>
+    <string name="no_directory_picker_activity">Barinsta cannot launch Android\'s file manager. Please make sure it is installed and enabled on your device.</string>
+    <string name="story_stickers">Stickers</string>
+    <string name="story_list">Story list</string>
 </resources>

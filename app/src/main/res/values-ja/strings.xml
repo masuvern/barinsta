@@ -91,7 +91,7 @@
     <string name="saved_create_collection">新しいコレクションを作成</string>
     <string name="edit_collection">コレクションの名前を編集</string>
     <string name="delete_collection">コレクションを削除する</string>
-    <string name="delete_collection_note">含まれるすべてのメディアは他のコレクションに残ります。</string>
+    <string name="delete_collection_note">All posts contained in the deleted collection will remain in other collections.</string>
     <string name="add_to_collection">Add to collection…</string>
     <string name="remove_from_collection">コレクションから削除する</string>
     <string name="liked">いいね！</string>
@@ -311,7 +311,7 @@
     <string name="corners">コーナー</string>
     <string name="show_grid_gap">グリッドの隙間</string>
     <string name="post_not_found">投稿が見つかりません！</string>
-    <string name="no_external_app_url">URLを開くアプリが見つかりません</string>
+    <string name="no_external_app_url">No apps for opening URLs found</string>
     <string name="gallery">ギャラリー</string>
     <string name="camera">カメラ</string>
     <string name="all_photos">すべての写真</string>
@@ -337,15 +337,6 @@
     <string name="reset">リセット</string>
     <string name="crop">トリミング</string>
     <string name="normal">ノーマル</string>
-    <plurals name="likes_count">
-        <item quantity="other">%d いいね！</item>
-    </plurals>
-    <plurals name="replies_count">
-        <item quantity="other">%d 件の返信</item>
-    </plurals>
-    <plurals name="comments_count">
-        <item quantity="other">%d コメント</item>
-    </plurals>
     <plurals name="views_count">
         <item quantity="other">%d ビュー</item>
     </plurals>
@@ -475,5 +466,7 @@
     <string name="slide_to_cancel">Slide to Cancel</string>
     <string name="disable_screen_transitions">Disable screen transitions</string>
     <string name="invalid_format">Invalid format</string>
-    <string name="no_directory_picker_activity">No activity found to select directory</string>
+    <string name="no_directory_picker_activity">Barinsta cannot launch Android\'s file manager. Please make sure it is installed and enabled on your device.</string>
+    <string name="story_stickers">Stickers</string>
+    <string name="story_list">Story list</string>
 </resources>

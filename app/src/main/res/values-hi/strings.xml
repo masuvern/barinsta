@@ -96,7 +96,7 @@
     <string name="saved_create_collection">नया संग्रह बनाएँ</string>
     <string name="edit_collection">संग्रह का नाम संपादित करें</string>
     <string name="delete_collection">संग्रह हटाएं</string>
-    <string name="delete_collection_note">सभी निहित मीडिया अन्य संग्रहों में बने रहेंगे।</string>
+    <string name="delete_collection_note">All posts contained in the deleted collection will remain in other collections.</string>
     <string name="add_to_collection">संग्रह में एड करे</string>
     <string name="remove_from_collection">संग्रह से निकालें</string>
     <string name="liked">पसंद किये</string>
@@ -318,7 +318,7 @@
     <string name="corners">कोने</string>
     <string name="show_grid_gap">Show grid gap</string>
     <string name="post_not_found">पोस्ट नहीं मिली</string>
-    <string name="no_external_app_url">यूआरएल खोलने के लिए कोई ऐप मौजूद नही</string>
+    <string name="no_external_app_url">No apps for opening URLs found</string>
     <string name="gallery">गैलरी</string>
     <string name="camera">कैमरा</string>
     <string name="all_photos">सभी तस्वीरें</string>
@@ -344,18 +344,6 @@
     <string name="reset">रीसेट</string>
     <string name="crop">क्रॉप</string>
     <string name="normal">सामान्य</string>
-    <plurals name="likes_count">
-        <item quantity="one">%d लाईक्स</item>
-        <item quantity="other">%d लाइक्स</item>
-    </plurals>
-    <plurals name="replies_count">
-        <item quantity="one">%d रिप्लाई</item>
-        <item quantity="other">%d रिप्लाई</item>
-    </plurals>
-    <plurals name="comments_count">
-        <item quantity="one">%d comment</item>
-        <item quantity="other">%d कॉमेंट्स</item>
-    </plurals>
     <plurals name="views_count">
         <item quantity="one">%d व्यू</item>
         <item quantity="other">%d views</item>
@@ -487,5 +475,7 @@
     <string name="slide_to_cancel">Slide to Cancel</string>
     <string name="disable_screen_transitions">Disable screen transitions</string>
     <string name="invalid_format">Invalid format</string>
-    <string name="no_directory_picker_activity">No activity found to select directory</string>
+    <string name="no_directory_picker_activity">Barinsta cannot launch Android\'s file manager. Please make sure it is installed and enabled on your device.</string>
+    <string name="story_stickers">Stickers</string>
+    <string name="story_list">Story list</string>
 </resources>

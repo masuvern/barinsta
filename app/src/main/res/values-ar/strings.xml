@@ -111,7 +111,7 @@
     <string name="saved_create_collection">إنشاء مجموعة جديدة</string>
     <string name="edit_collection">تحرير اسم المجموعة</string>
     <string name="delete_collection">حذف المجموعة</string>
-    <string name="delete_collection_note">وستظل جميع الوسائط المحتوية في مجموعات أخرى.</string>
+    <string name="delete_collection_note">All posts contained in the deleted collection will remain in other collections.</string>
     <string name="add_to_collection">Add to collection…</string>
     <string name="remove_from_collection">إزالة من المجموعة</string>
     <string name="liked">أعجبني</string>
@@ -336,7 +336,7 @@
     <string name="corners">Corners</string>
     <string name="show_grid_gap">Show grid gap</string>
     <string name="post_not_found">Post not found!</string>
-    <string name="no_external_app_url">No app found which opens urls</string>
+    <string name="no_external_app_url">No apps for opening URLs found</string>
     <string name="gallery">Gallery</string>
     <string name="camera">Camera</string>
     <string name="all_photos">All Photos</string>
@@ -362,30 +362,6 @@
     <string name="reset">إعادة تعيين</string>
     <string name="crop">قص</string>
     <string name="normal">عادية</string>
-    <plurals name="likes_count">
-        <item quantity="zero">%d likes</item>
-        <item quantity="one">%d like</item>
-        <item quantity="two">%d likes</item>
-        <item quantity="few">%d likes</item>
-        <item quantity="many">%d likes</item>
-        <item quantity="other">%d likes</item>
-    </plurals>
-    <plurals name="replies_count">
-        <item quantity="zero">%d replies</item>
-        <item quantity="one">%d reply</item>
-        <item quantity="two">%d replies</item>
-        <item quantity="few">%d replies</item>
-        <item quantity="many">%d replies</item>
-        <item quantity="other">%d replies</item>
-    </plurals>
-    <plurals name="comments_count">
-        <item quantity="zero">%d comments</item>
-        <item quantity="one">%d comment</item>
-        <item quantity="two">%d comments</item>
-        <item quantity="few">%d comments</item>
-        <item quantity="many">%d comments</item>
-        <item quantity="other">%d comments</item>
-    </plurals>
     <plurals name="views_count">
         <item quantity="zero">%d views</item>
         <item quantity="one">%d view</item>
@@ -525,5 +501,7 @@
     <string name="slide_to_cancel">Slide to Cancel</string>
     <string name="disable_screen_transitions">Disable screen transitions</string>
     <string name="invalid_format">Invalid format</string>
-    <string name="no_directory_picker_activity">No activity found to select directory</string>
+    <string name="no_directory_picker_activity">Barinsta cannot launch Android\'s file manager. Please make sure it is installed and enabled on your device.</string>
+    <string name="story_stickers">Stickers</string>
+    <string name="story_list">Story list</string>
 </resources>

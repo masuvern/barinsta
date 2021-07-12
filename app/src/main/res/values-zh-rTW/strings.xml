@@ -91,7 +91,7 @@
     <string name="saved_create_collection">建立新的收藏</string>
     <string name="edit_collection">編輯收藏名稱</string>
     <string name="delete_collection">刪除收藏</string>
-    <string name="delete_collection_note">所有包含的多媒體將會保留於其他收藏夾中。</string>
+    <string name="delete_collection_note">All posts contained in the deleted collection will remain in other collections.</string>
     <string name="add_to_collection">新增至收藏集…</string>
     <string name="remove_from_collection">從收藏中移除</string>
     <string name="liked">已按讚</string>
@@ -311,7 +311,7 @@
     <string name="corners">邊角</string>
     <string name="show_grid_gap">網格間保留間距</string>
     <string name="post_not_found">貼文不存在！</string>
-    <string name="no_external_app_url">找不到能開啟此連結的應用程式</string>
+    <string name="no_external_app_url">No apps for opening URLs found</string>
     <string name="gallery">圖庫</string>
     <string name="camera">相機</string>
     <string name="all_photos">所有照片</string>
@@ -337,15 +337,6 @@
     <string name="reset">重置</string>
     <string name="crop">裁剪</string>
     <string name="normal">普通</string>
-    <plurals name="likes_count">
-        <item quantity="other">%d 個讚</item>
-    </plurals>
-    <plurals name="replies_count">
-        <item quantity="other">%d 則回覆</item>
-    </plurals>
-    <plurals name="comments_count">
-        <item quantity="other">%d 個評論</item>
-    </plurals>
     <plurals name="views_count">
         <item quantity="other">%d 次觀看</item>
     </plurals>
@@ -475,5 +466,7 @@
     <string name="slide_to_cancel">滑動取消發送</string>
     <string name="disable_screen_transitions">Disable screen transitions</string>
     <string name="invalid_format">Invalid format</string>
-    <string name="no_directory_picker_activity">No activity found to select directory</string>
+    <string name="no_directory_picker_activity">Barinsta cannot launch Android\'s file manager. Please make sure it is installed and enabled on your device.</string>
+    <string name="story_stickers">Stickers</string>
+    <string name="story_list">Story list</string>
 </resources>

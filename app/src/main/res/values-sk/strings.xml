@@ -103,7 +103,7 @@
     <string name="saved_create_collection">Vytvoriť novú kolekciu</string>
     <string name="edit_collection">Upraviť meno kolekcie</string>
     <string name="delete_collection">Vymazať kolekciu</string>
-    <string name="delete_collection_note">All contained media will remain in other collections.</string>
+    <string name="delete_collection_note">All posts contained in the deleted collection will remain in other collections.</string>
     <string name="add_to_collection">Add to collection…</string>
     <string name="remove_from_collection">Remove from collection</string>
     <string name="liked">Obľúbené</string>
@@ -326,7 +326,7 @@
     <string name="corners">Rohy</string>
     <string name="show_grid_gap">Zobraziť medzery v mriežke</string>
     <string name="post_not_found">Príspevok sa nenašiel!</string>
-    <string name="no_external_app_url">Nebola nájdená aplikácia ktorá otvára odkazy</string>
+    <string name="no_external_app_url">No apps for opening URLs found</string>
     <string name="gallery">Galéria</string>
     <string name="camera">Kamera</string>
     <string name="all_photos">Všetky fotky</string>
@@ -352,24 +352,6 @@
     <string name="reset">Resetovať</string>
     <string name="crop">Orezať</string>
     <string name="normal">Normálne</string>
-    <plurals name="likes_count">
-        <item quantity="one">%d sa páči</item>
-        <item quantity="few">%d sa páči</item>
-        <item quantity="many">%d sa páči</item>
-        <item quantity="other">%d sa páči</item>
-    </plurals>
-    <plurals name="replies_count">
-        <item quantity="one">%d reply</item>
-        <item quantity="few">%d replies</item>
-        <item quantity="many">%d replies</item>
-        <item quantity="other">%d replies</item>
-    </plurals>
-    <plurals name="comments_count">
-        <item quantity="one">%d komentár</item>
-        <item quantity="few">%d komentáre</item>
-        <item quantity="many">%d komentáru</item>
-        <item quantity="other">%d komentárov</item>
-    </plurals>
     <plurals name="views_count">
         <item quantity="one">%d zobrazenie</item>
         <item quantity="few">%d zobrazenia</item>
@@ -505,5 +487,7 @@
     <string name="slide_to_cancel">Slide to Cancel</string>
     <string name="disable_screen_transitions">Disable screen transitions</string>
     <string name="invalid_format">Invalid format</string>
-    <string name="no_directory_picker_activity">No activity found to select directory</string>
+    <string name="no_directory_picker_activity">Barinsta cannot launch Android\'s file manager. Please make sure it is installed and enabled on your device.</string>
+    <string name="story_stickers">Stickers</string>
+    <string name="story_list">Story list</string>
 </resources>
