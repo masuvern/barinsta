@@ -98,6 +98,11 @@ class FollowViewerFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         else viewModel.fetch(isFollowersList, null)
     }
 
+    override fun onDestroy() {
+        fragmentActivity.supportActionBar?.subtitle = null
+        super.onDestroy()
+    }
+
     private fun listFollows() {
         viewModel.comparison.removeObservers(viewLifecycleOwner)
         viewModel.status.removeObservers(viewLifecycleOwner)
