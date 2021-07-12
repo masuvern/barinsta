@@ -448,6 +448,7 @@ public class MorePreferencesFragment extends BasePreferencesFragment {
                             Log.e(TAG, "onBindViewHolder: ", throwable);
                             return;
                         }
+                        if (account == null) return;
                         binding.getRoot().post(() -> {
                             binding.fullName.setText(account.getFullName());
                             binding.username.setText("@" + account.getUsername());
