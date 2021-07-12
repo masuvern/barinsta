@@ -355,14 +355,18 @@ public final class Utils {
     // }
 
     public static void showKeyboard(@NonNull final View view) {
-        final Context context = view.getContext();
-        if (context == null) return;
-        final InputMethodManager imm = (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
-        if (imm == null) return;
-        view.requestFocus();
-        final boolean shown = imm.showSoftInput(view, InputMethodManager.SHOW_IMPLICIT);
-        if (!shown) {
-            Log.e(TAG, "showKeyboard: System did not display the keyboard");
+        try {
+            final Context context = view.getContext();
+            if (context == null) return;
+            final InputMethodManager imm = (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
+            if (imm == null) return;
+            view.requestFocus();
+            final boolean shown = imm.showSoftInput(view, InputMethodManager.SHOW_IMPLICIT);
+            if (!shown) {
+                Log.e(TAG, "showKeyboard: System did not display the keyboard");
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "showKeyboard: ", e);
         }
     }
 

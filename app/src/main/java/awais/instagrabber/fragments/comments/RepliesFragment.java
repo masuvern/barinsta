@@ -59,7 +59,9 @@ public class RepliesFragment extends Fragment {
     @Override
     public void onCreate(@Nullable final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        viewModel = new ViewModelProvider(getParentFragment()).get(CommentsViewerViewModel.class);
+        final Fragment parentFragment = getParentFragment();
+        if (parentFragment == null) return;
+        viewModel = new ViewModelProvider(parentFragment).get(CommentsViewerViewModel.class);
         final Bundle bundle = getArguments();
         if (bundle == null) return;
         final Serializable serializable = bundle.getSerializable(ARG_PARENT);
@@ -117,10 +119,13 @@ public class RepliesFragment extends Fragment {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        viewModel.clearReplies();
+        if (viewModel != null) {
+            viewModel.clearReplies();
+        }
     }
 
     private void setupObservers() {
+        if (viewModel == null) return;
         viewModel.getCurrentUserId().observe(getViewLifecycleOwner(), currentUserId -> {
             long userId = 0;
             if (currentUserId != null) {
@@ -151,7 +156,8 @@ public class RepliesFragment extends Fragment {
             final Bundle bundle = getArguments();
             if (bundle == null) return;
             final boolean focusInput = bundle.getBoolean(ARG_FOCUS_INPUT);
-            if (focusInput && viewModel.getRepliesParent() != null && viewModel.getRepliesParent().getUser() != null) {
+            if (focusInput && viewModel.getRepliesParent() != null) {
+                viewModel.getRepliesParent().getUser();
                 binding.commentText.setText(String.format("@%s ", viewModel.getRepliesParent().getUser().getUsername()));
                 Utils.showKeyboard(binding.commentText);
             }
@@ -167,8 +173,9 @@ public class RepliesFragment extends Fragment {
                     break;
                 case ERROR:
                     binding.swipeRefreshLayout.setRefreshing(false);
-                    if (!TextUtils.isEmpty(listResource.message)) {
-                        Snackbar.make(binding.getRoot(), listResource.message, Snackbar.LENGTH_LONG).show();
+                    final String message = listResource.message;
+                    if (!TextUtils.isEmpty(message)) {
+                        Snackbar.make(binding.getRoot(), message, Snackbar.LENGTH_LONG).show();
                     }
                     break;
                 case LOADING:
@@ -188,6 +195,7 @@ public class RepliesFragment extends Fragment {
     }
 
     private void setupAdapter(final long currentUserId) {
+        if (viewModel == null) return;
         final Context context = getContext();
         if (context == null) return;
         commentsAdapter = new CommentsAdapter(
@@ -215,7 +223,9 @@ public class RepliesFragment extends Fragment {
         final Context context = getContext();
         if (context == null) return;
         final LinearLayoutManager layoutManager = new LinearLayoutManager(context);
-        final RecyclerLazyLoader lazyLoader = new RecyclerLazyLoader(layoutManager, (page, totalItemsCount) -> viewModel.fetchReplies());
+        final RecyclerLazyLoader lazyLoader = new RecyclerLazyLoader(layoutManager, (page, totalItemsCount) -> {
+            if (viewModel != null) viewModel.fetchReplies();
+        });
         Helper.setupList(context, binding.comments, layoutManager, lazyLoader);
     }
 
