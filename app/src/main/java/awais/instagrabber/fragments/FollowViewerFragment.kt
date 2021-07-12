@@ -69,6 +69,7 @@ class FollowViewerFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         isFollowersList = fragmentArgs.isFollowersList
         username = fragmentArgs.username
         namePost = username
+        setTitle(username)
         binding.swipeRefreshLayout.setOnRefreshListener(this)
         if (isCompare) listCompare() else listFollows()
         viewModel.fetch(isFollowersList, null)
@@ -101,6 +102,7 @@ class FollowViewerFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         viewModel.comparison.removeObservers(viewLifecycleOwner)
         viewModel.status.removeObservers(viewLifecycleOwner)
         type = if (isFollowersList) R.string.followers_type_followers else R.string.followers_type_following
+        setSubtitle(type)
         val layoutManager = LinearLayoutManager(context)
         lazyLoader = RecyclerLazyLoader(layoutManager) { _, totalItemsCount ->
             binding.swipeRefreshLayout.isRefreshing = true
@@ -123,7 +125,7 @@ class FollowViewerFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         viewModel.getList(isFollowersList).removeObservers(viewLifecycleOwner)
         binding.rvFollow.clearOnScrollListeners()
         binding.swipeRefreshLayout.isRefreshing = true
-        type = R.string.followers_compare
+        setSubtitle(R.string.followers_compare)
         viewModel.status.observe(viewLifecycleOwner) {}
         viewModel.comparison.observe(viewLifecycleOwner) {
             if (it != null) {
@@ -191,8 +193,6 @@ class FollowViewerFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         followingModels: List<User>?,
         followersModels: List<User>?
     ) {
-        setTitle(username)
-        setSubtitle(type)
         val groups: ArrayList<ExpandableGroup> = ArrayList<ExpandableGroup>(1)
         if (isCompare && followingModels != null && followersModels != null && allFollowing != null) {
             if (followingModels.isNotEmpty()) groups.add(
