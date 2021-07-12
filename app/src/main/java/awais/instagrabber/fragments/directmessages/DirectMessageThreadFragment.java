@@ -616,6 +616,7 @@ public class DirectMessageThreadFragment extends Fragment implements DirectReact
     }
 
     private void setObservers() {
+        if (viewModel == null) return;
         threadLiveData = viewModel.getThread();
         // if (threadLiveData == null) {
         //     final NavController navController = NavHostFragment.findNavController(this);
