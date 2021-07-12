@@ -1,102 +1,96 @@
-package awaisomereport;
+package awaisomereport
 
-import android.app.Activity;
-import android.content.Context;
-import android.graphics.Canvas;
-import android.graphics.Paint;
-import android.graphics.Rect;
-import android.graphics.drawable.Drawable;
-import android.os.Bundle;
-import android.text.Spannable;
-import android.text.SpannableString;
-import android.text.style.ImageSpan;
-import android.view.View;
-import android.view.ViewGroup;
+import android.app.Activity
+import android.content.Context
+import android.graphics.Canvas
+import android.graphics.Paint
+import android.graphics.Paint.FontMetricsInt
+import android.graphics.drawable.Drawable
+import android.os.Bundle
+import android.text.Spannable
+import android.text.SpannableString
+import android.text.style.ImageSpan
+import android.view.View
+import android.view.ViewGroup
+import androidx.annotation.DrawableRes
+import awais.instagrabber.R
+import awais.instagrabber.databinding.ActivityCrashErrorBinding
+import awaisomereport.CrashReporterHelper.startCrashEmailIntent
+import java.lang.ref.WeakReference
+import kotlin.system.exitProcess
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
+class ErrorReporterActivity : Activity(), View.OnClickListener {
 
-import java.lang.ref.WeakReference;
+    private lateinit var binding: ActivityCrashErrorBinding
 
-import awais.instagrabber.R;
-
-public final class ErrorReporterActivity extends Activity implements View.OnClickListener {
-    private View btnReport;
-
-    @Override
-    protected void onCreate(@Nullable final Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_crash_error);
-
-        setFinishOnTouchOutside(false);
-        getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-
-        final SpannableString crashTitle = new SpannableString("   " + getString(R.string.crash_title));
-        crashTitle.setSpan(new CenteredImageSpan(this, android.R.drawable.stat_notify_error),
-                0, 1, Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
-        setTitle(crashTitle);
-
-        btnReport = findViewById(R.id.btnReport);
-        btnReport.setOnClickListener(this);
-        findViewById(R.id.btnCancel).setOnClickListener(this);
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        binding = ActivityCrashErrorBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+        setFinishOnTouchOutside(false)
+        window.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+        val crashTitle = SpannableString("   " + getString(R.string.crash_title))
+        crashTitle.setSpan(
+            CenteredImageSpan(this, android.R.drawable.stat_notify_error),
+            0,
+            1,
+            Spannable.SPAN_INCLUSIVE_EXCLUSIVE
+        )
+        title = crashTitle
+        binding.btnReport.setOnClickListener(this)
+        binding.btnCancel.setOnClickListener(this)
     }
 
-    @Override
-    public void onClick(@NonNull final View v) {
-        if (v == btnReport) {
-            CrashReporterHelper.startCrashEmailIntent(this);
+    override fun onClick(v: View) {
+        if (v === binding.btnReport) {
+            startCrashEmailIntent(this)
         }
-        finish();
-        System.exit(10);
+        finish()
+        exitProcess(10)
     }
 
-    public static class CenteredImageSpan extends ImageSpan {
-        private WeakReference<Drawable> drawable;
+    private class CenteredImageSpan(context: Context, @DrawableRes drawableRes: Int) : ImageSpan(context, drawableRes) {
 
-        public CenteredImageSpan(final Context context, final int drawableRes) {
-            super(context, drawableRes);
-        }
+        private var drawable: WeakReference<Drawable>? = null
 
-        @Override
-        public int getSize(@NonNull final Paint paint, final CharSequence text, final int start, final int end, @Nullable final Paint.FontMetricsInt fm) {
-            final Drawable drawable = getCachedDrawable();
-            final Rect rect = drawable.getBounds();
-
-            if (fm != null) {
-                final Paint.FontMetricsInt pfm = paint.getFontMetricsInt();
-                fm.ascent = pfm.ascent;
-                fm.descent = pfm.descent;
-                fm.top = pfm.top;
-                fm.bottom = pfm.bottom;
+        override fun getSize(
+            paint: Paint,
+            text: CharSequence,
+            start: Int,
+            end: Int,
+            fm: FontMetricsInt?
+        ): Int {
+            fm?.apply {
+                val pfm = paint.fontMetricsInt
+                ascent = pfm.ascent
+                descent = pfm.descent
+                top = pfm.top
+                bottom = pfm.bottom
             }
-
-            return rect.right;
+            return cachedDrawable.bounds.right
         }
 
-        @Override
-        public void draw(@NonNull final Canvas canvas, final CharSequence text, final int start, final int end, final float x, final int top,
-                         final int y, final int bottom, @NonNull final Paint paint) {
-            final Drawable drawable = getCachedDrawable();
-            canvas.save();
-
-            final int drawableHeight = drawable.getIntrinsicHeight();
-            final Paint.FontMetricsInt fontMetricsInt = paint.getFontMetricsInt();
-            int transY = bottom - drawable.getBounds().bottom + (drawableHeight - fontMetricsInt.descent + fontMetricsInt.ascent) / 2;
-
-            canvas.translate(x, transY);
-            drawable.draw(canvas);
-            canvas.restore();
+        override fun draw(
+            canvas: Canvas,
+            text: CharSequence,
+            start: Int,
+            end: Int,
+            x: Float,
+            top: Int,
+            y: Int,
+            bottom: Int,
+            paint: Paint
+        ) {
+            canvas.save()
+            val drawableHeight = cachedDrawable.intrinsicHeight
+            val fontMetricsInt = paint.fontMetricsInt
+            val transY = bottom - cachedDrawable.bounds.bottom + (drawableHeight - fontMetricsInt.descent + fontMetricsInt.ascent) / 2
+            canvas.translate(x, transY.toFloat())
+            cachedDrawable.draw(canvas)
+            canvas.restore()
         }
 
-        private Drawable getCachedDrawable() {
-            Drawable d = null;
-            if (drawable != null) d = drawable.get();
-            if (d == null) {
-                d = getDrawable();
-                drawable = new WeakReference<>(d);
-            }
-            return d;
-        }
+        private val cachedDrawable: Drawable
+            get() = drawable?.get() ?: getDrawable().also { drawable = WeakReference(it) }
     }
 }
-
