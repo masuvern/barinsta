@@ -652,6 +652,7 @@ class MainActivity : BaseLanguageActivity() {
     fun getToolbar() = synchronized(toolbarLock) { this.toolbar }
 
     fun setToolbar(toolbar: Toolbar, owner: Fragment) = synchronized(toolbarLock) {
+        supportActionBar?.subtitle = null
         toolbarOwner = owner
         binding.appBarLayout.visibility = View.GONE
         removeScrollingBehaviour()
