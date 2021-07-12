@@ -130,9 +130,7 @@ public class TopicClusterViewHolder extends RecyclerView.ViewHolder {
         }
         // binding.title.setTransitionName("title-" + topicCluster.getCollectionId());
         binding.cover.setTransitionName("cover-" + topicCluster.getCollectionId());
-        final String thumbUrl = ResponseBodyUtils.getThumbUrl(topicCluster.getCoverMediaList() == null
-                                                              ? topicCluster.getCoverMedia()
-                                                              : topicCluster.getCoverMediaList().get(0));
+        final String thumbUrl = ResponseBodyUtils.getThumbUrl(topicCluster.getCoverMediaList().get(0));
         if (thumbUrl == null) {
             binding.cover.setImageURI((String) null);
         } else {
@@ -150,16 +148,19 @@ public class TopicClusterViewHolder extends RecyclerView.ViewHolder {
                     }
                     if (bitmap != null) {
                         Palette.from(bitmap).generate(p -> {
-                            final Palette.Swatch swatch = p.getDominantSwatch();
                             final Resources resources = itemView.getResources();
                             int titleTextColor = resources.getColor(R.color.white);
-                            if (swatch != null) {
-                                backgroundColor.set(swatch.getRgb());
-                                GradientDrawable gd = new GradientDrawable(
-                                        GradientDrawable.Orientation.TOP_BOTTOM,
-                                        new int[]{Color.TRANSPARENT, backgroundColor.get()});
-                                titleTextColor = swatch.getTitleTextColor();
-                                binding.background.setBackground(gd);
+                            if (p != null) {
+                                final Palette.Swatch swatch = p.getDominantSwatch();
+                                if (swatch != null) {
+                                    backgroundColor.set(swatch.getRgb());
+                                    GradientDrawable gd = new GradientDrawable(
+                                            GradientDrawable.Orientation.TOP_BOTTOM,
+                                            new int[]{Color.TRANSPARENT, backgroundColor.get()}
+                                    );
+                                    titleTextColor = swatch.getTitleTextColor();
+                                    binding.background.setBackground(gd);
+                                }
                             }
                             titleColor.set(titleTextColor);
                             binding.title.setTextColor(titleTextColor);
