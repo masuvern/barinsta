@@ -86,7 +86,7 @@ public final class FlavorTown {
         settingsHelper.putString(Constants.APP_UA, appUa);
         final String browserUa = UserAgentUtils.generateBrowserUA(browserUaCode);
         settingsHelper.putString(Constants.BROWSER_UA, browserUa);
-        CrashReporterHelper.deleteAllStacktraceFiles(context);
+        AppExecutors.INSTANCE.getDiskIO().execute(() -> CrashReporterHelper.deleteAllStacktraceFiles(context));
         Toast.makeText(context, R.string.updated, Toast.LENGTH_SHORT).show();
         settingsHelper.putInteger(Constants.PREV_INSTALL_VERSION, BuildConfig.VERSION_CODE);
     }
