@@ -64,8 +64,10 @@ public final class LikesViewerFragment extends BottomSheetDialogFragment impleme
                 }
             });
             binding.rvLikes.setAdapter(likesAdapter);
-            binding.rvLikes.setLayoutManager(new LinearLayoutManager(getContext()));
-            binding.rvLikes.addItemDecoration(new DividerItemDecoration(getContext(), DividerItemDecoration.VERTICAL));
+            final Context context = getContext();
+            if (context == null) return;
+            binding.rvLikes.setLayoutManager(new LinearLayoutManager(context));
+            binding.rvLikes.addItemDecoration(new DividerItemDecoration(context, DividerItemDecoration.VERTICAL));
             binding.swipeRefreshLayout.setRefreshing(false);
         }
 
@@ -176,9 +178,11 @@ public final class LikesViewerFragment extends BottomSheetDialogFragment impleme
         binding.swipeRefreshLayout.setOnRefreshListener(this);
         binding.swipeRefreshLayout.setRefreshing(true);
         if (isComment && !isLoggedIn) {
-            final LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
+            final Context context = getContext();
+            if (context == null) return;
+            final LinearLayoutManager layoutManager = new LinearLayoutManager(context);
             binding.rvLikes.setLayoutManager(layoutManager);
-            binding.rvLikes.addItemDecoration(new DividerItemDecoration(getContext(), DividerItemDecoration.HORIZONTAL));
+            binding.rvLikes.addItemDecoration(new DividerItemDecoration(context, DividerItemDecoration.HORIZONTAL));
             lazyLoader = new RecyclerLazyLoader(layoutManager, (page, totalItemsCount) -> {
                 if (!TextUtils.isEmpty(endCursor)) {
                     graphQLRepository.fetchCommentLikers(
