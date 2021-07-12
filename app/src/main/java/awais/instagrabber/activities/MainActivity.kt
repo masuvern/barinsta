@@ -78,8 +78,7 @@ class MainActivity : BaseLanguageActivity() {
     private var userId: Long = 0
     private var toolbarOwner: Fragment? = null
 
-    lateinit var toolbar: Toolbar
-        private set
+    private lateinit var toolbar: Toolbar
 
     var currentTabs: List<Tab> = emptyList()
         private set
@@ -610,16 +609,6 @@ class MainActivity : BaseLanguageActivity() {
     //     }
     // }
 
-    @Synchronized
-    fun resetToolbar(owner: Fragment) {
-        if (owner != toolbarOwner) return
-        binding.appBarLayout.visibility = View.VISIBLE
-        setScrollingBehaviour()
-        setSupportActionBar(binding.toolbar)
-        setupActionBarWithNavController(navController, appBarConfiguration)
-        toolbarOwner = null
-    }
-
     val collapsingToolbarView: CollapsingToolbarLayout
         get() = binding.collapsingToolbarLayout
     val appbarLayout: AppBarLayout
@@ -658,14 +647,27 @@ class MainActivity : BaseLanguageActivity() {
     val rootView: View
         get() = binding.root
 
-    @Synchronized
-    fun setToolbar(toolbar: Toolbar, owner: Fragment) {
+    private val toolbarLock = Any()
+
+    fun getToolbar() = synchronized(toolbarLock) { this.toolbar }
+
+    fun setToolbar(toolbar: Toolbar, owner: Fragment) = synchronized(toolbarLock) {
         toolbarOwner = owner
         binding.appBarLayout.visibility = View.GONE
         removeScrollingBehaviour()
         setSupportActionBar(toolbar)
         this.toolbar = toolbar
         NavigationUI.setupWithNavController(toolbar, navController, appBarConfiguration)
+    }
+
+    fun resetToolbar(owner: Fragment) = synchronized(toolbarLock) {
+        if (owner != toolbarOwner) return
+        this.toolbar = binding.toolbar
+        setSupportActionBar(binding.toolbar)
+        binding.appBarLayout.visibility = View.VISIBLE
+        setScrollingBehaviour()
+        setupActionBarWithNavController(navController, appBarConfiguration)
+        toolbarOwner = null
     }
 
     private fun setNavBarDMUnreadCountBadge(unseenCount: Int) {

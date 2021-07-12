@@ -391,8 +391,12 @@ class ProfileFragment : Fragment(), OnRefreshListener, ConfirmDialogFragmentCall
         }
     }
 
-    override fun onDestroyView() {
+    override fun onStop() {
+        super.onStop()
         mainActivity.resetToolbar(this)
+    }
+
+    override fun onDestroyView() {
         super.onDestroyView()
         setupPostsDone = false
     }

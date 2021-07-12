@@ -278,18 +278,8 @@ public class TopicPostsFragment extends Fragment implements SwipeRefreshLayout.O
     }
 
     @Override
-    public void onDestroy() {
-        super.onDestroy();
-        resetToolbar();
-    }
-
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        resetToolbar();
-    }
-
-    private void resetToolbar() {
+    public void onStop() {
+        super.onStop();
         fragmentActivity.resetToolbar(this);
     }
 
@@ -378,8 +368,7 @@ public class TopicPostsFragment extends Fragment implements SwipeRefreshLayout.O
     }
 
     private void updateSwipeRefreshState() {
-        AppExecutors.INSTANCE.getMainThread().execute(() ->
-                binding.swipeRefreshLayout.setRefreshing(binding.posts.isFetching())
+        AppExecutors.INSTANCE.getMainThread().execute(() -> binding.swipeRefreshLayout.setRefreshing(binding.posts.isFetching())
         );
     }
 

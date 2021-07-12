@@ -336,9 +336,9 @@ public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefre
     }
 
     @Override
-    public void onDestroyView() {
+    public void onStop() {
+        super.onStop();
         fragmentActivity.resetToolbar(this);
-        super.onDestroyView();
     }
 
     private void setupFeed() {

@@ -333,8 +333,8 @@ public class LocationFragment extends Fragment implements SwipeRefreshLayout.OnR
     }
 
     @Override
-    public void onDestroyView() {
-        super.onDestroyView();
+    public void onStop() {
+        super.onStop();
         fragmentActivity.resetToolbar(this);
     }
 

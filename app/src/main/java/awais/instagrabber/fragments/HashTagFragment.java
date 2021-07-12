@@ -339,8 +339,8 @@ public class HashTagFragment extends Fragment implements SwipeRefreshLayout.OnRe
     }
 
     @Override
-    public void onDestroyView() {
-        super.onDestroyView();
+    public void onStop() {
+        super.onStop();
         fragmentActivity.resetToolbar(this);
     }
 

@@ -72,9 +72,9 @@ class DirectMessageInboxFragment : Fragment(), OnRefreshListener {
         super.onPause()
         isPendingRequestTotalBadgeAttached = false
         pendingRequestsMenuItem?.let {
-            val menuItemView = ToolbarUtils.getActionMenuItemView(fragmentActivity.toolbar, it.itemId)
+            val menuItemView = ToolbarUtils.getActionMenuItemView(fragmentActivity.getToolbar(), it.itemId)
             if (menuItemView != null) {
-                BadgeUtils.detachBadgeDrawable(pendingRequestTotalBadgeDrawable, fragmentActivity.toolbar, it.itemId)
+                BadgeUtils.detachBadgeDrawable(pendingRequestTotalBadgeDrawable, fragmentActivity.getToolbar(), it.itemId)
                 pendingRequestTotalBadgeDrawable = null
             }
         }
@@ -145,11 +145,11 @@ class DirectMessageInboxFragment : Fragment(), OnRefreshListener {
         }
         if (count == null || count == 0) {
             val menuItemView = ToolbarUtils.getActionMenuItemView(
-                fragmentActivity.toolbar,
+                fragmentActivity.getToolbar(),
                 pendingRequestsMenuItem1.itemId
             )
             if (menuItemView != null) {
-                BadgeUtils.detachBadgeDrawable(pendingRequestTotalBadgeDrawable, fragmentActivity.toolbar, pendingRequestsMenuItem1.itemId)
+                BadgeUtils.detachBadgeDrawable(pendingRequestTotalBadgeDrawable, fragmentActivity.getToolbar(), pendingRequestsMenuItem1.itemId)
             }
             isPendingRequestTotalBadgeAttached = false
             pendingRequestTotalBadgeDrawable?.number = 0
@@ -161,7 +161,7 @@ class DirectMessageInboxFragment : Fragment(), OnRefreshListener {
         pendingRequestTotalBadgeDrawable?.number = count
         if (!isPendingRequestTotalBadgeAttached) {
             pendingRequestTotalBadgeDrawable?.let {
-                BadgeUtils.attachBadgeDrawable(it, fragmentActivity.toolbar, pendingRequestsMenuItem1.itemId)
+                BadgeUtils.attachBadgeDrawable(it, fragmentActivity.getToolbar(), pendingRequestsMenuItem1.itemId)
                 isPendingRequestTotalBadgeAttached = true
             }
         }
