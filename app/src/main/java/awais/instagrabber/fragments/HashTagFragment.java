@@ -305,7 +305,6 @@ public class HashTagFragment extends Fragment implements SwipeRefreshLayout.OnRe
 
     @Override
     public void onViewCreated(@NonNull final View view, @Nullable final Bundle savedInstanceState) {
-        fragmentActivity.setToolbar(binding.toolbar, this);
         if (!shouldRefresh) return;
         binding.swipeRefreshLayout.setOnRefreshListener(this);
         init();
@@ -321,6 +320,7 @@ public class HashTagFragment extends Fragment implements SwipeRefreshLayout.OnRe
     @Override
     public void onResume() {
         super.onResume();
+        fragmentActivity.setToolbar(binding.toolbar, this);
         setTitle();
     }
 

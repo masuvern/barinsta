@@ -280,7 +280,6 @@ public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefre
 
     @Override
     public void onViewCreated(@NonNull final View view, @Nullable final Bundle savedInstanceState) {
-        fragmentActivity.setToolbar(binding.toolbar, this);
         if (!shouldRefresh) return;
         binding.feedSwipeRefreshLayout.setOnRefreshListener(this);
         /*
@@ -333,6 +332,12 @@ public class FeedFragment extends Fragment implements SwipeRefreshLayout.OnRefre
     public void onRefresh() {
         binding.feedRecyclerView.refresh();
         fetchStories();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        fragmentActivity.setToolbar(binding.toolbar, this);
     }
 
     @Override

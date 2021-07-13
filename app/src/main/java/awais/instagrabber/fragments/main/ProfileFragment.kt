@@ -380,12 +380,14 @@ class ProfileFragment : Fragment(), OnRefreshListener, ConfirmDialogFragmentCall
 
     override fun onResume() {
         super.onResume()
+        mainActivity.setToolbar(binding.toolbar, this)
         try {
             val backStackEntry = NavHostFragment.findNavController(this).currentBackStackEntry
             if (backStackEntry != null) {
                 backStackSavedStateResultLiveData = backStackEntry.savedStateHandle.getLiveData("result")
                 backStackSavedStateResultLiveData?.observe(viewLifecycleOwner, backStackSavedStateObserver)
             }
+            mainActivity.supportActionBar?.title = viewModel.username.value
         } catch (e: Exception) {
             Log.e(TAG, "onResume: ", e)
         }
@@ -439,7 +441,6 @@ class ProfileFragment : Fragment(), OnRefreshListener, ConfirmDialogFragmentCall
     }
 
     private fun init() {
-        mainActivity.setToolbar(binding.toolbar, this)
         binding.swipeRefreshLayout.setOnRefreshListener(this)
         disableDm = !isNavRootInCurrentTabs("direct_messages_nav_graph")
         setupHighlights()
