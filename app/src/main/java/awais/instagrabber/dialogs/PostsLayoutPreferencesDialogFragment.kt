@@ -30,17 +30,17 @@ class PostsLayoutPreferencesDialogFragment(
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        binding = DialogPostLayoutPreferencesBinding.inflate(layoutInflater, null, false)
+        binding = DialogPostLayoutPreferencesBinding.inflate(layoutInflater)
         init()
-        return MaterialAlertDialogBuilder(requireContext()).apply {
-            setView(binding.root)
-            setPositiveButton(R.string.apply) { _: DialogInterface?, _: Int ->
+        return MaterialAlertDialogBuilder(requireContext())
+            .setView(binding.getRoot())
+            .setPositiveButton(R.string.apply) { _: DialogInterface?, _: Int ->
                 val preferences = preferencesBuilder.build()
                 val json = preferences.json
                 Utils.settingsHelper.putString(layoutPreferenceKey, json)
                 onApplyListener.onApply(preferences)
             }
-        }.create()
+            .create()
     }
 
     private fun init() {
