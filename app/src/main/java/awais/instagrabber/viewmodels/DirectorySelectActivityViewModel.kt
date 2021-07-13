@@ -1,113 +1,89 @@
-package awais.instagrabber.viewmodels;
+package awais.instagrabber.viewmodels
 
-import android.app.Application;
-import android.content.Intent;
-import android.content.UriPermission;
-import android.net.Uri;
-import android.os.Parcelable;
+import android.app.Application
+import android.content.Intent
+import android.content.UriPermission
+import android.net.Uri
+import android.os.Parcelable
+import androidx.documentfile.provider.DocumentFile
+import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import awais.instagrabber.R
+import awais.instagrabber.fragments.settings.PreferenceKeys
+import awais.instagrabber.utils.Constants
+import awais.instagrabber.utils.DownloadUtils.ReselectDocumentTreeException
+import awais.instagrabber.utils.TextUtils.isEmpty
+import awais.instagrabber.utils.Utils
+import java.io.UnsupportedEncodingException
+import java.net.URLDecoder
+import java.nio.charset.StandardCharsets
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.documentfile.provider.DocumentFile;
-import androidx.lifecycle.AndroidViewModel;
-import androidx.lifecycle.LiveData;
-import androidx.lifecycle.MutableLiveData;
+class DirectorySelectActivityViewModel(application: Application) : AndroidViewModel(application) {
+    private val _message = MutableLiveData<String>()
+    private val _prevUri = MutableLiveData<String?>()
+    private val _loading = MutableLiveData(false)
+    private val _dirSuccess = MutableLiveData(false)
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
-import java.util.List;
+    val message: LiveData<String> = _message
+    val prevUri: LiveData<String?> = _prevUri
+    val loading: LiveData<Boolean> = _loading
+    val dirSuccess: LiveData<Boolean> = _dirSuccess
 
-import awais.instagrabber.R;
-import awais.instagrabber.utils.Constants;
-import awais.instagrabber.utils.DownloadUtils;
-import awais.instagrabber.utils.TextUtils;
-import awais.instagrabber.utils.Utils;
-
-import static awais.instagrabber.fragments.settings.PreferenceKeys.FOLDER_PATH;
-
-public class DirectorySelectActivityViewModel extends AndroidViewModel {
-    private static final String TAG = DirectorySelectActivityViewModel.class.getSimpleName();
-
-    private final MutableLiveData<String> message = new MutableLiveData<>();
-    private final MutableLiveData<String> prevUri = new MutableLiveData<>();
-    private final MutableLiveData<Boolean> loading = new MutableLiveData<>(false);
-    private final MutableLiveData<Boolean> dirSuccess = new MutableLiveData<>(false);
-
-    public DirectorySelectActivityViewModel(final Application application) {
-        super(application);
-    }
-
-    public LiveData<String> getMessage() {
-        return message;
-    }
-
-    public LiveData<String> getPrevUri() {
-        return prevUri;
-    }
-
-    public LiveData<Boolean> isLoading() {
-        return loading;
-    }
-
-    public LiveData<Boolean> getDirSuccess() {
-        return dirSuccess;
-    }
-
-    public void setInitialUri(final Intent intent) {
+    fun setInitialUri(intent: Intent?) {
         if (intent == null) {
-            setMessage(null);
-            return;
+            setMessage(null)
+            return
         }
-        final Parcelable initialUriParcelable = intent.getParcelableExtra(Constants.EXTRA_INITIAL_URI);
-        if (!(initialUriParcelable instanceof Uri)) {
-            setMessage(null);
-            return;
+        val initialUriParcelable = intent.getParcelableExtra<Parcelable>(Constants.EXTRA_INITIAL_URI)
+        if (initialUriParcelable !is Uri) {
+            setMessage(null)
+            return
         }
-        setMessage((Uri) initialUriParcelable);
+        setMessage(initialUriParcelable as Uri?)
     }
 
-    private void setMessage(@Nullable final Uri initialUri) {
+    private fun setMessage(initialUri: Uri?) {
         if (initialUri == null) {
-            final String prevVersionFolderPath = Utils.settingsHelper.getString(FOLDER_PATH);
-            if (TextUtils.isEmpty(prevVersionFolderPath)) {
+            val prevVersionFolderPath = Utils.settingsHelper.getString(PreferenceKeys.FOLDER_PATH)
+            if (isEmpty(prevVersionFolderPath)) {
                 // default message
-                message.postValue(getApplication().getString(R.string.dir_select_default_message));
-                prevUri.postValue(null);
-                return;
+                _message.postValue(getApplication<Application>().getString(R.string.dir_select_default_message))
+                _prevUri.postValue(null)
+                return
             }
-            message.postValue(getApplication().getString(R.string.dir_select_reselect_message));
-            prevUri.postValue(prevVersionFolderPath);
-            return;
+            _message.postValue(getApplication<Application>().getString(R.string.dir_select_reselect_message))
+            _prevUri.postValue(prevVersionFolderPath)
+            return
         }
-        final List<UriPermission> existingPermissions = getApplication().getContentResolver().getPersistedUriPermissions();
-        final boolean anyMatch = existingPermissions.stream().anyMatch(uriPermission -> uriPermission.getUri().equals(initialUri));
-        final DocumentFile documentFile = DocumentFile.fromSingleUri(getApplication(), initialUri);
-        String path;
-        try {
-            path = URLDecoder.decode(initialUri.toString(), StandardCharsets.UTF_8.toString());
-        } catch (UnsupportedEncodingException e) {
-            path = initialUri.toString();
+        val existingPermissions = getApplication<Application>().contentResolver.persistedUriPermissions
+        val anyMatch = existingPermissions.stream().anyMatch { uriPermission: UriPermission -> uriPermission.uri == initialUri }
+        val documentFile = DocumentFile.fromSingleUri(getApplication(), initialUri)
+        val path: String = try {
+            URLDecoder.decode(initialUri.toString(), StandardCharsets.UTF_8.toString())
+        } catch (e: UnsupportedEncodingException) {
+            initialUri.toString()
         }
         if (!anyMatch) {
-            message.postValue(getApplication().getString(R.string.dir_select_permission_revoked_message));
-            prevUri.postValue(path);
-            return;
+            _message.postValue(getApplication<Application>().getString(R.string.dir_select_permission_revoked_message))
+            _prevUri.postValue(path)
+            return
         }
-        if (documentFile == null || !documentFile.exists() || documentFile.lastModified() == 0) {
-            message.postValue(getApplication().getString(R.string.dir_select_folder_not_exist));
-            prevUri.postValue(path);
+        if (documentFile == null || !documentFile.exists() || documentFile.lastModified() == 0L) {
+            _message.postValue(getApplication<Application>().getString(R.string.dir_select_folder_not_exist))
+            _prevUri.postValue(path)
         }
     }
 
-    public void setupSelectedDir(@NonNull final Intent data) throws DownloadUtils.ReselectDocumentTreeException {
-        loading.postValue(true);
+    @Throws(ReselectDocumentTreeException::class)
+    fun setupSelectedDir(data: Intent) {
+        _loading.postValue(true)
         try {
-            Utils.setupSelectedDir(getApplication(), data);
-            message.postValue(getApplication().getString(R.string.dir_select_success_message));
-            dirSuccess.postValue(true);
+            Utils.setupSelectedDir(getApplication(), data)
+            _message.postValue(getApplication<Application>().getString(R.string.dir_select_success_message))
+            _dirSuccess.postValue(true)
         } finally {
-            loading.postValue(false);
+            _loading.postValue(false)
         }
     }
 }

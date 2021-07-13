@@ -9,7 +9,7 @@ import android.os.Bundle
 import android.provider.DocumentsContract
 import android.util.Log
 import android.view.View
-import androidx.lifecycle.ViewModelProvider
+import androidx.activity.viewModels
 import awais.instagrabber.R
 import awais.instagrabber.databinding.ActivityDirectorySelectBinding
 import awais.instagrabber.dialogs.ConfirmDialogFragment
@@ -25,13 +25,13 @@ class DirectorySelectActivity : BaseLanguageActivity() {
     private var initialUri: Uri? = null
 
     private lateinit var binding: ActivityDirectorySelectBinding
-    private lateinit var viewModel: DirectorySelectActivityViewModel
+
+    private val viewModel: DirectorySelectActivityViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityDirectorySelectBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        viewModel = ViewModelProvider(this).get(DirectorySelectActivityViewModel::class.java)
         val intent = intent
         viewModel.setInitialUri(intent)
         setupObservers()
@@ -52,7 +52,7 @@ class DirectorySelectActivity : BaseLanguageActivity() {
             binding.message2.visibility = View.VISIBLE
         })
         viewModel.dirSuccess.observe(this, { success: Boolean -> binding.selectDir.visibility = if (success) View.GONE else View.VISIBLE })
-        viewModel.isLoading.observe(this, { loading: Boolean ->
+        viewModel.loading.observe(this, { loading: Boolean ->
             binding.message.visibility = if (loading) View.GONE else View.VISIBLE
             binding.loadingIndicator.visibility = if (loading) View.VISIBLE else View.GONE
         })
