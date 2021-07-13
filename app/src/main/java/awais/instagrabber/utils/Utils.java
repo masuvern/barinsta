@@ -195,10 +195,15 @@ public final class Utils {
         if (context == null || TextUtils.isEmpty(url)) {
             return;
         }
-        final Intent i = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
-        i.putExtra(Browser.EXTRA_APPLICATION_ID, context.getPackageName());
-        i.putExtra(Browser.EXTRA_CREATE_NEW_TAB, true);
         try {
+            String url1 = url;
+            // add http:// if string doesn't have http:// or https://
+            if (!url.startsWith("http://") && !url.startsWith("https://")) {
+                url1 = "http://" + url;
+            }
+            final Intent i = new Intent(Intent.ACTION_VIEW, Uri.parse(url1));
+            i.putExtra(Browser.EXTRA_APPLICATION_ID, context.getPackageName());
+            i.putExtra(Browser.EXTRA_CREATE_NEW_TAB, true);
             context.startActivity(i);
         } catch (ActivityNotFoundException e) {
             Log.e(TAG, "openURL: No activity found to handle URLs", e);
