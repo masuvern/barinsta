@@ -43,7 +43,9 @@ public class DirectItemLinkViewHolder extends DirectItemViewHolder {
     @Override
     public void bindItem(final DirectItem item, final MessageDirection messageDirection) {
         final DirectItemLink link = item.getLink();
+        if (link == null) return;
         final DirectItemLinkContext linkContext = link.getLinkContext();
+        if (linkContext == null) return;
         final String linkImageUrl = linkContext.getLinkImageUrl();
         if (TextUtils.isEmpty(linkImageUrl)) {
             binding.preview.setVisibility(View.GONE);
