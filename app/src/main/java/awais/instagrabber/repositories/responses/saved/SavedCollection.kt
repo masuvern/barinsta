@@ -8,5 +8,5 @@ class SavedCollection(val collectionId: String,
                       val collectionType: String,
                       val collectionMediaCount: Int,
                       // coverMedia or coverMediaList: only one is defined
-                      val coverMedia: Media,
-                      val coverMediaList: List<Media>) : Serializable
+                      val coverMedia: Media?,
+                      val coverMediaList: List<Media>?) : Serializable

@@ -29,6 +29,7 @@ import awais.instagrabber.adapters.SavedCollectionsAdapter;
 import awais.instagrabber.databinding.ItemDiscoverTopicBinding;
 import awais.instagrabber.repositories.responses.discover.TopicCluster;
 import awais.instagrabber.repositories.responses.saved.SavedCollection;
+import awais.instagrabber.repositories.responses.Media;
 import awais.instagrabber.utils.ResponseBodyUtils;
 
 public class TopicClusterViewHolder extends RecyclerView.ViewHolder {
@@ -130,7 +131,10 @@ public class TopicClusterViewHolder extends RecyclerView.ViewHolder {
         }
         // binding.title.setTransitionName("title-" + topicCluster.getCollectionId());
         binding.cover.setTransitionName("cover-" + topicCluster.getCollectionId());
-        final String thumbUrl = ResponseBodyUtils.getThumbUrl(topicCluster.getCoverMediaList().get(0));
+        final Media coverMedia = topicCluster.getCoverMediaList() == null
+                ? topicCluster.getCoverMedia()
+                : topicCluster.getCoverMediaList().get(0);
+        final String thumbUrl = ResponseBodyUtils.getThumbUrl(coverMedia);
         if (thumbUrl == null) {
             binding.cover.setImageURI((String) null);
         } else {

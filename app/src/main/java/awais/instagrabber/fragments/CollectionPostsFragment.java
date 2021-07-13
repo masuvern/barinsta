@@ -415,7 +415,10 @@ public class CollectionPostsFragment extends Fragment implements SwipeRefreshLay
     }
 
     private void setupCover() {
-        final String coverUrl = ResponseBodyUtils.getImageUrl(savedCollection.getCoverMediaList().get(0));
+        final Media coverMedia = savedCollection.getCoverMediaList() == null
+                ? savedCollection.getCoverMedia()
+                : savedCollection.getCoverMediaList().get(0);
+        final String coverUrl = ResponseBodyUtils.getImageUrl(coverMedia);
         final DraweeController controller = Fresco
                 .newDraweeControllerBuilder()
                 .setOldController(binding.cover.getController())
