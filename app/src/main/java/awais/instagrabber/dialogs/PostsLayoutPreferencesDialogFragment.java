@@ -5,7 +5,6 @@ import android.content.Context;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.Window;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -55,16 +54,6 @@ public class PostsLayoutPreferencesDialogFragment extends DialogFragment {
                     onApplyListener.onApply(preferences);
                 })
                 .create();
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-        final Dialog dialog = getDialog();
-        if (dialog == null) return;
-        final Window window = dialog.getWindow();
-        if (window == null) return;
-        window.setWindowAnimations(R.style.dialog_window_animation);
     }
 
     private void init() {
