@@ -103,7 +103,7 @@
     <string name="saved_create_collection">Utwórz nową kolekcję</string>
     <string name="edit_collection">Wpisz nazwę kolekcji</string>
     <string name="delete_collection">Usunąć kolekcję</string>
-    <string name="delete_collection_note">All posts contained in the deleted collection will remain in other collections.</string>
+    <string name="delete_collection_note">Wszystkie posty zawarte w usuniętej kolekcji pozostaną w innych kolekcjach.</string>
     <string name="add_to_collection">Dodać do kolekcji…</string>
     <string name="remove_from_collection">Usuń z kolekcji</string>
     <string name="liked">Polubione</string>
@@ -326,7 +326,7 @@
     <string name="corners">Narożniki</string>
     <string name="show_grid_gap">Pokaż widok siatki</string>
     <string name="post_not_found">Nie znaleziono posta!</string>
-    <string name="no_external_app_url">No apps for opening URLs found</string>
+    <string name="no_external_app_url">Nie znaleziono aplikacji dla otwierania adresów URL</string>
     <string name="gallery">Galeria</string>
     <string name="camera">Aparat</string>
     <string name="all_photos">Wszystkie zdjęcia</string>
@@ -487,7 +487,7 @@
     <string name="slide_to_cancel">Przesuń, by anulować</string>
     <string name="disable_screen_transitions">Wyłącz przejścia ekranu</string>
     <string name="invalid_format">Nieprawidłowy format</string>
-    <string name="no_directory_picker_activity">Barinsta cannot launch Android\'s file manager. Please make sure it is installed and enabled on your device.</string>
-    <string name="story_stickers">Stickers</string>
+    <string name="no_directory_picker_activity">Barinsta nie może uruchomić menedżera plików. Upewnij się, że jest on zainstalowana i włączona na twoim urządzeniu.</string>
+    <string name="story_stickers">Naklejki</string>
     <string name="story_list">Story list</string>
 </resources>
