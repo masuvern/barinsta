@@ -34,17 +34,9 @@
             app:destination="@id/postPreferencesFragment" />
     </fragment>
     <fragment
-        android:id="@+id/aboutFragment"
-        android:name="awais.instagrabber.fragments.settings.AboutFragment"
-        android:label="@string/action_about" />
-    <fragment
         android:id="@+id/themePreferencesFragment"
         android:name="awais.instagrabber.fragments.settings.ThemePreferencesFragment"
         android:label="@string/theme_settings" />
-    <fragment
-        android:id="@+id/backupPreferencesFragment"
-        android:name="awais.instagrabber.fragments.settings.BackupPreferencesFragment"
-        android:label="@string/backup_and_restore" />
     <fragment
         android:id="@+id/localePreferencesFragment"
         android:name="awais.instagrabber.fragments.settings.LocalePreferencesFragment"
