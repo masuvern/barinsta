@@ -542,4 +542,13 @@
             android:id="@+id/action_to_profile"
             app:destination="@id/profile_non_top" />
     </fragment>
+
+    <fragment
+        android:id="@+id/aboutFragment"
+        android:name="awais.instagrabber.fragments.settings.AboutFragment"
+        android:label="@string/action_about" />
+    <fragment
+        android:id="@+id/backupPreferencesFragment"
+        android:name="awais.instagrabber.fragments.settings.BackupPreferencesFragment"
+        android:label="@string/backup_and_restore" />
 </navigation>

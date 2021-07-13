@@ -34,13 +34,10 @@ import awais.instagrabber.customviews.RamboTextViewV2
 import awais.instagrabber.customviews.RamboTextViewV2.*
 import awais.instagrabber.databinding.FragmentProfileBinding
 import awais.instagrabber.db.repositories.FavoriteRepository
-import awais.instagrabber.dialogs.ConfirmDialogFragment
+import awais.instagrabber.dialogs.*
 import awais.instagrabber.dialogs.ConfirmDialogFragment.ConfirmDialogFragmentCallback
-import awais.instagrabber.dialogs.MultiOptionDialogFragment
 import awais.instagrabber.dialogs.MultiOptionDialogFragment.MultiOptionDialogSingleCallback
 import awais.instagrabber.dialogs.MultiOptionDialogFragment.Option
-import awais.instagrabber.dialogs.PostsLayoutPreferencesDialogFragment
-import awais.instagrabber.dialogs.ProfilePicDialogFragment
 import awais.instagrabber.fragments.UserSearchMode
 import awais.instagrabber.managers.DirectMessagesManager
 import awais.instagrabber.models.Resource
@@ -1002,10 +999,10 @@ class ProfileFragment : Fragment(), OnRefreshListener, ConfirmDialogFragmentCall
     }
 
     private fun showPostsLayoutPreferences() {
-        val fragment = PostsLayoutPreferencesDialogFragment(Constants.PREF_PROFILE_POSTS_LAYOUT) { preferences ->
-            layoutPreferences = preferences
+        val fragment = PostsLayoutPreferencesDialogFragment(Constants.PREF_PROFILE_POSTS_LAYOUT) {
+            layoutPreferences = it
             Handler(Looper.getMainLooper()).postDelayed(
-                { binding.postsRecyclerView.layoutPreferences = preferences },
+                { binding.postsRecyclerView.layoutPreferences = it },
                 200
             )
         }

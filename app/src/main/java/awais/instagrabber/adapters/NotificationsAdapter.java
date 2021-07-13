@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.ListAdapter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import awais.instagrabber.adapters.viewholder.NotificationViewHolder;
@@ -24,12 +25,12 @@ public final class NotificationsAdapter extends ListAdapter<Notification, Notifi
     private static final DiffUtil.ItemCallback<Notification> DIFF_CALLBACK = new DiffUtil.ItemCallback<Notification>() {
         @Override
         public boolean areItemsTheSame(final Notification oldItem, final Notification newItem) {
-            return oldItem.getPk().equals(newItem.getPk());
+            return Objects.requireNonNull(oldItem.getPk()).equals(newItem.getPk());
         }
 
         @Override
         public boolean areContentsTheSame(@NonNull final Notification oldItem, @NonNull final Notification newItem) {
-            return oldItem.getPk().equals(newItem.getPk()) && oldItem.getType() == newItem.getType();
+            return Objects.requireNonNull(oldItem.getPk()).equals(newItem.getPk()) && Objects.equals(oldItem.getType(), newItem.getType());
         }
     };
 
@@ -72,8 +73,8 @@ public final class NotificationsAdapter extends ListAdapter<Notification, Notifi
 
     private List<Notification> sort(final List<Notification> list) {
         final List<Notification> listCopy = new ArrayList<>(list).stream()
-                .filter(i -> i.getType() != null)
-                .collect(Collectors.toList());
+                                                                 .filter(i -> i.getType() != null)
+                                                                 .collect(Collectors.toList());
         Collections.sort(listCopy, (o1, o2) -> {
             // keep requests at top
             if (o1.getType() == o2.getType()
