@@ -274,6 +274,25 @@ public class PostViewV2Fragment extends Fragment implements EditTextDialogFragme
         }
     }
 
+    @Override
+    public void onPrimaryNavigationFragmentChanged(final boolean isPrimaryNavigationFragment) {
+        if (!isPrimaryNavigationFragment) {
+            final Media media = viewModel.getMedia();
+            switch (media.getType()) {
+                case MEDIA_TYPE_VIDEO:
+                    if (videoPlayerViewHelper != null) {
+                        videoPlayerViewHelper.pause();
+                    }
+                    return;
+                case MEDIA_TYPE_SLIDER:
+                    if (sliderItemsAdapter != null) {
+                        pauseSliderPlayer();
+                    }
+                default:
+            }
+        }
+    }
+
     private void init() {
         final Bundle arguments = getArguments();
         if (arguments == null) {
