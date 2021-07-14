@@ -118,7 +118,7 @@ public final class StoryListViewerFragment extends Fragment implements SwipeRefr
                 endCursor = result.getMaxId();
                 final List<Story> models = archivesViewModel.getList().getValue();
                 final List<Story> modelsCopy = models == null ? new ArrayList<>() : new ArrayList<>(models);
-                modelsCopy.addAll(result.getItems());
+                if (result.getItems() != null) modelsCopy.addAll(result.getItems());
                 archivesViewModel.getList().postValue(modelsCopy);
             }
         }
